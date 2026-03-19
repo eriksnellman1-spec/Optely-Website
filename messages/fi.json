@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "title": "Optely — AI-konsultointi & Automaatio yrityksille Pohjanmaalla, Suomi",
+    "description": "Optely auttaa suomalaisia pk-yrityksiä toimimaan älykkäämmin, nopeammin ja edullisemmin AI-ratkaisujen avulla. Toimisto Pohjanmaalla, Suomessa."
+  },
+  "nav": {
+    "services": "Palvelut",
+    "about": "Tietoa Optelystä",
+    "vvs": "LVI-automaatiojärjestelmä",
+    "contact": "Yhteystiedot",
+    "cta": "Varaa tapaaminen"
+  },
+  "hero": {
+    "badge": "AI-konsultointi & Automaatio",
+    "headline_1": "AI-konsultointi & AI-automaatio",
+    "headline_2": "yrityksille Suomessa",
+    "sub": "Autamme suomalaisia yrityksiä toimimaan älykkäämmin, nopeammin ja edullisemmin AI-ratkaisujen avulla — AI-transformaatiokumppanisi Pohjanmaalta, Suomesta",
+    "cta_primary": "Varaa ilmainen esittelypuhelu",
+    "cta_secondary": "Katso palvelumme",
+    "counter_processes": "Automatisoitua prosessia",
+    "counter_founders": "Perustajaa",
+    "counter_countries": "Maata",
+    "counter_roi": "ROI"
+  },
+  "trust": {
+    "title": "Johtavien suomalaisten yritysten luottama"
+  },
+  "strengths": {
+    "title": "Miksi valita Optely?",
+    "profitable_title": "Kannattavaa",
+    "profitable_desc": "Toimitamme mitattavia tuloksia ja selkeän ROI:n. Jokainen ratkaisu on suunniteltu tuottamaan konkreettista arvoa yrityksellesi.",
+    "tailored_title": "Räätälöityä",
+    "tailored_desc": "Ei valmiita pakettiratkaisuja — analysoimme yrityksesi ja rakennamme juuri sinulle sopivat AI-ratkaisut.",
+    "reliable_title": "Luotettavaa",
+    "reliable_desc": "Olemme pitkäaikainen AI-kumppanisi. Käyttöönotosta jatkuvaan optimointiin — olemme siellä, kun tarvitset meitä."
+  },
+  "services": {
+    "title": "Tarjoamme kattavia AI-palveluita",
+    "sub": "Strategiasta toteutukseen — katamme koko AI-matkan",
+    "automation_title": "Prosessiautomaatio",
+    "automation_desc": "Tehosta toimintaasi älykkäällä automaatiolla. Poista toistuvat tehtävät ja vapauta aikaa sille, mikä todella luo arvoa.",
+    "conversational_title": "Keskusteleva tekoäly",
+    "conversational_desc": "AI-agentit ja chatbotit, jotka hoitavat asiakaskontaktit ympäri vuorokauden — ilman viiveitä ja ylitöitä.",
+    "consulting_title": "Konsultointi",
+    "consulting_desc": "Analyysi, suositukset ja käyttöönotto. Kartoitamme AI-mahdollisuutesi ja laadimme selkeän toimintasuunnitelman.",
+    "custom_title": "Räätälöidyt AI-ratkaisut",
+    "custom_desc": "Kaikenlaiset agentit ja automaatiot — jos voit kuvitella sen, voimme rakentaa sen.",
+    "read_more": "Lue lisää"
+  },
+  "how_we_work": {
+    "title": "AI-kumppanisi",
+    "sub": "Jäsennelty prosessi maksimaalista vaikutusta varten",
+    "phase1_title": "Näkemys & Strategia",
+    "phase1_desc": "Ymmärrä yrityksesi, kartoita AI-mahdollisuudet ja laadi selkeä suunnitelma tavoitteidesi mukaisesti.",
+    "phase2_title": "Käyttöönotto",
+    "phase2_desc": "Rakenna ja ota käyttöön AI-ratkaisut, jotka on räätälöity organisaatiollesi — nopeasti, turvallisesti ja skaalautuvasti.",
+    "phase3_title": "Kumppanuus",
+    "phase3_desc": "Seuraa, optimoi ja kehitä edelleen liiketoiminnan tahdissa. Olemme mukanasi koko matkan.",
+    "cta": "Kiinnostunut? Lue lisää"
+  },
+  "process": {
+    "title": "Prosessimme",
+    "sub": "Yksinkertainen ja selkeä — ensimmäisestä kontaktista lanseeraukseen",
+    "step1_title": "Ota yhteyttä",
+    "step1_desc": "Varaa ilmainen esittelypuhelu. Kuuntelemme, ymmärrämme ja tunnistamme mahdollisuudet yrityksellesi.",
+    "step2_title": "Ratkaisuehdotus",
+    "step2_desc": "Esittelemme räätälöidyn ehdotuksen selkeällä aikataululla, budjetilla ja odotettavissa olevalla ROI:lla.",
+    "step3_title": "Projektin aloitus",
+    "step3_desc": "Aloitamme heti. Nopea käyttöönotto jatkuvalla viestinnällä ja selkeillä välitavoitteilla."
+  },
+  "testimonials": {
+    "title": "Mitä asiakkaamme sanovat",
+    "sub": "Todellisia tuloksia todellisille suomalaisille yrityksille",
+    "vlift_quote": "Optelyn AI-chatbotin avulla voimme nyt käsitellä asiakaskyselyitä ympäri vuorokauden — ilman henkilöstöä paikan päällä. Vastaukset ovat nopeita, tarkkoja ja asiakkaat ovat tyytyväisiä. Se on todella muuttanut työskentelytapamme.",
+    "vlift_author": "V-Lift",
+    "vlift_role": "Asiakastuen chatbot",
+    "seamex_quote": "Optely on yritys, jolla on vahva palveluajattelu ja korkea tekninen osaaminen. He ymmärsivät nopeasti tarpeemme ja toimittivat perusteellisen analyysin konkreettisine suosituksineen. Suosittelemme heitä lämpimästi kaikille, jotka haluavat ottaa seuraavan askeleen tekoälyn kanssa.",
+    "seamex_author": "Ab Seamex Oy",
+    "seamex_role": "Konsultointi & Mahdollisuusraportti"
+  },
+  "why": {
+    "title": "Miksi Optely?",
+    "sub": "Teemme AI:n kanssa menestymisen helpoksi",
+    "point1": "Tehosta liiketoimintaa tekoälyllä",
+    "point2": "Luo kestävää kasvua",
+    "point3": "Maksimoi tuotto",
+    "point4": "Toimita mitattavia tuloksia",
+    "point5": "Nopea käyttöönotto",
+    "point6": "Omistautunut kumppanuus"
+  },
+  "booking": {
+    "title": "Vie yrityksesi seuraavalle tasolle",
+    "sub": "Varaa ilmainen 30 minuutin puhelu ja selvitä, miten tekoäly voi muuttaa yrityksesi.",
+    "cta": "Varaa Ensimmäinen Tapaaminen",
+    "form_title": "Tai lähetä viesti",
+    "name": "Nimi",
+    "email": "Sähköposti",
+    "phone": "Puhelinnumero",
+    "company": "Yritys",
+    "message": "Asia",
+    "submit": "Lähetä viesti",
+    "success": "Kiitos! Palaamme asiaan pian.",
+    "error": "Jotain meni pieleen. Yritä uudelleen."
+  },
+  "faq": {
+    "title": "Usein kysytyt kysymykset",
+    "sub": "Vastauksia mieltäsi askarruttaviin kysymyksiin",
+    "q1": "Kuinka nopeasti näemme tuloksia?",
+    "a1": "Useimmat asiakkaat näkevät mitattavia tuloksia 2–6 viikon kuluessa käyttöönotosta. Yksinkertaisemmat automaatiot voivat tuottaa vaikutusta jo ensimmäisestä päivästä.",
+    "q2": "Onko datamme turvassa?",
+    "a2": "Ehdottomasti. Noudatamme GDPR:ää ja käsittelemme kaikki tiedot tiukalla luottamuksellisuudella. Emme koskaan käytä tietojasi AI-mallien kouluttamiseen ilman nimenomaista lupaa.",
+    "q3": "Mitä se maksaa?",
+    "a3": "Hinta vaihtelee projektin laajuuden mukaan. Tarjoamme aina ilmaisen esittelypuhelun ja selkeän hintaehdotuksen ennen projektin aloittamista.",
+    "q4": "Miten otan teihin yhteyttä?",
+    "a4": "Voit varata puhelun suoraan varauskalenteristamme, lähettää sähköpostia osoitteeseen eriksnellman1@gmail.com tai täyttää tämän sivun yhteydenottolomakkeen.",
+    "q5": "Miten yhteistyö teidän kanssanne toimii?",
+    "a5": "Aloitamme aina tarveanalyysillä, laadimme ehdotuksen ja aloitamme sitten käyttöönoton. Koko projektin ajan sinulla on meillä omistautunut yhteyshenkilö."
+  },
+  "footer": {
+    "tagline": "AI-kumppani tulevaisuuden suomalaisille yrityksille",
+    "nav_heading": "Navigointi",
+    "contact_heading": "Yhteystiedot",
+    "services": "Palvelut",
+    "about": "Tietoa meistä",
+    "vvs": "LVI-automaatiojärjestelmä",
+    "contact": "Yhteystiedot",
+    "rights": "Kaikki oikeudet pidätetään.",
+    "location": "Pohjanmaa, Suomi"
+  },
+  "vvs": {
+    "meta_title": "LVI-automaatiojärjestelmä — Optely | AI-automaatio LVI-alalle",
+    "meta_desc": "Optelyn LVI-automaatiojärjestelmä automatisoi LVI-yrityksesi tekoälyllä. Liidien kvalifiointi, varaukset, seuranta ja arvostelujen hallinta — täysin automaattisesti. Suomessa toimiva yritys.",
+    "hero_title": "LVI-automaatiojärjestelmä",
+    "hero_sub": "Automatisoi LVI-liiketoimintasi liidistä arvosteluun — Suomessa kehitetyillä AI-ratkaisuilla LVI-alalle.",
+    "hero_cta": "Varaa demo",
+    "what_title": "Mikä on LVI-automaatiojärjestelmä?",
+    "what_desc": "Täydellinen tekoälypohjainen automaatiojärjestelmä räätälöitynä suomalaisille LVI-yrityksille. Järjestelmä käsittelee koko asiakaspolun automaattisesti — ensimmäisestä kontaktista valmiiseen arvosteluun — jotta voit keskittyä siihen, mitä osaat parhaiten.",
+    "feature1_title": "Liidien kvalifiointi",
+    "feature1_desc": "Tekoäly kvalifioi saapuvat liidit automaattisesti ja priorisoi ne, joilla on korkein konversiopotentiaali.",
+    "feature2_title": "Varaukset & Aikataulutus",
+    "feature2_desc": "Automaattinen käyntien ja huoltojen varaus suoraan järjestelmääsi — ilman manuaalista käsittelyä.",
+    "feature3_title": "Putkilinja & Seuranta",
+    "feature3_desc": "Automaattinen liidien ja asiakkaiden seuranta oikeaan aikaan personoiduilla viesteillä.",
+    "feature4_title": "Arvostelut & Suositukset",
+    "feature4_desc": "Automaattiset arvostelukyselyt ja suositusohjelmat, jotka kasvattavat mainettasi ja asiakaskuntaasi.",
+    "process_title": "Miten se toimii",
+    "process_step1": "Liidi saapuu",
+    "process_step1_desc": "Asiakas ottaa yhteyttä verkon, puhelimen tai sosiaalisen median kautta",
+    "process_step2": "Tekoälykvalifiointi",
+    "process_step2_desc": "Järjestelmä analysoi ja kvalifioi liidin automaattisesti",
+    "process_step3": "Automaattinen varaus",
+    "process_step3_desc": "Aika varataan ja vahvistus lähetetään asiakkaalle välittömästi",
+    "process_step4": "Seuranta & Arvostelut",
+    "process_step4_desc": "Järjestelmä seuraa ja kerää arvosteluja automaattisesti",
+    "cta_title": "Valmis automatisoimaan LVI-liiketoimintasi?",
+    "cta_sub": "Varaa ilmainen demo ja katso, miten LVI-automaatiojärjestelmä voi muuttaa yrityksesi.",
+    "cta_btn": "Varaa Demo"
+  },
+  "services_page": {
+    "title": "AI-palvelumme",
+    "sub": "Kattavat AI-ratkaisut moderneille suomalaisille yrityksille"
+  },
+  "about_page": {
+    "title": "Tietoa Optelystä",
+    "sub": "Olemme suomalainen AI-yritys suurilla ambioilla — tehdä tekoäly saavutettavaksi kaikille yrityksille Pohjanmaalla, Suomessa ja maailmalla.",
+    "story_title": "Tarinamme",
+    "story": "Erik Snellman ja Joas Vikström perustivat Optelyn Pohjanmaalla, Suomessa yhteisellä visiolla: auttaa suomalaisia pk-yrityksiä osallistumaan tekoälyvallankumoukseen. Uskomme, että maailmanluokan tekoälyn ei tulisi olla suurten yritysten ja suurten budjettien etuoikeus.",
+    "values_title": "Arvomme",
+    "value1_title": "Rehellisyys",
+    "value1_desc": "Olemme avoimia hinnoittelussa, aikatauluissa ja tuloksissa — ei piilomaksuja, ei yllätyksiä.",
+    "value2_title": "Laatu",
+    "value2_desc": "Jokainen toimittamamme ratkaisu on testattu, optimoitu ja suunniteltu kestämään pitkälle tulevaisuuteen.",
+    "value3_title": "Kumppanuus",
+    "value3_desc": "Emme ole toimittaja — olemme kumppanisi. Sinun menestyksesi on meidän menestyksemme.",
+    "team_heading": "Tiimi",
+    "erik_role": "Perustaja & AI-arkkitehti",
+    "joas_role": "Perustaja & Automaatioasiantuntija"
+  },
+  "process_page": {
+    "heading": "Miten työskentelemme"
+  },
+  "contact_page": {
+    "title": "Ota yhteyttä",
+    "sub": "Vastaamme yleensä 24 tunnin kuluessa",
+    "email_label": "Sähköposti",
+    "phone_label": "Puhelin"
+  }
+}

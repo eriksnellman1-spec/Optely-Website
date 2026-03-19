@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "title": "Optely — AI-konsult & Automation för företag i Österbotten, Finland",
+    "description": "Optely hjälper finska SME-företag att arbeta smartare, snabbare och billigare med AI-lösningar, processautomation och konversations-AI. Baserat i Österbotten, Finland."
+  },
+  "nav": {
+    "services": "Tjänster",
+    "about": "Om Optely",
+    "vvs": "VVS Automation System",
+    "contact": "Kontakt",
+    "cta": "Boka samtal"
+  },
+  "hero": {
+    "badge": "AI-konsult & Automation",
+    "headline_1": "AI-konsult & AI-automation",
+    "headline_2": "för företag i Finland",
+    "sub": "Vi gör så att finska företag arbetar smartare, snabbare och billigare genom AI-lösningar — En partner för AI-transformation baserad i Österbotten, Finland",
+    "cta_primary": "Boka ett gratis introduktionssamtal",
+    "cta_secondary": "Se våra tjänster",
+    "counter_processes": "Automatiserade processer",
+    "counter_founders": "Grundare",
+    "counter_countries": "Länder",
+    "counter_roi": "ROI"
+  },
+  "trust": {
+    "title": "Betrodda av ledande finska företag"
+  },
+  "strengths": {
+    "title": "Varför välja Optely?",
+    "profitable_title": "Lönsamt",
+    "profitable_desc": "Vi levererar mätbara resultat och tydlig ROI. Varje lösning är designad för att generera konkret värde för din verksamhet.",
+    "tailored_title": "Skräddarsytt",
+    "tailored_desc": "Inga färdigpaketerade lösningar — vi analyserar din verksamhet och bygger AI-lösningar anpassade just för dig.",
+    "reliable_title": "Pålitligt",
+    "reliable_desc": "Vi är din långsiktiga AI-partner. Från implementering till löpande optimering — vi finns där när du behöver oss."
+  },
+  "services": {
+    "title": "Vi erbjuder heltäckande AI-tjänster",
+    "sub": "Från strategi till implementation — vi täcker hela AI-resan",
+    "automation_title": "Processautomation",
+    "automation_desc": "Effektivisera er verksamhet med intelligent automation. Eliminera repetitiva uppgifter och frigör tid för det som verkligen skapar värde.",
+    "conversational_title": "Konversations-AI",
+    "conversational_desc": "AI-agenter och chattbottar som hanterar kundkontakter dygnet runt — utan dröjsmål och utan övertid.",
+    "consulting_title": "Konsult",
+    "consulting_desc": "Analys, rekommendation och implementering. Vi kartlägger era AI-möjligheter och tar fram en tydlig handlingsplan.",
+    "custom_title": "Skräddarsydda AI-lösningar",
+    "custom_desc": "Alla typer av agenter och automatiseringar — om ni kan tänka det, kan vi bygga det.",
+    "read_more": "Läs mer"
+  },
+  "how_we_work": {
+    "title": "Din AI-partner",
+    "sub": "En strukturerad process för maximal effekt",
+    "phase1_title": "Insikt & Strategi",
+    "phase1_desc": "Förstå er verksamhet, kartlägg AI-möjligheter och ta fram en tydlig plan anpassad efter era mål.",
+    "phase2_title": "Implementering",
+    "phase2_desc": "Bygg och implementera AI-lösningar anpassade efter er organisation — snabbt, säkert och skalbart.",
+    "phase3_title": "Partnerskap",
+    "phase3_desc": "Följ upp, optimera och vidareutveckla i takt med verksamheten. Vi är med er hela vägen.",
+    "cta": "Intresserad? Läs mer"
+  },
+  "process": {
+    "title": "Vår Process",
+    "sub": "Enkelt och tydligt — från första kontakt till lansering",
+    "step1_title": "Kontakta Oss",
+    "step1_desc": "Boka ett gratis introduktionssamtal. Vi lyssnar, förstår och identifierar möjligheter för din verksamhet.",
+    "step2_title": "Lösningsförslag",
+    "step2_desc": "Vi presenterar ett skräddarsytt förslag med tydlig tidsplan, budget och förväntad ROI.",
+    "step3_title": "Projektstart",
+    "step3_desc": "Vi sätter igång direkt. Snabb implementering med löpande kommunikation och tydliga milstolpar."
+  },
+  "testimonials": {
+    "title": "Vad Våra Kunder Säger",
+    "sub": "Riktiga resultat för riktiga finska företag",
+    "vlift_quote": "Med hjälp av AI-chattboten från Optely kan vi nu hantera kundförfrågningar dygnet runt — utan att behöva ha personal på plats. Svaren är snabba, korrekta och kunderna är nöjda. Det har verkligen förändrat hur vi arbetar.",
+    "vlift_author": "V-Lift",
+    "vlift_role": "Chattbot för kundsupport",
+    "seamex_quote": "Optely är ett företag med ett starkt servicetänk och hög teknisk kompetens. De förstod snabbt våra behov och levererade en noggrann analys med konkreta rekommendationer. Vi rekommenderar dem varmt till alla som vill ta nästa steg med AI.",
+    "seamex_author": "Ab Seamex Oy",
+    "seamex_role": "Konsult & Möjlighetsrapport"
+  },
+  "why": {
+    "title": "Varför Optely?",
+    "sub": "Vi gör det enkelt att lyckas med AI",
+    "point1": "Effektivisera verksamheten med AI",
+    "point2": "Skapa hållbar tillväxt",
+    "point3": "Maximera avkastning",
+    "point4": "Leverera mätbara resultat",
+    "point5": "Snabb implementering",
+    "point6": "Dedikerat partnerskap"
+  },
+  "booking": {
+    "title": "Ta ditt företag till nästa nivå",
+    "sub": "Boka ett gratis 30-minuterssamtal och ta reda på hur AI kan transformera din verksamhet.",
+    "cta": "Boka Första Mötet",
+    "form_title": "Eller skicka ett meddelande",
+    "name": "Namn",
+    "email": "E-post",
+    "phone": "Telefonnummer",
+    "company": "Företag",
+    "message": "Ärende",
+    "submit": "Skicka meddelande",
+    "success": "Tack! Vi återkommer snart.",
+    "error": "Något gick fel. Försök igen."
+  },
+  "faq": {
+    "title": "Vanliga frågor",
+    "sub": "Svar på det du undrar",
+    "q1": "Hur snabbt ser vi resultat?",
+    "a1": "De flesta kunder ser mätbara resultat inom 2–6 veckor efter implementering. Enklare automatiseringar kan ge effekt redan dag ett.",
+    "q2": "Är vår data säker?",
+    "a2": "Absolut. Vi följer GDPR och hanterar all data med strikt sekretess. Vi använder aldrig er data för träning av AI-modeller utan uttryckligt tillstånd.",
+    "q3": "Vad kostar det?",
+    "a3": "Priset varierar beroende på projektets omfattning. Vi erbjuder alltid ett kostnadsfritt introduktionssamtal och ett tydligt prisförslag innan projektet startar.",
+    "q4": "Hur kontaktar jag er?",
+    "a4": "Du kan boka ett samtal direkt via vår bokningskalender, skicka e-post till eriksnellman1@gmail.com, eller fylla i kontaktformuläret på denna sida.",
+    "q5": "Hur går ett samarbete med er till?",
+    "a5": "Vi börjar alltid med en behovsanalys, tar fram ett förslag, och sätter sedan igång med implementeringen. Under hela projektet har du en dedikerad kontaktperson hos oss."
+  },
+  "footer": {
+    "tagline": "AI-partner för framtidens finska företag",
+    "nav_heading": "Navigation",
+    "contact_heading": "Kontakt",
+    "services": "Tjänster",
+    "about": "Om oss",
+    "vvs": "VVS Automation System",
+    "contact": "Kontakt",
+    "rights": "Alla rättigheter förbehållna.",
+    "location": "Österbotten, Finland"
+  },
+  "vvs": {
+    "meta_title": "VVS Automation System — Optely | AI-automation för VVS-branschen",
+    "meta_desc": "Optely VVS Automation System automatiserar ditt VVS-företag med AI. Leadkvalificering, bokning, uppföljning och recensionshantering — helt automatiskt. Baserat i Finland.",
+    "hero_title": "VVS Automation System",
+    "hero_sub": "Automatisera din VVS-verksamhet från lead till recension — med AI-lösningar designade specifikt för VVS-branschen i Finland.",
+    "hero_cta": "Boka en demo",
+    "what_title": "Vad är VVS Automation System?",
+    "what_desc": "Ett komplett AI-drivet automationssystem skräddarsytt för VVS-företag i Finland. Systemet hanterar hela kundresan automatiskt — från första kontakt till färdig recension — så att du kan fokusera på det du gör bäst.",
+    "feature1_title": "Leadkvalificering",
+    "feature1_desc": "AI kvalificerar inkommande leads automatiskt och prioriterar dem med högst konverteringspotential.",
+    "feature2_title": "Bokning & Schemaläggning",
+    "feature2_desc": "Automatisk bokning av besök och service direkt i ditt system — utan manuell hantering.",
+    "feature3_title": "Pipeline & Uppföljning",
+    "feature3_desc": "Automatisk uppföljning av leads och kunder i rätt tid med personaliserade meddelanden.",
+    "feature4_title": "Recension & Hänvisning",
+    "feature4_desc": "Automatiska recensionsförfrågningar och hänvisningsprogram som ökar ditt rykte och din kundstock.",
+    "process_title": "Hur det fungerar",
+    "process_step1": "Lead inkommer",
+    "process_step1_desc": "Kunden kontaktar dig via webb, telefon eller social media",
+    "process_step2": "AI-kvalificering",
+    "process_step2_desc": "Systemet analyserar och kvalificerar leaden automatiskt",
+    "process_step3": "Automatisk bokning",
+    "process_step3_desc": "Tid bokas och bekräftelse skickas till kunden direkt",
+    "process_step4": "Uppföljning & Recension",
+    "process_step4_desc": "Systemet följer upp och samlar in recensioner automatiskt",
+    "cta_title": "Redo att automatisera din VVS-verksamhet?",
+    "cta_sub": "Boka en gratis demo och se hur VVS Automation System kan förändra ditt företag.",
+    "cta_btn": "Boka Demo"
+  },
+  "services_page": {
+    "title": "Våra AI-tjänster",
+    "sub": "Heltäckande AI-lösningar för moderna finska företag"
+  },
+  "about_page": {
+    "title": "Om Optely",
+    "sub": "Vi är ett finskt AI-bolag med stora ambitioner — att göra AI tillgängligt för alla företag i Österbotten, Finland och bortom.",
+    "story_title": "Vår historia",
+    "story": "Optely grundades i Österbotten, Finland av Erik Snellman och Joas Vikström med en gemensam vision: att hjälpa finska SME-företag att ta del av AI-revolutionen. Vi tror att världsklassig AI inte ska vara förbehållet stora bolag med stora budgetar.",
+    "values_title": "Våra värderingar",
+    "value1_title": "Ärlighet",
+    "value1_desc": "Vi är transparenta med priser, tidsplaner och resultat — inga dolda avgifter, inga överraskningar.",
+    "value2_title": "Kvalitet",
+    "value2_desc": "Varje lösning vi levererar är testad, optimerad och designad för att hålla långsiktigt.",
+    "value3_title": "Partnerskap",
+    "value3_desc": "Vi är inte en leverantör — vi är er partner. Er framgång är vår framgång.",
+    "team_heading": "Team",
+    "erik_role": "Grundare & AI-arkitekt",
+    "joas_role": "Grundare & Automationsspecialist"
+  },
+  "process_page": {
+    "heading": "Hur vi arbetar"
+  },
+  "contact_page": {
+    "title": "Kontakta Oss",
+    "sub": "Vi svarar vanligtvis inom 24 timmar",
+    "email_label": "E-post",
+    "phone_label": "Telefon"
+  }
+}

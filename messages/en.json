@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "title": "Optely — AI Consulting & Automation for Businesses in Ostrobothnia, Finland",
+    "description": "Optely helps Finnish SMEs work smarter, faster and more efficiently with AI solutions, process automation and conversational AI. Based in Ostrobothnia, Finland."
+  },
+  "nav": {
+    "services": "Services",
+    "about": "About Optely",
+    "vvs": "VVS Automation System",
+    "contact": "Contact",
+    "cta": "Book a call"
+  },
+  "hero": {
+    "badge": "AI Consulting & Automation",
+    "headline_1": "AI Consulting & AI Automation",
+    "headline_2": "for businesses in Finland",
+    "sub": "We help Finnish businesses work smarter, faster and more efficiently through AI solutions — your AI transformation partner based in Ostrobothnia, Finland",
+    "cta_primary": "Book a free intro call",
+    "cta_secondary": "See our services",
+    "counter_processes": "Automated processes",
+    "counter_founders": "Founders",
+    "counter_countries": "Countries",
+    "counter_roi": "ROI"
+  },
+  "trust": {
+    "title": "Trusted by leading Finnish companies"
+  },
+  "strengths": {
+    "title": "Why choose Optely?",
+    "profitable_title": "Profitable",
+    "profitable_desc": "We deliver measurable results and clear ROI. Every solution is designed to generate concrete value for your business.",
+    "tailored_title": "Tailored",
+    "tailored_desc": "No off-the-shelf solutions — we analyze your business and build AI solutions tailored specifically to you.",
+    "reliable_title": "Reliable",
+    "reliable_desc": "We are your long-term AI partner. From implementation to ongoing optimization — we're there when you need us."
+  },
+  "services": {
+    "title": "We offer comprehensive AI services",
+    "sub": "From strategy to implementation — we cover the entire AI journey",
+    "automation_title": "Process Automation",
+    "automation_desc": "Streamline your operations with intelligent automation. Eliminate repetitive tasks and free up time for what truly creates value.",
+    "conversational_title": "Conversational AI",
+    "conversational_desc": "AI agents and chatbots that handle customer interactions around the clock — without delays and without overtime.",
+    "consulting_title": "Consulting",
+    "consulting_desc": "Analysis, recommendation and implementation. We map your AI opportunities and develop a clear action plan.",
+    "custom_title": "Custom AI Solutions",
+    "custom_desc": "All types of agents and automations — if you can think it, we can build it.",
+    "read_more": "Read more"
+  },
+  "how_we_work": {
+    "title": "Your AI Partner",
+    "sub": "A structured process for maximum impact",
+    "phase1_title": "Insight & Strategy",
+    "phase1_desc": "Understand your business, map AI opportunities and develop a clear plan tailored to your goals.",
+    "phase2_title": "Implementation",
+    "phase2_desc": "Build and implement AI solutions tailored to your organization — fast, secure and scalable.",
+    "phase3_title": "Partnership",
+    "phase3_desc": "Follow up, optimize and further develop in line with the business. We're with you all the way.",
+    "cta": "Interested? Learn more"
+  },
+  "process": {
+    "title": "Our Process",
+    "sub": "Simple and clear — from first contact to launch",
+    "step1_title": "Contact Us",
+    "step1_desc": "Book a free intro call. We listen, understand and identify opportunities for your business.",
+    "step2_title": "Solution Proposal",
+    "step2_desc": "We present a tailored proposal with a clear timeline, budget and expected ROI.",
+    "step3_title": "Project Start",
+    "step3_desc": "We get started immediately. Fast implementation with ongoing communication and clear milestones."
+  },
+  "testimonials": {
+    "title": "What Our Clients Say",
+    "sub": "Real results for real Finnish businesses",
+    "vlift_quote": "With the AI chatbot from Optely, we can now handle customer inquiries around the clock — without needing staff on site. The answers are fast, accurate and customers are satisfied. It has truly changed how we work.",
+    "vlift_author": "V-Lift",
+    "vlift_role": "Customer Support Chatbot",
+    "seamex_quote": "Optely is a company with a strong service mindset and high technical competence. They quickly understood our needs and delivered a thorough analysis with concrete recommendations. We warmly recommend them to anyone who wants to take the next step with AI.",
+    "seamex_author": "Ab Seamex Oy",
+    "seamex_role": "Consulting & Opportunity Report"
+  },
+  "why": {
+    "title": "Why Optely?",
+    "sub": "We make it easy to succeed with AI",
+    "point1": "Streamline your business with AI",
+    "point2": "Create sustainable growth",
+    "point3": "Maximize return on investment",
+    "point4": "Deliver measurable results",
+    "point5": "Fast implementation",
+    "point6": "Dedicated partnership"
+  },
+  "booking": {
+    "title": "Take your business to the next level",
+    "sub": "Book a free 30-minute call and find out how AI can transform your business.",
+    "cta": "Book First Meeting",
+    "form_title": "Or send a message",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone number",
+    "company": "Company",
+    "message": "Message",
+    "submit": "Send message",
+    "success": "Thank you! We'll get back to you soon.",
+    "error": "Something went wrong. Please try again."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "sub": "Answers to what you're wondering",
+    "q1": "How quickly will we see results?",
+    "a1": "Most clients see measurable results within 2–6 weeks after implementation. Simpler automations can have an effect from day one.",
+    "q2": "Is our data secure?",
+    "a2": "Absolutely. We follow GDPR and handle all data with strict confidentiality. We never use your data for training AI models without explicit permission.",
+    "q3": "What does it cost?",
+    "a3": "The price varies depending on the scope of the project. We always offer a free introductory call and a clear price proposal before the project starts.",
+    "q4": "How do I contact you?",
+    "a4": "You can book a call directly via our booking calendar, send an email to eriksnellman1@gmail.com, or fill in the contact form on this page.",
+    "q5": "How does a collaboration with you work?",
+    "a5": "We always start with a needs analysis, develop a proposal, and then begin implementation. Throughout the project you have a dedicated contact person with us."
+  },
+  "footer": {
+    "tagline": "AI partner for tomorrow's Finnish businesses",
+    "nav_heading": "Navigation",
+    "contact_heading": "Contact",
+    "services": "Services",
+    "about": "About us",
+    "vvs": "VVS Automation System",
+    "contact": "Contact",
+    "rights": "All rights reserved.",
+    "location": "Ostrobothnia, Finland"
+  },
+  "vvs": {
+    "meta_title": "VVS Automation System — Optely | AI Automation for the HVAC Industry",
+    "meta_desc": "Optely VVS Automation System automates your HVAC business with AI. Lead qualification, booking, follow-up and review management — fully automatic. Based in Finland.",
+    "hero_title": "VVS Automation System",
+    "hero_sub": "Automate your HVAC business from lead to review — with AI solutions designed specifically for the HVAC industry in Finland.",
+    "hero_cta": "Book a demo",
+    "what_title": "What is VVS Automation System?",
+    "what_desc": "A complete AI-powered automation system tailored for HVAC companies in Finland. The system handles the entire customer journey automatically — from first contact to completed review — so you can focus on what you do best.",
+    "feature1_title": "Lead Qualification",
+    "feature1_desc": "AI automatically qualifies incoming leads and prioritizes those with the highest conversion potential.",
+    "feature2_title": "Booking & Scheduling",
+    "feature2_desc": "Automatic booking of visits and service directly in your system — without manual handling.",
+    "feature3_title": "Pipeline & Follow-up",
+    "feature3_desc": "Automatic follow-up of leads and customers at the right time with personalized messages.",
+    "feature4_title": "Reviews & Referrals",
+    "feature4_desc": "Automatic review requests and referral programs that increase your reputation and customer base.",
+    "process_title": "How it works",
+    "process_step1": "Lead arrives",
+    "process_step1_desc": "Customer contacts you via web, phone or social media",
+    "process_step2": "AI qualification",
+    "process_step2_desc": "The system analyzes and qualifies the lead automatically",
+    "process_step3": "Automatic booking",
+    "process_step3_desc": "Appointment is booked and confirmation sent to customer immediately",
+    "process_step4": "Follow-up & Reviews",
+    "process_step4_desc": "The system follows up and collects reviews automatically",
+    "cta_title": "Ready to automate your HVAC business?",
+    "cta_sub": "Book a free demo and see how VVS Automation System can transform your company.",
+    "cta_btn": "Book Demo"
+  },
+  "services_page": {
+    "title": "Our AI Services",
+    "sub": "Comprehensive AI solutions for modern Finnish businesses"
+  },
+  "about_page": {
+    "title": "About Optely",
+    "sub": "We are a Finnish AI company with big ambitions — making AI accessible to all businesses in Ostrobothnia, Finland and beyond.",
+    "story_title": "Our story",
+    "story": "Optely was founded in Ostrobothnia, Finland by Erik Snellman and Joas Vikström with a shared vision: to help Finnish SMEs take part in the AI revolution. We believe world-class AI shouldn't be reserved for large companies with large budgets.",
+    "values_title": "Our values",
+    "value1_title": "Honesty",
+    "value1_desc": "We are transparent with pricing, timelines and results — no hidden fees, no surprises.",
+    "value2_title": "Quality",
+    "value2_desc": "Every solution we deliver is tested, optimized and designed to last long-term.",
+    "value3_title": "Partnership",
+    "value3_desc": "We are not a vendor — we are your partner. Your success is our success.",
+    "team_heading": "Team",
+    "erik_role": "Founder & AI Architect",
+    "joas_role": "Founder & Automation Specialist"
+  },
+  "process_page": {
+    "heading": "How we work"
+  },
+  "contact_page": {
+    "title": "Contact Us",
+    "sub": "We usually respond within 24 hours",
+    "email_label": "Email",
+    "phone_label": "Phone"
+  }
+}
