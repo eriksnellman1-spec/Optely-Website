@@ -6,6 +6,7 @@ import ScrollReveal from "@/components/shared/ScrollReveal";
 import { ArrowDown } from "lucide-react";
 
 const steps = [
+  { key: "process_step0" as const, descKey: "process_step0_desc" as const },
   { key: "process_step1" as const, descKey: "process_step1_desc" as const },
   { key: "process_step2" as const, descKey: "process_step2_desc" as const },
   { key: "process_step3" as const, descKey: "process_step3_desc" as const },

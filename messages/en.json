@@ -6,7 +6,7 @@
   "nav": {
     "services": "Services",
     "about": "About Optely",
-    "vvs": "VVS Automation System",
+    "vvs": "The HVAC Generator",
     "contact": "Contact",
     "cta": "Book a call"
   },
@@ -122,18 +122,18 @@
     "contact_heading": "Contact",
     "services": "Services",
     "about": "About us",
-    "vvs": "VVS Automation System",
+    "vvs": "The HVAC Generator",
     "contact": "Contact",
     "rights": "All rights reserved.",
     "location": "Ostrobothnia, Finland"
   },
   "vvs": {
-    "meta_title": "VVS Automation System — Optely | AI Automation for the HVAC Industry",
-    "meta_desc": "Optely VVS Automation System automates your HVAC business with AI. Lead qualification, booking, follow-up and review management — fully automatic. Based in Finland.",
-    "hero_title": "VVS Automation System",
+    "meta_title": "The HVAC Generator — Optely | AI Automation for the HVAC Industry",
+    "meta_desc": "Optely The HVAC Generator automates your HVAC business with AI. Lead qualification, booking, follow-up and review management — fully automatic. Based in Finland.",
+    "hero_title": "The HVAC Generator",
     "hero_sub": "Automate your HVAC business from lead to review — with AI solutions designed specifically for the HVAC industry in Finland.",
     "hero_cta": "Book a demo",
-    "what_title": "What is VVS Automation System?",
+    "what_title": "What is The HVAC Generator?",
     "what_desc": "A complete AI-powered automation system tailored for HVAC companies in Finland. The system handles the entire customer journey automatically — from first contact to completed review — so you can focus on what you do best.",
     "feature1_title": "Lead Qualification",
     "feature1_desc": "AI automatically qualifies incoming leads and prioritizes those with the highest conversion potential.",
@@ -144,6 +144,8 @@
     "feature4_title": "Reviews & Referrals",
     "feature4_desc": "Automatic review requests and referral programs that increase your reputation and customer base.",
     "process_title": "How it works",
+    "process_step0": "We run ads",
+    "process_step0_desc": "We run targeted Google and Meta ads to generate quality leads for your business",
     "process_step1": "Lead arrives",
     "process_step1_desc": "Customer contacts you via web, phone or social media",
     "process_step2": "AI qualification",
@@ -153,7 +155,7 @@
     "process_step4": "Follow-up & Reviews",
     "process_step4_desc": "The system follows up and collects reviews automatically",
     "cta_title": "Ready to automate your HVAC business?",
-    "cta_sub": "Book a free demo and see how VVS Automation System can transform your company.",
+    "cta_sub": "Book a free demo and see how The HVAC Generator can transform your company.",
     "cta_btn": "Book Demo"
   },
   "services_page": {

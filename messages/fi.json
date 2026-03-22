@@ -6,7 +6,7 @@
   "nav": {
     "services": "Palvelut",
     "about": "Tietoa Optelystä",
-    "vvs": "LVI-automaatiojärjestelmä",
+    "vvs": "The HVAC Generator",
     "contact": "Yhteystiedot",
     "cta": "Varaa tapaaminen"
   },
@@ -122,18 +122,18 @@
     "contact_heading": "Yhteystiedot",
     "services": "Palvelut",
     "about": "Tietoa meistä",
-    "vvs": "LVI-automaatiojärjestelmä",
+    "vvs": "The HVAC Generator",
     "contact": "Yhteystiedot",
     "rights": "Kaikki oikeudet pidätetään.",
     "location": "Pohjanmaa, Suomi"
   },
   "vvs": {
-    "meta_title": "LVI-automaatiojärjestelmä — Optely | AI-automaatio LVI-alalle",
-    "meta_desc": "Optelyn LVI-automaatiojärjestelmä automatisoi LVI-yrityksesi tekoälyllä. Liidien kvalifiointi, varaukset, seuranta ja arvostelujen hallinta — täysin automaattisesti. Suomessa toimiva yritys.",
-    "hero_title": "LVI-automaatiojärjestelmä",
+    "meta_title": "The HVAC Generator — Optely | AI-automaatio LVI-alalle",
+    "meta_desc": "Optelyn The HVAC Generator automatisoi LVI-yrityksesi tekoälyllä. Liidien kvalifiointi, varaukset, seuranta ja arvostelujen hallinta — täysin automaattisesti. Suomessa toimiva yritys.",
+    "hero_title": "The HVAC Generator",
     "hero_sub": "Automatisoi LVI-liiketoimintasi liidistä arvosteluun — Suomessa kehitetyillä AI-ratkaisuilla LVI-alalle.",
     "hero_cta": "Varaa demo",
-    "what_title": "Mikä on LVI-automaatiojärjestelmä?",
+    "what_title": "Mikä on The HVAC Generator?",
     "what_desc": "Täydellinen tekoälypohjainen automaatiojärjestelmä räätälöitynä suomalaisille LVI-yrityksille. Järjestelmä käsittelee koko asiakaspolun automaattisesti — ensimmäisestä kontaktista valmiiseen arvosteluun — jotta voit keskittyä siihen, mitä osaat parhaiten.",
     "feature1_title": "Liidien kvalifiointi",
     "feature1_desc": "Tekoäly kvalifioi saapuvat liidit automaattisesti ja priorisoi ne, joilla on korkein konversiopotentiaali.",
@@ -144,6 +144,8 @@
     "feature4_title": "Arvostelut & Suositukset",
     "feature4_desc": "Automaattiset arvostelukyselyt ja suositusohjelmat, jotka kasvattavat mainettasi ja asiakaskuntaasi.",
     "process_title": "Miten se toimii",
+    "process_step0": "Ajamme mainoksia",
+    "process_step0_desc": "Ajamme kohdennettuja Google- ja Meta-mainoksia laadukkaiden liidien tuottamiseksi yrityksellesi",
     "process_step1": "Liidi saapuu",
     "process_step1_desc": "Asiakas ottaa yhteyttä verkon, puhelimen tai sosiaalisen median kautta",
     "process_step2": "Tekoälykvalifiointi",
@@ -153,7 +155,7 @@
     "process_step4": "Seuranta & Arvostelut",
     "process_step4_desc": "Järjestelmä seuraa ja kerää arvosteluja automaattisesti",
     "cta_title": "Valmis automatisoimaan LVI-liiketoimintasi?",
-    "cta_sub": "Varaa ilmainen demo ja katso, miten LVI-automaatiojärjestelmä voi muuttaa yrityksesi.",
+    "cta_sub": "Varaa ilmainen demo ja katso, miten The HVAC Generator voi muuttaa yrityksesi.",
     "cta_btn": "Varaa Demo"
   },
   "services_page": {

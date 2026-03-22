@@ -43,7 +43,7 @@ export default function VvsHero() {
           className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-          <span className="font-mono text-xs text-accent-light">VVS Automation System</span>
+          <span className="font-mono text-xs text-accent-light">The HVAC Generator</span>
         </motion.div>
 
         <motion.h1
