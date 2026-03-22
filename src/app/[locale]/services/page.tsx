@@ -85,7 +85,7 @@ function ServicesContent() {
     <section className="min-h-screen bg-bg pt-28 pb-24 px-6">
       <div className="mx-auto max-w-7xl">
         <ScrollReveal className="mb-4 text-center">
-          <h1 className="font-syne text-5xl font-extrabold text-white md:text-6xl">
+          <h1 className="font-syne text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">
             {pt("title")}
           </h1>
         </ScrollReveal>
@@ -97,7 +97,7 @@ function ServicesContent() {
           {services.map((service, i) => {
             const Icon = service.icon;
             return (
-              <GlassCard key={service.title} delay={i * 0.08} className="p-10">
+              <GlassCard key={service.title} delay={i * 0.08} className="p-6 sm:p-10">
                 <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
                   <Icon className="text-accent" size={22} />
                 </div>

@@ -44,9 +44,9 @@ export default function BookingSection() {
       <div className="mx-auto max-w-7xl">
         {/* CTA block */}
         <ScrollReveal>
-          <div className="mb-16 rounded-2xl border border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5 p-12 text-center">
+          <div className="mb-16 rounded-2xl border border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5 p-6 sm:p-10 md:p-12 text-center">
             <Calendar className="mx-auto mb-4 text-accent" size={32} />
-            <h2 className="mb-4 font-syne text-4xl font-bold text-white md:text-5xl">
+            <h2 className="mb-4 font-syne text-3xl font-bold text-white sm:text-4xl md:text-5xl">
               {t("title")}
             </h2>
             <p className="mb-8 font-dm text-lg text-muted">{t("sub")}</p>

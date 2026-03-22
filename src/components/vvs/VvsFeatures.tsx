@@ -14,7 +14,7 @@ export default function VvsFeatures() {
       <div className="mx-auto max-w-7xl">
         {/* What is VVS */}
         <ScrollReveal className="mb-20 text-center">
-          <h2 className="mb-6 font-syne text-4xl font-bold text-white md:text-5xl">
+          <h2 className="mb-6 font-syne text-3xl font-bold text-white sm:text-4xl md:text-5xl">
             {t("what_title")}
           </h2>
           <p className="mx-auto max-w-3xl font-dm text-lg text-muted leading-relaxed">

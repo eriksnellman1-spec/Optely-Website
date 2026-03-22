@@ -22,7 +22,7 @@ export default function Testimonials() {
     <section className="bg-bg py-24 px-6">
       <div className="mx-auto max-w-7xl">
         <ScrollReveal className="mb-4 text-center">
-          <h2 className="font-syne text-4xl font-bold text-white md:text-5xl">
+          <h2 className="font-syne text-3xl font-bold text-white sm:text-4xl md:text-5xl">
             {t("title")}
           </h2>
         </ScrollReveal>
@@ -33,7 +33,7 @@ export default function Testimonials() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {items.map((item, i) => (
             <ScrollReveal key={item.author} delay={i * 0.12}>
-              <div className="flex flex-col gap-6 rounded-2xl border border-white/[0.06] bg-surface/80 p-8 backdrop-blur-md">
+              <div className="flex flex-col gap-6 rounded-2xl border border-white/[0.06] bg-surface/80 p-5 sm:p-8 backdrop-blur-md">
                 <Quote className="text-accent/40" size={28} />
                 <p className="font-dm text-base leading-relaxed text-white/90 italic">
                   &ldquo;{item.quote}&rdquo;

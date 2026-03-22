@@ -21,7 +21,7 @@ export default function WhyOptely() {
           {/* Left: text */}
           <div>
             <ScrollReveal>
-              <h2 className="mb-4 font-syne text-4xl font-bold text-white md:text-5xl">
+              <h2 className="mb-4 font-syne text-3xl font-bold text-white sm:text-4xl md:text-5xl">
                 {t("title")}
               </h2>
             </ScrollReveal>

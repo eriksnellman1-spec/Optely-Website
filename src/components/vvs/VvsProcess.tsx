@@ -20,7 +20,7 @@ export default function VvsProcess() {
     <section className="bg-bg py-24 px-6">
       <div className="mx-auto max-w-2xl">
         <ScrollReveal className="mb-16 text-center">
-          <h2 className="font-syne text-4xl font-bold text-white md:text-5xl">
+          <h2 className="font-syne text-3xl font-bold text-white sm:text-4xl md:text-5xl">
             {t("process_title")}
           </h2>
         </ScrollReveal>
@@ -54,7 +54,7 @@ export default function VvsProcess() {
         </div>
 
         {/* CTA */}
-        <ScrollReveal delay={0.4} className="mt-16 rounded-2xl border border-accent/20 bg-accent/10 p-10 text-center">
+        <ScrollReveal delay={0.4} className="mt-16 rounded-2xl border border-accent/20 bg-accent/10 p-6 sm:p-10 text-center">
           <h3 className="mb-3 font-syne text-2xl font-bold text-white">
             {t("cta_title")}
           </h3>

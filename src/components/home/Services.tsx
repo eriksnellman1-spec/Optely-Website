@@ -41,7 +41,7 @@ export default function Services() {
     <section id="services" className="bg-surface/30 py-24 px-6">
       <div className="mx-auto max-w-7xl">
         <ScrollReveal className="mb-4 text-center">
-          <h2 className="font-syne text-4xl font-bold text-white md:text-5xl">
+          <h2 className="font-syne text-3xl font-bold text-white sm:text-4xl md:text-5xl">
             {t("title")}
           </h2>
         </ScrollReveal>

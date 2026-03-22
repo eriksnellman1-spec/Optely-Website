@@ -21,7 +21,7 @@ export default function HowWeWork() {
     <section className="bg-bg py-24 px-6">
       <div className="mx-auto max-w-7xl">
         <ScrollReveal className="mb-4 text-center">
-          <h2 className="font-syne text-4xl font-bold text-white md:text-5xl">
+          <h2 className="font-syne text-3xl font-bold text-white sm:text-4xl md:text-5xl">
             {t("title")}
           </h2>
         </ScrollReveal>
@@ -42,7 +42,7 @@ export default function HowWeWork() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.6, delay: i * 0.15 }}
-                className="relative flex gap-8"
+                className="relative flex gap-4 md:gap-8"
               >
                 {/* Dot */}
                 <div className="relative hidden flex-shrink-0 md:block">
@@ -54,7 +54,7 @@ export default function HowWeWork() {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 rounded-2xl border border-white/[0.06] bg-surface/60 p-8 backdrop-blur-md">
+                <div className="flex-1 rounded-2xl border border-white/[0.06] bg-surface/60 p-5 sm:p-8 backdrop-blur-md">
                   <div className="mb-1 font-mono text-xs uppercase tracking-widest text-accent">
                     Phase {phase.num}
                   </div>

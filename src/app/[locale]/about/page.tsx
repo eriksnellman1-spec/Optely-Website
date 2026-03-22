@@ -55,7 +55,7 @@ function AboutContent() {
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <ScrollReveal className="mb-4 text-center">
-          <h1 className="font-syne text-5xl font-extrabold text-white md:text-6xl">
+          <h1 className="font-syne text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">
             {t("title")}
           </h1>
         </ScrollReveal>
@@ -65,7 +65,7 @@ function AboutContent() {
 
         {/* Story */}
         <ScrollReveal delay={0.15}>
-          <div className="mb-20 rounded-2xl border border-white/[0.06] bg-surface/60 p-10 md:p-16">
+          <div className="mb-20 rounded-2xl border border-white/[0.06] bg-surface/60 p-6 sm:p-10 md:p-16">
             <h2 className="mb-6 font-syne text-3xl font-bold text-white">
               {t("story_title")}
             </h2>
@@ -119,7 +119,7 @@ function AboutContent() {
 
         {/* Values */}
         <ScrollReveal delay={0.2}>
-          <div className="mt-16 rounded-2xl border border-accent/20 bg-accent/5 p-10 md:p-16">
+          <div className="mt-16 rounded-2xl border border-accent/20 bg-accent/5 p-6 sm:p-10 md:p-16">
             <h2 className="mb-8 font-syne text-3xl font-bold text-white">
               {t("values_title")}
             </h2>

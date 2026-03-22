@@ -119,7 +119,7 @@ export default function Hero() {
         </motion.div>
 
         {/* Headline */}
-        <h1 className="font-syne text-5xl font-extrabold leading-[1.08] tracking-tight text-white md:text-7xl lg:text-8xl">
+        <h1 className="font-syne text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-7xl lg:text-8xl">
           <AnimatedHeadline text={t("headline_1")} />
           <br />
           <span className="bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent">

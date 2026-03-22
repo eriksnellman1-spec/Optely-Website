@@ -50,7 +50,7 @@ export default function VvsHero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="mb-6 font-syne text-5xl font-extrabold leading-tight text-white md:text-7xl"
+          className="mb-6 font-syne text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-7xl"
         >
           {t("hero_title")}
         </motion.h1>

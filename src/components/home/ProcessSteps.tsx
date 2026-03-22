@@ -14,7 +14,7 @@ export default function ProcessSteps() {
     <section className="bg-surface/30 py-24 px-6">
       <div className="mx-auto max-w-7xl">
         <ScrollReveal className="mb-4 text-center">
-          <h2 className="font-syne text-4xl font-bold text-white md:text-5xl">
+          <h2 className="font-syne text-3xl font-bold text-white sm:text-4xl md:text-5xl">
             {t("title")}
           </h2>
         </ScrollReveal>
@@ -25,7 +25,7 @@ export default function ProcessSteps() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {steps.map((step, i) => (
             <ScrollReveal key={step.key} delay={i * 0.1}>
-              <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-surface/80 p-8">
+              <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-surface/80 p-5 sm:p-8">
                 {/* Large faded number */}
                 <div
                   className="pointer-events-none absolute -right-4 -top-6 font-syne text-9xl font-extrabold leading-none text-white/[0.04]"

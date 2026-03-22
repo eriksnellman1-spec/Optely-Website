@@ -39,7 +39,7 @@ function ContactContent() {
       <div className="px-6 pb-10">
         <div className="mx-auto max-w-7xl">
           <ScrollReveal className="mb-4 text-center">
-            <h1 className="font-syne text-5xl font-extrabold text-white md:text-6xl">
+            <h1 className="font-syne text-4xl font-extrabold text-white sm:text-5xl md:text-6xl">
               {t("title")}
             </h1>
           </ScrollReveal>
@@ -48,7 +48,7 @@ function ContactContent() {
           </ScrollReveal>
 
           {/* Contact cards */}
-          <div className="mx-auto mb-10 grid max-w-3xl grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="mx-auto mb-10 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
             {[
               { icon: Mail, label: t("email_label"), value: "eriksnellman1@gmail.com", href: "mailto:eriksnellman1@gmail.com" },
               { icon: Phone, label: t("phone_label"), value: "+358 44 971 8103", href: "tel:+358449718103" },
