@@ -29,6 +29,10 @@ export async function generateMetadata({
     },
     description,
     metadataBase: new URL(SITE_URL),
+    icons: {
+      icon: "/favicon.png",
+      apple: "/favicon.png",
+    },
     alternates,
     openGraph: {
       type: "website",
