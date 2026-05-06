@@ -16,6 +16,11 @@ export default function Testimonials() {
       author: t("seamex_author"),
       role: t("seamex_role"),
     },
+    {
+      quote: t("tyre_quote"),
+      author: t("tyre_author"),
+      role: t("tyre_role"),
+    },
   ];
 
   return (
