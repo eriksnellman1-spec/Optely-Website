@@ -4,7 +4,6 @@ import Strengths from "@/components/home/Strengths";
 import Services from "@/components/home/Services";
 import HowWeWork from "@/components/home/HowWeWork";
 import ProcessSteps from "@/components/home/ProcessSteps";
-import Testimonials from "@/components/home/Testimonials";
 import WhyOptely from "@/components/home/WhyOptely";
 import BookingSection from "@/components/home/BookingSection";
 import FAQ from "@/components/home/FAQ";
@@ -18,7 +17,6 @@ export default function HomePage() {
       <Services />
       <HowWeWork />
       <ProcessSteps />
-      <Testimonials />
       <WhyOptely />
       <BookingSection />
       <FAQ />

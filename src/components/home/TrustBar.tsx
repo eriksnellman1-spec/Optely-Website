@@ -1,6 +1,13 @@
 import { useTranslations } from "next-intl";
 
-const logos = ["Tyre Center", "Ab Seamex Oy", "V-Lift"];
+const logos = [
+  "Tyre Center",
+  "Ab Seamex Oy",
+  "V-Lift",
+  "Olea IT",
+  "Holmängs Trävaruhandel",
+  "Brejk Ekonomitjänster",
+];
 
 export default function TrustBar() {
   const t = useTranslations("trust");
