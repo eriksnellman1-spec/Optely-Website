@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
+import { usePathname, useRouter } from "@/navigation";
 import { Menu, X } from "lucide-react";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
@@ -14,6 +15,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const prefix = locale === "sv" ? "" : `/${locale}`;
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -24,6 +27,14 @@ export default function Navbar() {
   const links = [
     { href: `${prefix}/services`, label: t("services") },
     { href: `${prefix}/about`, label: t("about") },
+    { href: `${prefix}/contact`, label: t("contact") },
+  ];
+
+  const pageLinks = [
+    { href: prefix || "/", label: t("home") },
+    { href: `${prefix}/services`, label: t("services") },
+    { href: `${prefix}/about`, label: t("about") },
+    { href: `${prefix}/process`, label: t("process") },
     { href: `${prefix}/contact`, label: t("contact") },
   ];
 
@@ -63,6 +74,21 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="hidden items-center gap-4 md:flex">
+          <label htmlFor="page-select" className="sr-only">
+            {t("nav_select")}
+          </label>
+          <select
+            id="page-select"
+            value={pathname}
+            onChange={(event) => router.push(event.target.value)}
+            className="rounded-full border border-white/10 bg-surface px-3 py-2 text-sm text-white outline-none transition duration-200 hover:border-white/20"
+          >
+            {pageLinks.map((link) => (
+              <option key={link.href} value={link.href}>
+                {link.label}
+              </option>
+            ))}
+          </select>
           <LanguageSwitcher />
           <a
             href="https://calendly.com/optelyofficial/15min"
@@ -103,6 +129,26 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
+          <div className="mt-4">
+            <label htmlFor="mobile-page-select" className="sr-only">
+              {t("nav_select")}
+            </label>
+            <select
+              id="mobile-page-select"
+              value={pathname}
+              onChange={(event) => {
+                router.push(event.target.value);
+                setMobileOpen(false);
+              }}
+              className="w-full rounded-full border border-white/10 bg-surface px-4 py-3 text-sm text-white outline-none transition duration-200 hover:border-white/20"
+            >
+              {pageLinks.map((link) => (
+                <option key={link.href} value={link.href}>
+                  {link.label}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="mt-6 flex flex-col gap-4">
             <LanguageSwitcher />
             <a

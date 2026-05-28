@@ -4,11 +4,14 @@
     "description": "Optely hjälper finska SME-företag att arbeta smartare, snabbare och billigare med AI-lösningar, processautomation och konversations-AI. Baserat i Österbotten, Finland."
   },
   "nav": {
+    "home": "Hem",
     "services": "Tjänster",
     "about": "Om Optely",
+    "process": "Process",
     "vvs": "The HVAC Generator",
     "contact": "Kontakt",
-    "cta": "Boka samtal"
+    "cta": "Boka samtal",
+    "nav_select": "Välj sida"
   },
   "hero": {
     "badge": "AI-konsult & Automation",

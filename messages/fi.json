@@ -4,11 +4,14 @@
     "description": "Optely auttaa suomalaisia pk-yrityksiä toimimaan älykkäämmin, nopeammin ja edullisemmin AI-ratkaisujen avulla. Toimisto Pohjanmaalla, Suomessa."
   },
   "nav": {
+    "home": "Koti",
     "services": "Palvelut",
     "about": "Tietoa Optelystä",
+    "process": "Prosessi",
     "vvs": "The HVAC Generator",
     "contact": "Yhteystiedot",
-    "cta": "Varaa tapaaminen"
+    "cta": "Varaa tapaaminen",
+    "nav_select": "Valitse sivu"
   },
   "hero": {
     "badge": "AI-konsultointi & Automaatio",

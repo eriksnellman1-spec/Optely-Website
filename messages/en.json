@@ -4,11 +4,14 @@
     "description": "Optely helps Finnish SMEs work smarter, faster and more efficiently with AI solutions, process automation and conversational AI. Based in Ostrobothnia, Finland."
   },
   "nav": {
+    "home": "Home",
     "services": "Services",
     "about": "About Optely",
+    "process": "Process",
     "vvs": "The HVAC Generator",
     "contact": "Contact",
-    "cta": "Book a call"
+    "cta": "Book a call",
+    "nav_select": "Choose page"
   },
   "hero": {
     "badge": "AI Consulting & Automation",
