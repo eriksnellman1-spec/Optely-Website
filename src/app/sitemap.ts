@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
 
 const locales = ["sv", "fi", "en"];
-const pages = ["", "/services", "/vvs", "/about", "/contact", "/process"];
+const pages = ["", "/services", "/about", "/contact", "/process"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         url: `${SITE_URL}${localePath}${page}`,
         lastModified: new Date(),
         changeFrequency: page === "" ? "weekly" : "monthly",
-        priority: page === "" ? 1.0 : page === "/vvs" ? 0.9 : 0.8,
+        priority: page === "" ? 1.0 : 0.8,
       });
     }
   }
