@@ -5,6 +5,9 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useLocale } from "next-intl";
+import svMessages from "../../../messages/sv.json";
+import fiMessages from "../../../messages/fi.json";
+import enMessages from "../../../messages/en.json";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 
@@ -43,6 +46,29 @@ export default function Hero() {
   const locale = useLocale();
   const prefix = locale === "sv" ? "" : `/${locale}`;
   const [particlesInit, setParticlesInit] = useState(false);
+  const [langIndex, setLangIndex] = useState(0);
+
+  const supportedHeadlines = [
+    {
+      h1: svMessages.hero.headline_1,
+      h2: svMessages.hero.headline_2,
+    },
+    {
+      h1: fiMessages.hero.headline_1,
+      h2: fiMessages.hero.headline_2,
+    },
+    {
+      h1: enMessages.hero.headline_1,
+      h2: enMessages.hero.headline_2,
+    },
+  ];
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setLangIndex((i) => (i + 1) % supportedHeadlines.length);
+    }, 3500);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     initParticlesEngine(async (engine) => {
@@ -120,10 +146,10 @@ export default function Hero() {
 
         {/* Headline */}
         <h1 className="font-syne text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-7xl lg:text-8xl">
-          <AnimatedHeadline text={t("headline_1")} />
+          <AnimatedHeadline text={supportedHeadlines[langIndex].h1} key={langIndex + "h1"} />
           <br />
           <span className="bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent">
-            <AnimatedHeadline text={t("headline_2")} />
+            <AnimatedHeadline text={supportedHeadlines[langIndex].h2} key={langIndex + "h2"} />
           </span>
         </h1>
 
