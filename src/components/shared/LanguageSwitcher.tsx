@@ -23,13 +23,13 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <label className="relative block">
+    <label className="relative block shrink-0">
       <span className="sr-only">Language selector</span>
       <select
         value={locale}
         onChange={(event) => handleLocaleChange(event.target.value)}
         disabled={isPending}
-        className="min-w-[78px] appearance-none rounded-full border border-white/15 bg-surface px-3 py-2 pr-8 font-mono text-xs font-medium text-white outline-none transition duration-200 hover:border-white/30 focus:border-accent"
+        className="min-w-[78px] shrink-0 appearance-none rounded-full border border-white/15 bg-surface px-3 py-2 pr-8 font-mono text-xs font-medium text-white outline-none transition duration-200 hover:border-white/30 focus:border-accent"
         aria-label="Select language"
       >
         {locales.map((l) => (

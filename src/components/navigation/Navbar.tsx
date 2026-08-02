@@ -81,7 +81,7 @@ export default function Navbar() {
             id="page-select"
             value={pathname}
             onChange={(event) => router.push(event.target.value)}
-            className="rounded-full border border-white/10 bg-surface px-3 py-2 text-sm text-white outline-none transition duration-200 hover:border-white/20"
+            className="shrink-0 rounded-full border border-white/10 bg-surface px-3 py-2 text-sm text-white outline-none transition duration-200 hover:border-white/20"
           >
             {pageLinks.map((link) => (
               <option key={link.href} value={link.href}>
