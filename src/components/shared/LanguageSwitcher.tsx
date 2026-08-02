@@ -23,21 +23,24 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-1 rounded-full border border-white/20 bg-surface p-1">
-      {locales.map((l) => (
-        <button
-          key={l.code}
-          onClick={() => handleLocaleChange(l.code)}
-          disabled={isPending}
-          className={`rounded-full px-3 py-1 font-mono text-xs font-medium transition-all duration-200 ${
-            locale === l.code
-              ? "bg-accent text-white"
-              : "text-muted hover:text-white"
-          }`}
-        >
-          {l.label}
-        </button>
-      ))}
-    </div>
+    <label className="relative block">
+      <span className="sr-only">Language selector</span>
+      <select
+        value={locale}
+        onChange={(event) => handleLocaleChange(event.target.value)}
+        disabled={isPending}
+        className="min-w-[78px] appearance-none rounded-full border border-white/15 bg-surface px-3 py-2 pr-8 font-mono text-xs font-medium text-white outline-none transition duration-200 hover:border-white/30 focus:border-accent"
+        aria-label="Select language"
+      >
+        {locales.map((l) => (
+          <option key={l.code} value={l.code}>
+            {l.label}
+          </option>
+        ))}
+      </select>
+      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted">
+        ▾
+      </span>
+    </label>
   );
 }

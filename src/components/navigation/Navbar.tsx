@@ -100,14 +100,17 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          className="text-muted md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        {/* Mobile controls */}
+        <div className="flex items-center gap-3 md:hidden">
+          <LanguageSwitcher />
+          <button
+            className="text-muted"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}
@@ -150,7 +153,6 @@ export default function Navbar() {
             </select>
           </div>
           <div className="mt-6 flex flex-col gap-4">
-            <LanguageSwitcher />
             <a
               href="https://calendly.com/optelyofficial/15min"
               target="_blank"
