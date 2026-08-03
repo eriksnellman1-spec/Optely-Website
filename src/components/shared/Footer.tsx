@@ -100,20 +100,6 @@ export default function Footer() {
                   </a>
                 </div>
               </div>
-              <div>
-                <div className="text-white">Joas Vikström</div>
-                <a
-                  href="mailto:joas.vikstrom@gmail.com"
-                  className="transition-colors hover:text-accent"
-                >
-                  joas.vikstrom@gmail.com
-                </a>
-                <div>
-                  <a href="tel:+358456160663" className="transition-colors hover:text-accent">
-                    +358 45 616 0663
-                  </a>
-                </div>
-              </div>
             </div>
           </div>
         </div>

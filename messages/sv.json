@@ -172,7 +172,7 @@
     "title": "Om Optely",
     "sub": "Vi är ett finskt AI-bolag med stora ambitioner — att göra AI tillgängligt för alla företag i Österbotten, Finland och bortom.",
     "story_title": "Vår historia",
-    "story": "Optely grundades i Österbotten, Finland av Erik Snellman och Joas Vikström med en gemensam vision: att hjälpa finska SME-företag att ta del av AI-revolutionen. Vi tror att världsklassig AI inte ska vara förbehållet stora bolag med stora budgetar.",
+    "story": "Optely grundades i Österbotten, Finland av Erik Snellman med en gemensam vision: att hjälpa finska SME-företag att ta del av AI-revolutionen. Vi tror att världsklassig AI inte ska vara förbehållet stora bolag med stora budgetar.",
     "values_title": "Våra värderingar",
     "value1_title": "Ärlighet",
     "value1_desc": "Vi är transparenta med priser, tidsplaner och resultat — inga dolda avgifter, inga överraskningar.",
@@ -181,8 +181,7 @@
     "value3_title": "Partnerskap",
     "value3_desc": "Vi är inte en leverantör — vi är er partner. Er framgång är vår framgång.",
     "team_heading": "Team",
-    "erik_role": "Grundare & AI-arkitekt",
-    "joas_role": "Grundare & Automationsspecialist"
+    "erik_role": "Grundare & AI-arkitekt"
   },
   "process_page": {
     "heading": "Hur vi arbetar"

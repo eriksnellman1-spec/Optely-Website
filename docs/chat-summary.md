@@ -16,7 +16,7 @@ Full Next.js 14 website for Optely, an AI consulting & automation agency in Öst
 | `/services` | Expanded services grid |
 | `/process` | How we work — timeline + steps |
 | `/vvs` | VVS Automation System product page |
-| `/about` | Team (Erik + Joas), company story, values |
+| `/about` | Team (Erik), company story, values |
 | `/contact` | Contact form + Calendly embed |
 
 All pages exist in three locales: `sv` (default, no prefix), `/fi`, `/en`

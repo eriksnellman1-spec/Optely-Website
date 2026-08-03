@@ -38,13 +38,6 @@ const teamMembers = [
     phone: "+358 44 971 8103",
     initials: "ES",
   },
-  {
-    name: "Joas Vikström",
-    roleKey: "joas_role" as const,
-    email: "joas.vikstrom@gmail.com",
-    phone: "+358 45 616 0663",
-    initials: "JV",
-  },
 ];
 
 function AboutContent() {

@@ -172,7 +172,7 @@
     "title": "Tietoa Optelystä",
     "sub": "Olemme suomalainen AI-yritys suurilla ambioilla — tehdä tekoäly saavutettavaksi kaikille yrityksille Pohjanmaalla, Suomessa ja maailmalla.",
     "story_title": "Tarinamme",
-    "story": "Erik Snellman ja Joas Vikström perustivat Optelyn Pohjanmaalla, Suomessa yhteisellä visiolla: auttaa suomalaisia pk-yrityksiä osallistumaan tekoälyvallankumoukseen. Uskomme, että maailmanluokan tekoälyn ei tulisi olla suurten yritysten ja suurten budjettien etuoikeus.",
+    "story": "Erik Snellman perusti Optelyn Pohjanmaalla, Suomessa yhteisellä visiolla: auttaa suomalaisia pk-yrityksiä osallistumaan tekoälyvallankumoukseen. Uskomme, että maailmanluokan tekoälyn ei tulisi olla suurten yritysten ja suurten budjettien etuoikeus.",
     "values_title": "Arvomme",
     "value1_title": "Rehellisyys",
     "value1_desc": "Olemme avoimia hinnoittelussa, aikatauluissa ja tuloksissa — ei piilomaksuja, ei yllätyksiä.",
@@ -181,8 +181,7 @@
     "value3_title": "Kumppanuus",
     "value3_desc": "Emme ole toimittaja — olemme kumppanisi. Sinun menestyksesi on meidän menestyksemme.",
     "team_heading": "Tiimi",
-    "erik_role": "Perustaja & AI-arkkitehti",
-    "joas_role": "Perustaja & Automaatioasiantuntija"
+    "erik_role": "Perustaja & AI-arkkitehti"
   },
   "process_page": {
     "heading": "Miten työskentelemme"

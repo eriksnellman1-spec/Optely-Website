@@ -172,7 +172,7 @@
     "title": "About Optely",
     "sub": "We are a Finnish AI company with big ambitions — making AI accessible to all businesses in Ostrobothnia, Finland and beyond.",
     "story_title": "Our story",
-    "story": "Optely was founded in Ostrobothnia, Finland by Erik Snellman and Joas Vikström with a shared vision: to help Finnish SMEs take part in the AI revolution. We believe world-class AI shouldn't be reserved for large companies with large budgets.",
+    "story": "Optely was founded in Ostrobothnia, Finland by Erik Snellman with a shared vision: to help Finnish SMEs take part in the AI revolution. We believe world-class AI shouldn't be reserved for large companies with large budgets.",
     "values_title": "Our values",
     "value1_title": "Honesty",
     "value1_desc": "We are transparent with pricing, timelines and results — no hidden fees, no surprises.",
@@ -181,8 +181,7 @@
     "value3_title": "Partnership",
     "value3_desc": "We are not a vendor — we are your partner. Your success is our success.",
     "team_heading": "Team",
-    "erik_role": "Founder & AI Architect",
-    "joas_role": "Founder & Automation Specialist"
+    "erik_role": "Founder & AI Architect"
   },
   "process_page": {
     "heading": "How we work"

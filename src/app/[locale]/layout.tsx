@@ -95,7 +95,6 @@ const localBusinessSchema = {
   },
   founder: [
     { "@type": "Person", name: "Erik Snellman" },
-    { "@type": "Person", name: "Joas Vikström" },
   ],
   sameAs: [
     "https://www.instagram.com/optely",
