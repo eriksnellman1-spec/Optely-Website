@@ -50,7 +50,7 @@ function ContactContent() {
           {/* Contact cards */}
           <div className="mx-auto mb-10 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
             {[
-              { icon: Mail, label: t("email_label"), value: "eriksnellman1@gmail.com", href: "mailto:eriksnellman1@gmail.com" },
+              { icon: Mail, label: t("email_label"), value: "erik@optely.eu", href: "mailto:erik@optely.eu" },
               { icon: Phone, label: t("phone_label"), value: "+358 44 971 8103", href: "tel:+358449718103" },
               { icon: Calendar, label: "Calendly", value: "Book a call", href: "https://calendly.com/optelyofficial/15min" },
             ].map((item) => {

@@ -34,7 +34,7 @@ const teamMembers = [
   {
     name: "Erik Snellman",
     roleKey: "erik_role" as const,
-    email: "eriksnellman1@gmail.com",
+    email: "erik@optely.eu",
     phone: "+358 44 971 8103",
     initials: "ES",
   },

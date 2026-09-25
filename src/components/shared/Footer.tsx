@@ -89,10 +89,10 @@ export default function Footer() {
               <div>
                 <div className="text-white">Erik Snellman</div>
                 <a
-                  href="mailto:eriksnellman1@gmail.com"
+                  href="mailto:erik@optely.eu"
                   className="transition-colors hover:text-accent"
                 >
-                  eriksnellman1@gmail.com
+                  erik@optely.eu
                 </a>
                 <div>
                   <a href="tel:+358449718103" className="transition-colors hover:text-accent">

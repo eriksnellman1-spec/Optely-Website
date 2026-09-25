@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     await resend.emails.send({
       from: "onboarding@resend.dev",
-      to: "eriksnellman1@gmail.com",
+      to: "erik@optely.eu",
       subject: `Nytt meddelande från ${name}${company ? ` — ${company}` : ""}`,
       text: `Namn: ${name}\nE-post: ${email}\nTelefon: ${phone || "–"}\nFöretag: ${company || "–"}\n\nMeddelande:\n${message}`,
     });
