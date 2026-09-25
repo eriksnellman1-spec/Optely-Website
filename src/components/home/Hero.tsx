@@ -41,6 +41,19 @@ function AnimatedHeadline({ text }: { text: string }) {
   );
 }
 
+// Same word layout as AnimatedHeadline, without animation, so hidden copies wrap identically
+function StaticHeadline({ text }: { text: string }) {
+  return (
+    <span className="inline">
+      {text.split(" ").map((w, i) => (
+        <span key={i} className="inline-block mr-[0.25em]">
+          {w}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function Hero() {
   const t = useTranslations("hero");
   const locale = useLocale();
@@ -145,12 +158,24 @@ export default function Hero() {
         </motion.div>
 
         {/* Headline */}
-        <h1 className="font-syne text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-7xl lg:text-8xl">
-          <AnimatedHeadline text={supportedHeadlines[langIndex].h1} key={langIndex + "h1"} />
-          <br />
-          <span className="bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent">
-            <AnimatedHeadline text={supportedHeadlines[langIndex].h2} key={langIndex + "h2"} />
-          </span>
+        {/* All languages share one grid cell so the height stays fixed at the tallest version */}
+        <h1 className="grid font-syne text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-7xl lg:text-8xl">
+          {supportedHeadlines.map((headline, i) => {
+            const active = i === langIndex;
+            return (
+              <span
+                key={i}
+                aria-hidden={!active}
+                className={`[grid-area:1/1] ${active ? "" : "invisible"}`}
+              >
+                {active ? <AnimatedHeadline text={headline.h1} key={langIndex + "h1"} /> : <StaticHeadline text={headline.h1} />}
+                <br />
+                <span className="bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent">
+                  {active ? <AnimatedHeadline text={headline.h2} key={langIndex + "h2"} /> : <StaticHeadline text={headline.h2} />}
+                </span>
+              </span>
+            );
+          })}
         </h1>
 
         {/* Sub */}
