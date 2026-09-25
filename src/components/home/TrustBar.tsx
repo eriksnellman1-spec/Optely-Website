@@ -7,6 +7,7 @@ const logos = [
   "Olea IT",
   "Holmängs Trävaruhandel",
   "Brejk Ekonomitjänster",
+  "OD Center",
 ];
 
 export default function TrustBar() {
