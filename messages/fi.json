@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Optely — AI-konsultointi & Automaatio yrityksille Pohjanmaalla, Suomi",
-    "description": "Optely auttaa suomalaisia pk-yrityksiä toimimaan älykkäämmin, nopeammin ja edullisemmin AI-ratkaisujen avulla. Toimisto Pohjanmaalla, Suomessa."
+    "title": "Optely — AI-konsultointi & automaatio yrityksellesi",
+    "description": "Optely auttaa yrityksiä toimimaan älykkäämmin, nopeammin ja edullisemmin tekoälyn avulla — työtehtävien automatisointi, AI-asiakaspalvelu ja neuvonta."
   },
   "nav": {
     "home": "Koti",
@@ -17,7 +17,7 @@
     "badge": "AI-konsultointi & Automaatio",
     "headline_1": "AI-konsultointi & AI-automaatio",
     "headline_2": "yrityksille, jotka haluavat kasvaa",
-    "sub": "Autamme yrityksiä toimimaan älykkäämmin, nopeammin ja edullisemmin AI-ratkaisujen avulla — AI-transformaatiokumppanisi, kotipaikkana Suomi ja asiakkaita koko Pohjoismaissa",
+    "sub": "Autamme yrityksiä toimimaan älykkäämmin, nopeammin ja edullisemmin tekoälyn avulla — kumppani, joka vie teidät ideasta valmiiseen ratkaisuun",
     "cta_primary": "Varaa ilmainen esittelypuhelu",
     "cta_secondary": "Katso palvelumme",
     "counter_processes": "Automatisoitua prosessia",
@@ -31,7 +31,7 @@
   "strengths": {
     "title": "Miksi valita Optely?",
     "profitable_title": "Kannattavaa",
-    "profitable_desc": "Toimitamme mitattavia tuloksia ja selkeän ROI:n. Jokainen ratkaisu on suunniteltu tuottamaan konkreettista arvoa yrityksellesi.",
+    "profitable_desc": "Tuotamme mitattavia tuloksia ja selvää hyötyä. Jokainen ratkaisu on suunniteltu tuottamaan konkreettista arvoa liiketoiminnallesi.",
     "tailored_title": "Räätälöityä",
     "tailored_desc": "Ei valmiita pakettiratkaisuja — analysoimme yrityksesi ja rakennamme juuri sinulle sopivat AI-ratkaisut.",
     "reliable_title": "Luotettavaa",
@@ -40,15 +40,39 @@
   "services": {
     "title": "Tarjoamme kattavia AI-palveluita",
     "sub": "Strategiasta toteutukseen — katamme koko AI-matkan",
-    "automation_title": "Prosessiautomaatio",
-    "automation_desc": "Tehosta toimintaasi älykkäällä automaatiolla. Poista toistuvat tehtävät ja vapauta aikaa sille, mikä todella luo arvoa.",
-    "conversational_title": "Keskusteleva tekoäly",
-    "conversational_desc": "AI-agentit ja chatbotit, jotka hoitavat asiakaskontaktit ympäri vuorokauden — ilman viiveitä ja ylitöitä.",
+    "automation_title": "Automatisointi",
+    "automation_desc": "Anna tekoälyn hoitaa toistuvat tehtävät. Vähemmän käsityötä ja enemmän aikaa sille, mikä todella luo arvoa.",
+    "conversational_title": "AI-asiakaspalvelu",
+    "conversational_desc": "AI-avustajat, jotka vastaavat asiakkaillenne ympäri vuorokauden — nopeasti ja ilman ylitöitä.",
     "consulting_title": "Konsultointi",
     "consulting_desc": "Analyysi, suositukset ja käyttöönotto. Kartoitamme AI-mahdollisuutesi ja laadimme selkeän toimintasuunnitelman.",
     "custom_title": "Räätälöidyt AI-ratkaisut",
-    "custom_desc": "Kaikenlaiset agentit ja automaatiot — jos voit kuvitella sen, voimme rakentaa sen.",
-    "read_more": "Lue lisää"
+    "custom_desc": "Kaikenlaiset AI-avustajat ja automaatiot — jos voitte kuvitella sen, voimme rakentaa sen.",
+    "read_more": "Lue lisää",
+    "automation_points": [
+      "Automatisoi toistuvat työtehtävät",
+      "Vähemmän käsityötä",
+      "Yhdistää jo käyttämänne ohjelmat",
+      "Räätälöity teidän tapaanne työskennellä"
+    ],
+    "conversational_points": [
+      "Asiakaspalvelu ympäri vuorokauden",
+      "Vastaa ja lajittelee yhteydenotot",
+      "Toimii verkkosivuilla, sähköpostissa ja somessa",
+      "Siirtää ihmiselle tarvittaessa"
+    ],
+    "consulting_points": [
+      "Löydämme, missä tekoäly hyödyttää eniten",
+      "Laskelma siitä, mitä säästätte",
+      "Selkeä suunnitelma askel askeleelta",
+      "Apu oikeiden työkalujen valintaan"
+    ],
+    "custom_points": [
+      "Teille rakennetut AI-avustajat",
+      "Tiedon automaattinen käsittely",
+      "Yhteydet nykyisiin järjestelmiinne",
+      "Ratkaisut täysin tarpeidenne mukaan"
+    ]
   },
   "how_we_work": {
     "title": "AI-kumppanisi",
@@ -56,7 +80,7 @@
     "phase1_title": "Näkemys & Strategia",
     "phase1_desc": "Ymmärrä yrityksesi, kartoita AI-mahdollisuudet ja laadi selkeä suunnitelma tavoitteidesi mukaisesti.",
     "phase2_title": "Käyttöönotto",
-    "phase2_desc": "Rakenna ja ota käyttöön AI-ratkaisut, jotka on räätälöity organisaatiollesi — nopeasti, turvallisesti ja skaalautuvasti.",
+    "phase2_desc": "Rakennamme ja otamme käyttöön organisaatiollenne räätälöidyt AI-ratkaisut — nopeasti, turvallisesti ja valmiina kasvamaan kanssanne.",
     "phase3_title": "Kumppanuus",
     "phase3_desc": "Seuraa, optimoi ja kehitä edelleen liiketoiminnan tahdissa. Olemme mukanasi koko matkan.",
     "cta": "Kiinnostunut? Lue lisää"
@@ -67,13 +91,13 @@
     "step1_title": "Ota yhteyttä",
     "step1_desc": "Varaa ilmainen esittelypuhelu. Kuuntelemme, ymmärrämme ja tunnistamme mahdollisuudet yrityksellesi.",
     "step2_title": "Ratkaisuehdotus",
-    "step2_desc": "Esittelemme räätälöidyn ehdotuksen selkeällä aikataululla, budjetilla ja odotettavissa olevalla ROI:lla.",
+    "step2_desc": "Esitämme räätälöidyn ehdotuksen selkeällä aikataululla, budjetilla ja odotetulla hyödyllä.",
     "step3_title": "Projektin aloitus",
     "step3_desc": "Aloitamme heti. Nopea käyttöönotto jatkuvalla viestinnällä ja selkeillä välitavoitteilla."
   },
   "testimonials": {
     "title": "Mitä asiakkaamme sanovat",
-    "sub": "Todellisia tuloksia todellisille suomalaisille yrityksille",
+    "sub": "Todellisia tuloksia todellisille yrityksille",
     "vlift_quote": "Optelyn AI-chatbotin avulla voimme nyt käsitellä asiakaskyselyitä ympäri vuorokauden — ilman henkilöstöä paikan päällä. Vastaukset ovat nopeita, tarkkoja ja asiakkaat ovat tyytyväisiä. Se on todella muuttanut työskentelytapamme.",
     "vlift_author": "V-Lift",
     "vlift_role": "Asiakastuen chatbot",
@@ -123,24 +147,23 @@
     "a5": "Aloitamme aina tarveanalyysillä, laadimme ehdotuksen ja aloitamme sitten käyttöönoton. Koko projektin ajan sinulla on meillä omistautunut yhteyshenkilö."
   },
   "footer": {
-    "tagline": "AI-kumppani tulevaisuuden suomalaisille yrityksille",
+    "tagline": "AI-kumppani tulevaisuuden yrityksille",
     "nav_heading": "Navigointi",
     "contact_heading": "Yhteystiedot",
     "services": "Palvelut",
     "about": "Tietoa meistä",
     "vvs": "The HVAC Generator",
     "contact": "Yhteystiedot",
-    "rights": "Kaikki oikeudet pidätetään.",
-    "location": "Pohjanmaa, Suomi"
+    "rights": "Kaikki oikeudet pidätetään."
   },
   "vvs": {
     "meta_title": "The HVAC Generator — Optely | AI-automaatio LVI-alalle",
-    "meta_desc": "Optelyn The HVAC Generator automatisoi LVI-yrityksesi tekoälyllä. Liidien kvalifiointi, varaukset, seuranta ja arvostelujen hallinta — täysin automaattisesti. Suomessa toimiva yritys.",
+    "meta_desc": "Optelyn The HVAC Generator automatisoi LVI-yrityksesi tekoälyllä. Varaukset, seuranta ja arvostelut — täysin automaattisesti.",
     "hero_title": "The HVAC Generator",
-    "hero_sub": "Automatisoi LVI-liiketoimintasi liidistä arvosteluun — Suomessa kehitetyillä AI-ratkaisuilla LVI-alalle.",
+    "hero_sub": "Automatisoi LVI-liiketoimintasi ensimmäisestä yhteydenotosta arvosteluun — AI-ratkaisuilla, jotka on suunniteltu LVI-alalle.",
     "hero_cta": "Varaa demo",
     "what_title": "Mikä on The HVAC Generator?",
-    "what_desc": "Täydellinen tekoälypohjainen automaatiojärjestelmä räätälöitynä suomalaisille LVI-yrityksille. Järjestelmä käsittelee koko asiakaspolun automaattisesti — ensimmäisestä kontaktista valmiiseen arvosteluun — jotta voit keskittyä siihen, mitä osaat parhaiten.",
+    "what_desc": "Täydellinen tekoälypohjainen järjestelmä räätälöitynä LVI-yrityksille. Järjestelmä käsittelee koko asiakaspolun automaattisesti — ensimmäisestä kontaktista valmiiseen arvosteluun — jotta voit keskittyä siihen, mitä osaat parhaiten.",
     "feature1_title": "Liidien kvalifiointi",
     "feature1_desc": "Tekoäly kvalifioi saapuvat liidit automaattisesti ja priorisoi ne, joilla on korkein konversiopotentiaali.",
     "feature2_title": "Varaukset & Aikataulutus",
@@ -166,13 +189,13 @@
   },
   "services_page": {
     "title": "AI-palvelumme",
-    "sub": "Kattavat AI-ratkaisut moderneille suomalaisille yrityksille"
+    "sub": "Kattavat AI-ratkaisut moderneille yrityksille"
   },
   "about_page": {
     "title": "Tietoa Optelystä",
-    "sub": "Olemme suomalainen AI-yritys suurilla ambioilla — tehdä tekoäly saavutettavaksi kaikille yrityksille Pohjanmaalla, Suomessa ja maailmalla.",
+    "sub": "Olemme AI-yritys suurilla tavoitteilla — teemme tekoälystä saavutettavaa kaikille yrityksille.",
     "story_title": "Tarinamme",
-    "story": "Erik Snellman perusti Optelyn Pohjanmaalla, Suomessa yhteisellä visiolla: auttaa suomalaisia pk-yrityksiä osallistumaan tekoälyvallankumoukseen. Uskomme, että maailmanluokan tekoälyn ei tulisi olla suurten yritysten ja suurten budjettien etuoikeus.",
+    "story": "Erik Snellman perusti Optelyn selkeällä visiolla: auttaa pieniä ja kasvavia yrityksiä osallistumaan tekoälyvallankumoukseen. Uskomme, että maailmanluokan tekoälyn ei tulisi olla suurten yritysten ja suurten budjettien etuoikeus.",
     "values_title": "Arvomme",
     "value1_title": "Rehellisyys",
     "value1_desc": "Olemme avoimia hinnoittelussa, aikatauluissa ja tuloksissa — ei piilomaksuja, ei yllätyksiä.",
@@ -181,7 +204,7 @@
     "value3_title": "Kumppanuus",
     "value3_desc": "Emme ole toimittaja — olemme kumppanisi. Sinun menestyksesi on meidän menestyksemme.",
     "team_heading": "Tiimi",
-    "erik_role": "Perustaja & AI-arkkitehti"
+    "erik_role": "Perustaja"
   },
   "process_page": {
     "heading": "Miten työskentelemme"

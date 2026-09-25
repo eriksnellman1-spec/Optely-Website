@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Optely — AI-konsult & Automation för företag i Österbotten, Finland",
-    "description": "Optely hjälper finska SME-företag att arbeta smartare, snabbare och billigare med AI-lösningar, processautomation och konversations-AI. Baserat i Österbotten, Finland."
+    "title": "Optely — AI-konsult & automation för ditt företag",
+    "description": "Optely hjälper företag att arbeta smartare, snabbare och billigare med AI — automatisering av arbetsuppgifter, AI-kundservice och rådgivning."
   },
   "nav": {
     "home": "Hem",
@@ -17,7 +17,7 @@
     "badge": "AI-konsult & Automation",
     "headline_1": "AI-konsult & AI-automation",
     "headline_2": "för företag som vill växa",
-    "sub": "Vi hjälper företag att arbeta smartare, snabbare och billigare med AI-lösningar — din partner för AI-transformation, med bas i Finland och kunder i hela Norden",
+    "sub": "Vi hjälper företag att arbeta smartare, snabbare och billigare med AI — en partner som tar er från idé till färdig lösning",
     "cta_primary": "Boka ett gratis introduktionssamtal",
     "cta_secondary": "Se våra tjänster",
     "counter_processes": "Automatiserade processer",
@@ -31,7 +31,7 @@
   "strengths": {
     "title": "Varför välja Optely?",
     "profitable_title": "Lönsamt",
-    "profitable_desc": "Vi levererar mätbara resultat och tydlig ROI. Varje lösning är designad för att generera konkret värde för din verksamhet.",
+    "profitable_desc": "Vi levererar mätbara resultat och en tydlig vinst. Varje lösning är designad för att ge konkret värde för din verksamhet.",
     "tailored_title": "Skräddarsytt",
     "tailored_desc": "Inga färdigpaketerade lösningar — vi analyserar din verksamhet och bygger AI-lösningar anpassade just för dig.",
     "reliable_title": "Pålitligt",
@@ -40,15 +40,39 @@
   "services": {
     "title": "Vi erbjuder heltäckande AI-tjänster",
     "sub": "Från strategi till implementation — vi täcker hela AI-resan",
-    "automation_title": "Processautomation",
-    "automation_desc": "Effektivisera er verksamhet med intelligent automation. Eliminera repetitiva uppgifter och frigör tid för det som verkligen skapar värde.",
-    "conversational_title": "Konversations-AI",
-    "conversational_desc": "AI-agenter och chattbottar som hanterar kundkontakter dygnet runt — utan dröjsmål och utan övertid.",
+    "automation_title": "Automatisering",
+    "automation_desc": "Låt AI sköta de återkommande uppgifterna. Mindre manuellt arbete och mer tid för det som verkligen skapar värde.",
+    "conversational_title": "AI-kundservice",
+    "conversational_desc": "AI-assistenter som svarar era kunder dygnet runt — snabbt och utan övertid.",
     "consulting_title": "Konsult",
     "consulting_desc": "Analys, rekommendation och implementering. Vi kartlägger era AI-möjligheter och tar fram en tydlig handlingsplan.",
     "custom_title": "Skräddarsydda AI-lösningar",
-    "custom_desc": "Alla typer av agenter och automatiseringar — om ni kan tänka det, kan vi bygga det.",
-    "read_more": "Läs mer"
+    "custom_desc": "Alla typer av AI-assistenter och automatiseringar — om ni kan tänka det, kan vi bygga det.",
+    "read_more": "Läs mer",
+    "automation_points": [
+      "Automatiserar återkommande arbetsuppgifter",
+      "Mindre manuellt arbete",
+      "Kopplar ihop program ni redan använder",
+      "Anpassat efter hur ni arbetar"
+    ],
+    "conversational_points": [
+      "Kundservice dygnet runt",
+      "Svarar på och sorterar förfrågningar",
+      "Fungerar på webben, e-post och sociala medier",
+      "Lämnar över till en människa vid behov"
+    ],
+    "consulting_points": [
+      "Vi hittar var AI gör mest nytta",
+      "Beräkning av vad ni sparar",
+      "Tydlig plan steg för steg",
+      "Hjälp att välja rätt verktyg"
+    ],
+    "custom_points": [
+      "AI-assistenter byggda för er",
+      "Automatisk hantering av information",
+      "Kopplingar till era befintliga system",
+      "Lösningar helt efter era behov"
+    ]
   },
   "how_we_work": {
     "title": "Din AI-partner",
@@ -56,7 +80,7 @@
     "phase1_title": "Insikt & Strategi",
     "phase1_desc": "Förstå er verksamhet, kartlägg AI-möjligheter och ta fram en tydlig plan anpassad efter era mål.",
     "phase2_title": "Implementering",
-    "phase2_desc": "Bygg och implementera AI-lösningar anpassade efter er organisation — snabbt, säkert och skalbart.",
+    "phase2_desc": "Bygg och inför AI-lösningar anpassade efter er organisation — snabbt, säkert och redo att växa med er.",
     "phase3_title": "Partnerskap",
     "phase3_desc": "Följ upp, optimera och vidareutveckla i takt med verksamheten. Vi är med er hela vägen.",
     "cta": "Intresserad? Läs mer"
@@ -67,13 +91,13 @@
     "step1_title": "Kontakta Oss",
     "step1_desc": "Boka ett gratis introduktionssamtal. Vi lyssnar, förstår och identifierar möjligheter för din verksamhet.",
     "step2_title": "Lösningsförslag",
-    "step2_desc": "Vi presenterar ett skräddarsytt förslag med tydlig tidsplan, budget och förväntad ROI.",
+    "step2_desc": "Vi presenterar ett skräddarsytt förslag med tydlig tidsplan, budget och förväntad nytta.",
     "step3_title": "Projektstart",
     "step3_desc": "Vi sätter igång direkt. Snabb implementering med löpande kommunikation och tydliga milstolpar."
   },
   "testimonials": {
     "title": "Vad Våra Kunder Säger",
-    "sub": "Riktiga resultat för riktiga finska företag",
+    "sub": "Riktiga resultat för riktiga företag",
     "vlift_quote": "Med hjälp av AI-chattboten från Optely kan vi nu hantera kundförfrågningar dygnet runt — utan att behöva ha personal på plats. Svaren är snabba, korrekta och kunderna är nöjda. Det har verkligen förändrat hur vi arbetar.",
     "vlift_author": "V-Lift",
     "vlift_role": "Chattbot för kundsupport",
@@ -123,24 +147,23 @@
     "a5": "Vi börjar alltid med en behovsanalys, tar fram ett förslag, och sätter sedan igång med implementeringen. Under hela projektet har du en dedikerad kontaktperson hos oss."
   },
   "footer": {
-    "tagline": "AI-partner för framtidens finska företag",
+    "tagline": "AI-partner för framtidens företag",
     "nav_heading": "Navigation",
     "contact_heading": "Kontakt",
     "services": "Tjänster",
     "about": "Om oss",
     "vvs": "The HVAC Generator",
     "contact": "Kontakt",
-    "rights": "Alla rättigheter förbehållna.",
-    "location": "Österbotten, Finland"
+    "rights": "Alla rättigheter förbehållna."
   },
   "vvs": {
     "meta_title": "The HVAC Generator — Optely | AI-automation för VVS-branschen",
-    "meta_desc": "Optely The HVAC Generator automatiserar ditt VVS-företag med AI. Leadkvalificering, bokning, uppföljning och recensionshantering — helt automatiskt. Baserat i Finland.",
+    "meta_desc": "Optely The HVAC Generator automatiserar ditt VVS-företag med AI. Bokning, uppföljning och recensioner — helt automatiskt.",
     "hero_title": "The HVAC Generator",
-    "hero_sub": "Automatisera din VVS-verksamhet från lead till recension — med AI-lösningar designade specifikt för VVS-branschen i Finland.",
+    "hero_sub": "Automatisera din VVS-verksamhet från första kontakt till recension — med AI-lösningar designade specifikt för VVS-branschen.",
     "hero_cta": "Boka en demo",
     "what_title": "Vad är The HVAC Generator?",
-    "what_desc": "Ett komplett AI-drivet automationssystem skräddarsytt för VVS-företag i Finland. Systemet hanterar hela kundresan automatiskt — från första kontakt till färdig recension — så att du kan fokusera på det du gör bäst.",
+    "what_desc": "Ett komplett AI-drivet system skräddarsytt för VVS-företag. Systemet hanterar hela kundresan automatiskt — från första kontakt till färdig recension — så att du kan fokusera på det du gör bäst.",
     "feature1_title": "Leadkvalificering",
     "feature1_desc": "AI kvalificerar inkommande leads automatiskt och prioriterar dem med högst konverteringspotential.",
     "feature2_title": "Bokning & Schemaläggning",
@@ -166,13 +189,13 @@
   },
   "services_page": {
     "title": "Våra AI-tjänster",
-    "sub": "Heltäckande AI-lösningar för moderna finska företag"
+    "sub": "Heltäckande AI-lösningar för moderna företag"
   },
   "about_page": {
     "title": "Om Optely",
-    "sub": "Vi är ett finskt AI-bolag med stora ambitioner — att göra AI tillgängligt för alla företag i Österbotten, Finland och bortom.",
+    "sub": "Vi är ett AI-bolag med stora ambitioner — att göra AI tillgängligt för alla företag.",
     "story_title": "Vår historia",
-    "story": "Optely grundades i Österbotten, Finland av Erik Snellman med en gemensam vision: att hjälpa finska SME-företag att ta del av AI-revolutionen. Vi tror att världsklassig AI inte ska vara förbehållet stora bolag med stora budgetar.",
+    "story": "Optely grundades av Erik Snellman med en tydlig vision: att hjälpa små och växande företag att ta del av AI-revolutionen. Vi tror att världsklassig AI inte ska vara förbehållet stora bolag med stora budgetar.",
     "values_title": "Våra värderingar",
     "value1_title": "Ärlighet",
     "value1_desc": "Vi är transparenta med priser, tidsplaner och resultat — inga dolda avgifter, inga överraskningar.",
@@ -181,7 +204,7 @@
     "value3_title": "Partnerskap",
     "value3_desc": "Vi är inte en leverantör — vi är er partner. Er framgång är vår framgång.",
     "team_heading": "Team",
-    "erik_role": "Grundare & AI-arkitekt"
+    "erik_role": "Grundare"
   },
   "process_page": {
     "heading": "Hur vi arbetar"
