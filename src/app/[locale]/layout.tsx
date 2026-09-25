@@ -77,7 +77,7 @@ const localBusinessSchema = {
   logo: `${SITE_URL}/logo.webp`,
   image: OG_IMAGE,
   telephone: "+358449718103",
-  email: "eriksnellman1@gmail.com",
+  email: "erik@optely.eu",
   address: {
     "@type": "PostalAddress",
     addressRegion: "Pohjanmaa",
