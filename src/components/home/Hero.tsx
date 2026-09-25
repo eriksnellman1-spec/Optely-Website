@@ -159,7 +159,7 @@ export default function Hero() {
 
         {/* Headline */}
         {/* All languages share one grid cell so the height stays fixed at the tallest version */}
-        <h1 className="grid font-syne text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-7xl lg:text-8xl">
+        <h1 className="grid font-syne text-3xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
           {supportedHeadlines.map((headline, i) => {
             const active = i === langIndex;
             return (
