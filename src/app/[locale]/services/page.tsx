@@ -39,45 +39,25 @@ function ServicesContent() {
       icon: Zap,
       title: t("automation_title"),
       desc: t("automation_desc"),
-      points: [
-        "Workflow automation",
-        "Repetitive task elimination",
-        "System integrations",
-        "Custom triggers & actions",
-      ],
+      points: t.raw("automation_points") as string[],
     },
     {
       icon: Bot,
       title: t("conversational_title"),
       desc: t("conversational_desc"),
-      points: [
-        "24/7 customer support",
-        "Lead qualification bots",
-        "Multi-channel deployment",
-        "Human handoff protocols",
-      ],
+      points: t.raw("conversational_points") as string[],
     },
     {
       icon: LineChart,
       title: t("consulting_title"),
       desc: t("consulting_desc"),
-      points: [
-        "AI opportunity mapping",
-        "ROI analysis",
-        "Implementation roadmap",
-        "Vendor selection",
-      ],
+      points: t.raw("consulting_points") as string[],
     },
     {
       icon: Cpu,
       title: t("custom_title"),
       desc: t("custom_desc"),
-      points: [
-        "Custom AI agents",
-        "Data pipelines",
-        "API integrations",
-        "Bespoke solutions",
-      ],
+      points: t.raw("custom_points") as string[],
     },
   ];
 

@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Optely — AI Consulting & Automation for Businesses in Ostrobothnia, Finland",
-    "description": "Optely helps Finnish SMEs work smarter, faster and more efficiently with AI solutions, process automation and conversational AI. Based in Ostrobothnia, Finland."
+    "title": "Optely — AI Consulting & Automation for Your Business",
+    "description": "Optely helps businesses work smarter, faster and more efficiently with AI — automating everyday tasks, AI customer service and advice."
   },
   "nav": {
     "home": "Home",
@@ -17,7 +17,7 @@
     "badge": "AI Consulting & Automation",
     "headline_1": "AI Consulting & AI Automation",
     "headline_2": "for businesses ready to grow",
-    "sub": "We help businesses work smarter, faster and more efficiently with AI solutions — your AI transformation partner, based in Finland with clients across the Nordics",
+    "sub": "We help businesses work smarter, faster and more efficiently with AI — a partner that takes you from idea to finished solution",
     "cta_primary": "Book a free intro call",
     "cta_secondary": "See our services",
     "counter_processes": "Automated processes",
@@ -31,7 +31,7 @@
   "strengths": {
     "title": "Why choose Optely?",
     "profitable_title": "Profitable",
-    "profitable_desc": "We deliver measurable results and clear ROI. Every solution is designed to generate concrete value for your business.",
+    "profitable_desc": "We deliver measurable results and clear returns. Every solution is designed to create real value for your business.",
     "tailored_title": "Tailored",
     "tailored_desc": "No off-the-shelf solutions — we analyze your business and build AI solutions tailored specifically to you.",
     "reliable_title": "Reliable",
@@ -40,15 +40,39 @@
   "services": {
     "title": "We offer comprehensive AI services",
     "sub": "From strategy to implementation — we cover the entire AI journey",
-    "automation_title": "Process Automation",
-    "automation_desc": "Streamline your operations with intelligent automation. Eliminate repetitive tasks and free up time for what truly creates value.",
-    "conversational_title": "Conversational AI",
-    "conversational_desc": "AI agents and chatbots that handle customer interactions around the clock — without delays and without overtime.",
+    "automation_title": "Automation",
+    "automation_desc": "Let AI handle the repetitive tasks. Less manual work and more time for what really creates value.",
+    "conversational_title": "AI Customer Service",
+    "conversational_desc": "AI assistants that answer your customers around the clock — fast and without overtime.",
     "consulting_title": "Consulting",
     "consulting_desc": "Analysis, recommendation and implementation. We map your AI opportunities and develop a clear action plan.",
     "custom_title": "Custom AI Solutions",
-    "custom_desc": "All types of agents and automations — if you can think it, we can build it.",
-    "read_more": "Read more"
+    "custom_desc": "All kinds of AI assistants and automations — if you can imagine it, we can build it.",
+    "read_more": "Read more",
+    "automation_points": [
+      "Automates repetitive tasks",
+      "Less manual work",
+      "Connects the programs you already use",
+      "Adapted to how you work"
+    ],
+    "conversational_points": [
+      "Customer service around the clock",
+      "Answers and sorts enquiries",
+      "Works on your website, email and social media",
+      "Hands over to a person when needed"
+    ],
+    "consulting_points": [
+      "We find where AI helps the most",
+      "A calculation of what you save",
+      "A clear step-by-step plan",
+      "Help choosing the right tools"
+    ],
+    "custom_points": [
+      "AI assistants built for you",
+      "Automatic handling of information",
+      "Connections to your existing systems",
+      "Solutions fully tailored to your needs"
+    ]
   },
   "how_we_work": {
     "title": "Your AI Partner",
@@ -56,7 +80,7 @@
     "phase1_title": "Insight & Strategy",
     "phase1_desc": "Understand your business, map AI opportunities and develop a clear plan tailored to your goals.",
     "phase2_title": "Implementation",
-    "phase2_desc": "Build and implement AI solutions tailored to your organization — fast, secure and scalable.",
+    "phase2_desc": "Build and roll out AI solutions tailored to your organisation — fast, secure and ready to grow with you.",
     "phase3_title": "Partnership",
     "phase3_desc": "Follow up, optimize and further develop in line with the business. We're with you all the way.",
     "cta": "Interested? Learn more"
@@ -67,13 +91,13 @@
     "step1_title": "Contact Us",
     "step1_desc": "Book a free intro call. We listen, understand and identify opportunities for your business.",
     "step2_title": "Solution Proposal",
-    "step2_desc": "We present a tailored proposal with a clear timeline, budget and expected ROI.",
+    "step2_desc": "We present a tailored proposal with a clear timeline, budget and expected benefits.",
     "step3_title": "Project Start",
     "step3_desc": "We get started immediately. Fast implementation with ongoing communication and clear milestones."
   },
   "testimonials": {
     "title": "What Our Clients Say",
-    "sub": "Real results for real Finnish businesses",
+    "sub": "Real results for real businesses",
     "vlift_quote": "With the AI chatbot from Optely, we can now handle customer inquiries around the clock — without needing staff on site. The answers are fast, accurate and customers are satisfied. It has truly changed how we work.",
     "vlift_author": "V-Lift",
     "vlift_role": "Customer Support Chatbot",
@@ -123,24 +147,23 @@
     "a5": "We always start with a needs analysis, develop a proposal, and then begin implementation. Throughout the project you have a dedicated contact person with us."
   },
   "footer": {
-    "tagline": "AI partner for tomorrow's Finnish businesses",
+    "tagline": "AI partner for tomorrow's businesses",
     "nav_heading": "Navigation",
     "contact_heading": "Contact",
     "services": "Services",
     "about": "About us",
     "vvs": "The HVAC Generator",
     "contact": "Contact",
-    "rights": "All rights reserved.",
-    "location": "Ostrobothnia, Finland"
+    "rights": "All rights reserved."
   },
   "vvs": {
     "meta_title": "The HVAC Generator — Optely | AI Automation for the HVAC Industry",
-    "meta_desc": "Optely The HVAC Generator automates your HVAC business with AI. Lead qualification, booking, follow-up and review management — fully automatic. Based in Finland.",
+    "meta_desc": "Optely The HVAC Generator automates your HVAC business with AI. Booking, follow-up and reviews — fully automatic.",
     "hero_title": "The HVAC Generator",
-    "hero_sub": "Automate your HVAC business from lead to review — with AI solutions designed specifically for the HVAC industry in Finland.",
+    "hero_sub": "Automate your HVAC business from first contact to review — with AI solutions designed specifically for the HVAC industry.",
     "hero_cta": "Book a demo",
     "what_title": "What is The HVAC Generator?",
-    "what_desc": "A complete AI-powered automation system tailored for HVAC companies in Finland. The system handles the entire customer journey automatically — from first contact to completed review — so you can focus on what you do best.",
+    "what_desc": "A complete AI-powered system tailored for HVAC companies. The system handles the entire customer journey automatically — from first contact to completed review — so you can focus on what you do best.",
     "feature1_title": "Lead Qualification",
     "feature1_desc": "AI automatically qualifies incoming leads and prioritizes those with the highest conversion potential.",
     "feature2_title": "Booking & Scheduling",
@@ -166,13 +189,13 @@
   },
   "services_page": {
     "title": "Our AI Services",
-    "sub": "Comprehensive AI solutions for modern Finnish businesses"
+    "sub": "Complete AI solutions for modern businesses"
   },
   "about_page": {
     "title": "About Optely",
-    "sub": "We are a Finnish AI company with big ambitions — making AI accessible to all businesses in Ostrobothnia, Finland and beyond.",
+    "sub": "We are an AI company with big ambitions — making AI accessible to every business.",
     "story_title": "Our story",
-    "story": "Optely was founded in Ostrobothnia, Finland by Erik Snellman with a shared vision: to help Finnish SMEs take part in the AI revolution. We believe world-class AI shouldn't be reserved for large companies with large budgets.",
+    "story": "Optely was founded by Erik Snellman with a clear vision: to help small and growing businesses take part in the AI revolution. We believe world-class AI shouldn't be reserved for large companies with large budgets.",
     "values_title": "Our values",
     "value1_title": "Honesty",
     "value1_desc": "We are transparent with pricing, timelines and results — no hidden fees, no surprises.",
@@ -181,7 +204,7 @@
     "value3_title": "Partnership",
     "value3_desc": "We are not a vendor — we are your partner. Your success is our success.",
     "team_heading": "Team",
-    "erik_role": "Founder & AI Architect"
+    "erik_role": "Founder"
   },
   "process_page": {
     "heading": "How we work"

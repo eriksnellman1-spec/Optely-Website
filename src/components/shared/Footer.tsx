@@ -109,9 +109,6 @@ export default function Footer() {
           <p className="font-dm text-xs text-muted">
             © 2026 Optely. {t("rights")}
           </p>
-          <p className="font-mono text-xs text-muted/60">
-            {t("location")}
-          </p>
         </div>
       </div>
     </footer>
