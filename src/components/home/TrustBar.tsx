@@ -24,11 +24,11 @@ export default function TrustBar() {
         <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-surface/80 to-transparent sm:w-32" />
         <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-surface/80 to-transparent sm:w-32" />
 
-        <div className="flex animate-marquee gap-20 whitespace-nowrap">
+        <div className="flex w-max animate-marquee whitespace-nowrap">
           {[...logos, ...logos, ...logos, ...logos].map((name, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 font-syne text-sm font-bold text-muted/60 transition-colors hover:text-muted"
+              className="flex items-center gap-3 pr-20 font-syne text-sm font-bold text-muted/60 transition-colors hover:text-muted"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-accent/40" />
               {name}
