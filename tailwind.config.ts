@@ -24,7 +24,7 @@ const config: Config = {
         mono: ["var(--font-jetbrains)", "monospace"],
       },
       animation: {
-        marquee: "marquee 15s linear infinite",
+        marquee: "marquee 40s linear infinite",
         glow: "glow 2s ease-in-out infinite alternate",
       },
       keyframes: {
