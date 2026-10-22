@@ -17,7 +17,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description,
-    alternates: buildAlternates("/services"),
+    alternates: buildAlternates(locale, "/services"),
     openGraph: {
       type: "website",
       locale: localeNames[locale] ?? "sv_SE",

@@ -13,9 +13,10 @@ export function buildCanonical(locale: string, path: string = "") {
   return `${SITE_URL}${localePath}${path}`;
 }
 
-export function buildAlternates(path: string = "") {
+// Each locale is its own canonical page; pointing fi/en at sv made Google drop them
+export function buildAlternates(locale: string, path: string = "") {
   return {
-    canonical: buildCanonical("sv", path),
+    canonical: buildCanonical(locale, path),
     languages: {
       sv: buildCanonical("sv", path),
       fi: buildCanonical("fi", path),
