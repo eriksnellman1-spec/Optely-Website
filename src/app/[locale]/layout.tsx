@@ -20,7 +20,7 @@ export async function generateMetadata({
   const title = t("title");
   const description = t("description");
   const canonical = buildCanonical(locale);
-  const alternates = buildAlternates();
+  const alternates = buildAlternates(locale);
 
   return {
     title: {

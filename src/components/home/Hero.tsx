@@ -59,7 +59,10 @@ export default function Hero() {
   const locale = useLocale();
   const prefix = locale === "sv" ? "" : `/${locale}`;
   const [particlesInit, setParticlesInit] = useState(false);
-  const [langIndex, setLangIndex] = useState(0);
+  // Start on the page's own language so the server-rendered <h1> matches the page
+  const [langIndex, setLangIndex] = useState(() =>
+    Math.max(0, ["sv", "fi", "en"].indexOf(locale))
+  );
 
   const supportedHeadlines = [
     {
@@ -158,14 +161,16 @@ export default function Hero() {
         </motion.div>
 
         {/* Headline */}
-        {/* All languages share one grid cell so the height stays fixed at the tallest version */}
-        <h1 className="grid font-syne text-3xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
+        {/* All languages share one grid cell so the height stays fixed at the tallest version;
+            only the visible one is the <h1>, so search engines see a single headline */}
+        <div className="grid font-syne text-3xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
           {supportedHeadlines.map((headline, i) => {
             const active = i === langIndex;
+            const Tag = active ? "h1" : "div";
             return (
-              <span
+              <Tag
                 key={i}
-                aria-hidden={!active}
+                aria-hidden={active ? undefined : true}
                 className={`[grid-area:1/1] ${active ? "" : "invisible"}`}
               >
                 {active ? <AnimatedHeadline text={headline.h1} key={langIndex + "h1"} /> : <StaticHeadline text={headline.h1} />}
@@ -173,10 +178,10 @@ export default function Hero() {
                 <span className="bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent">
                   {active ? <AnimatedHeadline text={headline.h2} key={langIndex + "h2"} /> : <StaticHeadline text={headline.h2} />}
                 </span>
-              </span>
+              </Tag>
             );
           })}
-        </h1>
+        </div>
 
         {/* Sub */}
         <motion.p
