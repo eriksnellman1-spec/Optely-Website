@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Optely — AI-konsult & automation för ditt företag",
-    "description": "Optely hjälper företag att arbeta smartare, snabbare och billigare med AI — automatisering av arbetsuppgifter, AI-kundservice och rådgivning."
+    "title": "Optely — AI-konsult & AI-automation i Österbotten, Finland",
+    "description": "Optely är ett AI-konsult- och automationsföretag i Österbotten som hjälper företag i hela Finland att arbeta smartare med AI — automatisering, chattbottar och AI-kundservice, rådgivning och skräddarsydda AI-lösningar."
   },
   "nav": {
     "home": "Hem",
@@ -154,7 +154,8 @@
     "about": "Om oss",
     "vvs": "The HVAC Generator",
     "contact": "Kontakt",
-    "rights": "Alla rättigheter förbehållna."
+    "rights": "Alla rättigheter förbehållna.",
+    "location": "Österbotten, Finland"
   },
   "vvs": {
     "meta_title": "The HVAC Generator — Optely | AI-automation för VVS-branschen",
@@ -193,9 +194,9 @@
   },
   "about_page": {
     "title": "Om Optely",
-    "sub": "Vi är ett AI-bolag med stora ambitioner — att göra AI tillgängligt för alla företag.",
+    "sub": "Vi är ett AI-bolag från Österbotten med stora ambitioner — att göra AI tillgängligt för alla företag.",
     "story_title": "Vår historia",
-    "story": "Optely grundades av Erik Snellman med en tydlig vision: att hjälpa små och växande företag att ta del av AI-revolutionen. Vi tror att världsklassig AI inte ska vara förbehållet stora bolag med stora budgetar.",
+    "story": "Optely grundades i Österbotten av Erik Snellman med en tydlig vision: att hjälpa små och växande företag att ta del av AI-revolutionen. Vi tror att världsklassig AI inte ska vara förbehållet stora bolag med stora budgetar. I dag hjälper vi företag i hela Finland.",
     "values_title": "Våra värderingar",
     "value1_title": "Ärlighet",
     "value1_desc": "Vi är transparenta med priser, tidsplaner och resultat — inga dolda avgifter, inga överraskningar.",
