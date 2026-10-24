@@ -4,35 +4,44 @@ import Link from "next/link";
 import { Bot, Zap, LineChart, Cpu } from "lucide-react";
 import GlassCard from "@/components/shared/GlassCard";
 import ScrollReveal from "@/components/shared/ScrollReveal";
+import { servicePages, servicePagePath, type Locale } from "@/lib/servicePages";
 
 export default function Services() {
   const t = useTranslations("services");
   const locale = useLocale();
   const prefix = locale === "sv" ? "" : `/${locale}`;
+  const pageHref = (id: string) => {
+    const page = servicePages.find((p) => p.id === id);
+    return page ? servicePagePath(locale as Locale, page) : `${prefix}/services`;
+  };
 
   const services = [
     {
       icon: Zap,
       title: t("automation_title"),
       desc: t("automation_desc"),
+      href: pageHref("automation"),
       wide: true,
     },
     {
       icon: Bot,
       title: t("conversational_title"),
       desc: t("conversational_desc"),
+      href: pageHref("chatbot"),
       wide: false,
     },
     {
       icon: LineChart,
       title: t("consulting_title"),
       desc: t("consulting_desc"),
+      href: pageHref("consulting"),
       wide: false,
     },
     {
       icon: Cpu,
       title: t("custom_title"),
       desc: t("custom_desc"),
+      href: pageHref(""),
       wide: true,
     },
   ];
@@ -69,7 +78,7 @@ export default function Services() {
                   {service.desc}
                 </p>
                 <Link
-                  href={`${prefix}/services`}
+                  href={service.href}
                   className="inline-flex items-center gap-1 font-mono text-xs text-accent-light transition-colors hover:text-accent"
                 >
                   {t("read_more")} →

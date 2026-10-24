@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
+import { servicePages, servicePagePath, type Locale } from "@/lib/servicePages";
 
 const locales = ["sv", "fi", "en"];
 const pages = ["", "/services", "/about", "/contact", "/process"];
@@ -15,6 +16,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: new Date(),
         changeFrequency: page === "" ? "weekly" : "monthly",
         priority: page === "" ? 1.0 : 0.8,
+      });
+    }
+  }
+
+  for (const page of servicePages) {
+    for (const locale of locales as Locale[]) {
+      entries.push({
+        url: `${SITE_URL}${servicePagePath(locale, page)}`,
+        lastModified: new Date(),
+        changeFrequency: "monthly",
+        priority: 0.9,
       });
     }
   }

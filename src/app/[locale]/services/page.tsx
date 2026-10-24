@@ -1,7 +1,9 @@
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
-import { Bot, Zap, LineChart, Cpu, ArrowRight } from "lucide-react";
+import { Bot, Zap, LineChart, Cpu, GraduationCap, ArrowRight } from "lucide-react";
+import { useLocale } from "next-intl";
+import { servicePages, servicePagePath, type Locale } from "@/lib/servicePages";
 import GlassCard from "@/components/shared/GlassCard";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import { OG_IMAGE, localeNames, buildCanonical, buildAlternates } from "@/lib/seo";
@@ -33,6 +35,11 @@ export async function generateMetadata({
 function ServicesContent() {
   const t = useTranslations("services");
   const pt = useTranslations("services_page");
+  const locale = useLocale() as Locale;
+  const pageHref = (id: string) => {
+    const page = servicePages.find((p) => p.id === id);
+    return page ? servicePagePath(locale, page) : undefined;
+  };
 
   const services = [
     {
@@ -40,24 +47,35 @@ function ServicesContent() {
       title: t("automation_title"),
       desc: t("automation_desc"),
       points: t.raw("automation_points") as string[],
+      href: pageHref("automation"),
     },
     {
       icon: Bot,
       title: t("conversational_title"),
       desc: t("conversational_desc"),
       points: t.raw("conversational_points") as string[],
+      href: pageHref("chatbot"),
     },
     {
       icon: LineChart,
       title: t("consulting_title"),
       desc: t("consulting_desc"),
       points: t.raw("consulting_points") as string[],
+      href: pageHref("consulting"),
     },
     {
       icon: Cpu,
       title: t("custom_title"),
       desc: t("custom_desc"),
       points: t.raw("custom_points") as string[],
+      href: undefined,
+    },
+    {
+      icon: GraduationCap,
+      title: t("training_title"),
+      desc: t("training_desc"),
+      points: t.raw("training_points") as string[],
+      href: pageHref("training"),
     },
   ];
 
@@ -95,6 +113,14 @@ function ServicesContent() {
                     </li>
                   ))}
                 </ul>
+                {service.href && (
+                  <a
+                    href={service.href}
+                    className="mt-6 inline-flex items-center gap-1 font-mono text-xs text-accent-light transition-colors hover:text-accent"
+                  >
+                    {t("read_more")} →
+                  </a>
+                )}
               </GlassCard>
             );
           })}
