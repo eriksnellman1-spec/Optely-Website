@@ -79,17 +79,37 @@ export default function Hero() {
     },
   ];
 
+  // The first headline is shown immediately (it's the page's largest element, so a fade-in
+  // would delay Largest Contentful Paint); only later language switches animate
+  const [rotated, setRotated] = useState(false);
+
   useEffect(() => {
     const id = setInterval(() => {
+      setRotated(true);
       setLangIndex((i) => (i + 1) % supportedHeadlines.length);
     }, 3500);
     return () => clearInterval(id);
   }, []);
 
+  // Decorative only: start the particle engine once the page is idle so it doesn't compete with first paint
   useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-    }).then(() => setParticlesInit(true));
+    let cancelled = false;
+    const start = () => {
+      initParticlesEngine(async (engine) => {
+        await loadSlim(engine);
+      }).then(() => {
+        if (!cancelled) setParticlesInit(true);
+      });
+    };
+    const hasIdle = typeof window.requestIdleCallback === "function";
+    const id = hasIdle
+      ? window.requestIdleCallback(start, { timeout: 2000 })
+      : setTimeout(start, 1200);
+    return () => {
+      cancelled = true;
+      if (hasIdle) window.cancelIdleCallback(id as number);
+      else clearTimeout(id);
+    };
   }, []);
 
   return (
@@ -173,10 +193,10 @@ export default function Hero() {
                 aria-hidden={active ? undefined : true}
                 className={`[grid-area:1/1] ${active ? "" : "invisible"}`}
               >
-                {active ? <AnimatedHeadline text={headline.h1} key={langIndex + "h1"} /> : <StaticHeadline text={headline.h1} />}
+                {active && rotated ? <AnimatedHeadline text={headline.h1} key={langIndex + "h1"} /> : <StaticHeadline text={headline.h1} />}
                 <br />
                 <span className="bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent">
-                  {active ? <AnimatedHeadline text={headline.h2} key={langIndex + "h2"} /> : <StaticHeadline text={headline.h2} />}
+                  {active && rotated ? <AnimatedHeadline text={headline.h2} key={langIndex + "h2"} /> : <StaticHeadline text={headline.h2} />}
                 </span>
               </Tag>
             );
@@ -187,7 +207,7 @@ export default function Hero() {
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.7 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
           className="max-w-2xl font-dm text-lg text-muted md:text-xl"
         >
           {t("sub")}
@@ -197,7 +217,7 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
           className="flex flex-col items-center gap-4 sm:flex-row"
         >
           <a

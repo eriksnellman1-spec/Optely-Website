@@ -49,7 +49,7 @@ export async function generateMetadata({
           url: OG_IMAGE,
           width: 1200,
           height: 630,
-          alt: "Optely — AI-konsult & Automation",
+          alt: "Optely — AI-konsult & AI-automation",
         },
       ],
     },
@@ -72,12 +72,18 @@ const localBusinessSchema = {
   "@type": "ProfessionalService",
   name: "Optely",
   description:
-    "AI consulting and automation agency. We help businesses work smarter with AI — automating everyday tasks, AI customer service and advice.",
+    "AI consulting and automation company in Ostrobothnia, Finland. We help businesses across Finland work smarter with AI — automation, chatbots and AI customer service, advice and custom AI solutions.",
   url: SITE_URL,
   logo: `${SITE_URL}/logo.webp`,
   image: OG_IMAGE,
   telephone: "+358449718103",
   email: "erik@optely.eu",
+  address: {
+    "@type": "PostalAddress",
+    addressRegion: "Pohjanmaa",
+    addressCountry: "FI",
+  },
+  areaServed: { "@type": "Country", name: "Finland" },
   founder: [
     { "@type": "Person", name: "Erik Snellman" },
   ],

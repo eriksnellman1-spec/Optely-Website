@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Optely — AI-konsultointi & automaatio yrityksellesi",
-    "description": "Optely auttaa yrityksiä toimimaan älykkäämmin, nopeammin ja edullisemmin tekoälyn avulla — työtehtävien automatisointi, AI-asiakaspalvelu ja neuvonta."
+    "title": "Optely — Tekoälykonsultointi ja AI-automaatio | Pohjanmaa, Suomi",
+    "description": "Optely on pohjanmaalainen tekoälykonsultointi- ja automaatioyritys, joka auttaa yrityksiä koko Suomessa toimimaan älykkäämmin tekoälyn avulla — automatisointi, chatbotit ja AI-asiakaspalvelu, neuvonta ja räätälöidyt tekoälyratkaisut."
   },
   "nav": {
     "home": "Koti",
@@ -154,7 +154,8 @@
     "about": "Tietoa meistä",
     "vvs": "The HVAC Generator",
     "contact": "Yhteystiedot",
-    "rights": "Kaikki oikeudet pidätetään."
+    "rights": "Kaikki oikeudet pidätetään.",
+    "location": "Pohjanmaa, Suomi"
   },
   "vvs": {
     "meta_title": "The HVAC Generator — Optely | AI-automaatio LVI-alalle",
@@ -193,9 +194,9 @@
   },
   "about_page": {
     "title": "Tietoa Optelystä",
-    "sub": "Olemme AI-yritys suurilla tavoitteilla — teemme tekoälystä saavutettavaa kaikille yrityksille.",
+    "sub": "Olemme pohjanmaalainen AI-yritys suurilla tavoitteilla — teemme tekoälystä saavutettavaa kaikille yrityksille.",
     "story_title": "Tarinamme",
-    "story": "Erik Snellman perusti Optelyn selkeällä visiolla: auttaa pieniä ja kasvavia yrityksiä osallistumaan tekoälyvallankumoukseen. Uskomme, että maailmanluokan tekoälyn ei tulisi olla suurten yritysten ja suurten budjettien etuoikeus.",
+    "story": "Erik Snellman perusti Optelyn Pohjanmaalla selkeällä visiolla: auttaa pieniä ja kasvavia yrityksiä osallistumaan tekoälyvallankumoukseen. Uskomme, että maailmanluokan tekoälyn ei tulisi olla suurten yritysten ja suurten budjettien etuoikeus. Nykyään autamme yrityksiä koko Suomessa.",
     "values_title": "Arvomme",
     "value1_title": "Rehellisyys",
     "value1_desc": "Olemme avoimia hinnoittelussa, aikatauluissa ja tuloksissa — ei piilomaksuja, ei yllätyksiä.",

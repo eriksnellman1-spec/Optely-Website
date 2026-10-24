@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Optely — AI Consulting & Automation for Your Business",
-    "description": "Optely helps businesses work smarter, faster and more efficiently with AI — automating everyday tasks, AI customer service and advice."
+    "title": "Optely — AI Consulting & Automation in Ostrobothnia, Finland",
+    "description": "Optely is an AI consulting and automation company in Ostrobothnia helping businesses across Finland work smarter with AI — automation, chatbots and AI customer service, advice and custom AI solutions."
   },
   "nav": {
     "home": "Home",
@@ -154,7 +154,8 @@
     "about": "About us",
     "vvs": "The HVAC Generator",
     "contact": "Contact",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "location": "Ostrobothnia, Finland"
   },
   "vvs": {
     "meta_title": "The HVAC Generator — Optely | AI Automation for the HVAC Industry",
@@ -193,9 +194,9 @@
   },
   "about_page": {
     "title": "About Optely",
-    "sub": "We are an AI company with big ambitions — making AI accessible to every business.",
+    "sub": "We are an AI company from Ostrobothnia with big ambitions — making AI accessible to every business.",
     "story_title": "Our story",
-    "story": "Optely was founded by Erik Snellman with a clear vision: to help small and growing businesses take part in the AI revolution. We believe world-class AI shouldn't be reserved for large companies with large budgets.",
+    "story": "Optely was founded in Ostrobothnia by Erik Snellman with a clear vision: to help small and growing businesses take part in the AI revolution. We believe world-class AI shouldn't be reserved for large companies with large budgets. Today we help businesses across Finland.",
     "values_title": "Our values",
     "value1_title": "Honesty",
     "value1_desc": "We are transparent with pricing, timelines and results — no hidden fees, no surprises.",
