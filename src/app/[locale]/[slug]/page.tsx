@@ -12,13 +12,22 @@ import {
   findServicePageAnyLocale,
   servicePagePath,
 } from "@/lib/servicePages";
+import {
+  caseStudies,
+  caseStudyLabels,
+  caseStudyPath,
+  findCaseStudy,
+  findCaseStudyAnyLocale,
+} from "@/lib/caseStudies";
+import CaseStudyView from "@/components/CaseStudyView";
 
 const locales: Locale[] = ["sv", "fi", "en"];
 
 export function generateStaticParams() {
-  return locales.flatMap((locale) =>
-    servicePages.map((page) => ({ locale, slug: page.content[locale].slug }))
-  );
+  return locales.flatMap((locale) => [
+    ...servicePages.map((page) => ({ locale, slug: page.content[locale].slug })),
+    ...caseStudies.map((study) => ({ locale, slug: study.content[locale].slug })),
+  ]);
 }
 
 export async function generateMetadata({
@@ -26,20 +35,23 @@ export async function generateMetadata({
 }: {
   params: { locale: Locale; slug: string };
 }): Promise<Metadata> {
+  const study = findCaseStudy(locale, slug);
   const page = findServicePage(locale, slug);
-  if (!page) return {};
-  const c = page.content[locale];
-  const url = `${SITE_URL}${servicePagePath(locale, page)}`;
+  if (!study && !page) return {};
+  const c = study ? study.content[locale] : page!.content[locale];
+  const pathFor = (l: Locale) =>
+    `${SITE_URL}${study ? caseStudyPath(l, study) : servicePagePath(l, page!)}`;
+  const url = pathFor(locale);
   return {
     title: { absolute: c.metaTitle },
     description: c.metaDescription,
     alternates: {
       canonical: url,
       languages: {
-        sv: `${SITE_URL}${servicePagePath("sv", page)}`,
-        fi: `${SITE_URL}${servicePagePath("fi", page)}`,
-        en: `${SITE_URL}${servicePagePath("en", page)}`,
-        "x-default": `${SITE_URL}${servicePagePath("sv", page)}`,
+        sv: pathFor("sv"),
+        fi: pathFor("fi"),
+        en: pathFor("en"),
+        "x-default": pathFor("sv"),
       },
     },
     openGraph: {
@@ -59,13 +71,19 @@ export default async function ServiceLandingPage({
 }: {
   params: { locale: Locale; slug: string };
 }) {
+  const study = findCaseStudy(locale, slug);
+  if (study) return <CaseStudyView locale={locale} study={study} />;
+
   const page = findServicePage(locale, slug);
   if (!page) {
     // Language switcher keeps the slug; send it to this language's slug
     const other = findServicePageAnyLocale(slug);
     if (other) permanentRedirect(servicePagePath(locale, other));
+    const otherStudy = findCaseStudyAnyLocale(slug);
+    if (otherStudy) permanentRedirect(caseStudyPath(locale, otherStudy));
     notFound();
   }
+  const relatedCase = caseStudies.find((cs) => cs.id === page.caseStudyId);
 
   const c = page.content[locale];
   const faqT = await getTranslations({ locale, namespace: "faq" });
@@ -159,6 +177,26 @@ export default async function ServiceLandingPage({
             </GlassCard>
           ))}
         </div>
+
+        {relatedCase && (
+          <GlassCard className="mb-20 p-8">
+            <div className="mb-2 font-mono text-xs uppercase tracking-widest text-accent-light">
+              {caseStudyLabels[locale].label}
+            </div>
+            <h2 className="mb-3 font-syne text-2xl font-bold text-white">
+              {relatedCase.content[locale].h1}
+            </h2>
+            <p className="mb-5 font-dm leading-relaxed text-muted">
+              {relatedCase.content[locale].intro}
+            </p>
+            <a
+              href={caseStudyPath(locale, relatedCase)}
+              className="inline-flex items-center gap-1 font-mono text-xs text-accent-light transition-colors hover:text-accent"
+            >
+              {caseStudyLabels[locale].readMore} →
+            </a>
+          </GlassCard>
+        )}
 
         <ScrollReveal className="mb-8 text-center">
           <h2 className="font-syne text-3xl font-bold text-white">{processT("title")}</h2>
