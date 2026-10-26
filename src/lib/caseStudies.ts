@@ -1,5 +1,6 @@
-// Customer case studies. Text approved by the owner; the customer is anonymous until
-// they approve being named (then add the name and, if approved, a quote).
+// Customer case studies. Text, customer name and quote are approved by the owner and
+// the customer. Quotes are kept in the language they were given; other locales get a
+// translation marked with `translated`.
 
 import type { Locale } from "@/lib/servicePages";
 
@@ -9,6 +10,7 @@ export interface CaseStudyContent {
   metaDescription: string;
   h1: string;
   intro: string;
+  quote?: { text: string; author: string; translated?: boolean };
   sections: { title: string; text?: string; items?: string[] }[];
 }
 
@@ -29,12 +31,16 @@ export const caseStudies: CaseStudy[] = [
     content: {
       sv: {
         slug: "kundcase-automatisk-lonsamhetskalkyl",
-        metaTitle: "Kundcase: Automatisk lönsamhetskalkyl för begagnade båtar | Optely",
+        metaTitle: "Kundcase OD Center: Automatisk lönsamhetskalkyl för begagnade båtar | Optely",
         metaDescription:
-          "Hur Optely automatiserade lönsamhetskalkylen för en båtåterförsäljare i Österbotten: en n8n-automation kopplar kassasystemet Tehden till ett kalkylark.",
-        h1: "Automatisk lönsamhetskalkyl för begagnade båtar och maskiner",
+          "Hur Optely automatiserade lönsamhetskalkylen för OD Center i Bosund: en n8n-automation kopplar kassasystemet Tehden till ett kalkylark.",
+        h1: "OD Center: automatisk lönsamhetskalkyl för begagnade båtar och maskiner",
         intro:
-          "En båtåterförsäljare i Österbotten säljer båtar, motorer och fyrhjulingar och har omkring 710 begagnade produkter i sortimentet. Optely byggde en automation som räknar ut vad varje begagnad produkt har kostat och vad den lämnar i bidrag.",
+          "OD Center (Ocean Dealers Ab Oy) i Bosund säljer båtar, motorer och fyrhjulingar och har omkring 710 begagnade produkter i sortimentet. Optely byggde en automation som räknar ut vad varje begagnad produkt har kostat och vad den lämnar i bidrag.",
+        quote: {
+          text: "Optely byggde en automation som kopplar vår Tehden-kassa till ett kalkylark och räknar ut värdeuppräkningen på våra begagnade produkter automatiskt. Det sparar oss manuellt arbete.",
+          author: "Bertil, OD Center",
+        },
         sections: [
           {
             title: "Utmaningen",
@@ -52,18 +58,23 @@ export const caseStudies: CaseStudy[] = [
           },
           {
             title: "Resultatet",
-            text: "Kunden ser nu direkt vad varje begagnad produkt har kostat och vad den lämnar i bidrag – utan att räkna för hand.",
+            text: "OD Center ser nu direkt vad varje begagnad produkt har kostat och vad den lämnar i bidrag – utan att räkna för hand.",
           },
         ],
       },
       fi: {
         slug: "asiakastarina-automaattinen-kannattavuuslaskelma",
-        metaTitle: "Asiakastarina: Automaattinen kannattavuuslaskelma käytetyille veneille | Optely",
+        metaTitle: "Asiakastarina OD Center: Automaattinen kannattavuuslaskelma käytetyille veneille | Optely",
         metaDescription:
-          "Näin Optely automatisoi pohjalaisen venekaupan kannattavuuslaskelman: n8n-automaatio yhdistää Tehden-kassajärjestelmän laskentataulukkoon.",
-        h1: "Automaattinen kannattavuuslaskelma käytetyille veneille ja koneille",
+          "Näin Optely automatisoi OD Centerin kannattavuuslaskelman: n8n-automaatio yhdistää Tehden-kassajärjestelmän laskentataulukkoon.",
+        h1: "OD Center: automaattinen kannattavuuslaskelma käytetyille veneille ja koneille",
         intro:
-          "Pohjalainen venekauppa myy veneitä, moottoreita ja mönkijöitä, ja valikoimassa on noin 710 käytettyä tuotetta. Optely rakensi automaation, joka laskee, mitä kukin käytetty tuote on maksanut ja paljonko se jättää katetta.",
+          "Bosundissa toimiva OD Center (Ocean Dealers Ab Oy) myy veneitä, moottoreita ja mönkijöitä, ja valikoimassa on noin 710 käytettyä tuotetta. Optely rakensi automaation, joka laskee, mitä kukin käytetty tuote on maksanut ja paljonko se jättää katetta.",
+        quote: {
+          text: "Optely rakensi automaation, joka yhdistää Tehden-kassamme laskentataulukkoon ja laskee käytettyjen tuotteidemme arvonnousun automaattisesti. Se säästää meiltä käsityötä.",
+          author: "Bertil, OD Center",
+          translated: true,
+        },
         sections: [
           {
             title: "Haaste",
@@ -81,18 +92,23 @@ export const caseStudies: CaseStudy[] = [
           },
           {
             title: "Tulos",
-            text: "Asiakas näkee nyt suoraan, mitä kukin käytetty tuote on maksanut ja paljonko se jättää katetta – ilman käsin laskemista.",
+            text: "OD Center näkee nyt suoraan, mitä kukin käytetty tuote on maksanut ja paljonko se jättää katetta – ilman käsin laskemista.",
           },
         ],
       },
       en: {
         slug: "case-study-automated-margin-calculation",
-        metaTitle: "Case study: Automated margin calculation for used boats | Optely",
+        metaTitle: "Case study OD Center: Automated margin calculation for used boats | Optely",
         metaDescription:
-          "How Optely automated the margin calculation for a boat dealer in Ostrobothnia: an n8n automation connects the Tehden POS system to a spreadsheet.",
-        h1: "Automated margin calculation for used boats and machines",
+          "How Optely automated the margin calculation for OD Center in Bosund, Finland: an n8n automation connects the Tehden POS system to a spreadsheet.",
+        h1: "OD Center: automated margin calculation for used boats and machines",
         intro:
-          "A boat dealer in Ostrobothnia sells boats, engines and ATVs and has around 710 used products in stock. Optely built an automation that calculates what each used product has cost and the margin it leaves.",
+          "OD Center (Ocean Dealers Ab Oy) in Bosund sells boats, engines and ATVs and has around 710 used products in stock. Optely built an automation that calculates what each used product has cost and the margin it leaves.",
+        quote: {
+          text: "Optely built an automation that connects our Tehden POS to a spreadsheet and automatically calculates the added value of our used products. It saves us manual work.",
+          author: "Bertil, OD Center",
+          translated: true,
+        },
         sections: [
           {
             title: "The challenge",
@@ -110,7 +126,7 @@ export const caseStudies: CaseStudy[] = [
           },
           {
             title: "The result",
-            text: "The customer now sees straight away what each used product has cost and the margin it leaves – without calculating by hand.",
+            text: "OD Center now sees straight away what each used product has cost and the margin it leaves – without calculating by hand.",
           },
         ],
       },

@@ -5,6 +5,12 @@ import { SITE_URL } from "@/lib/seo";
 import type { Locale } from "@/lib/servicePages";
 import { type CaseStudy, caseStudyLabels, caseStudyPath } from "@/lib/caseStudies";
 
+const translatedLabel: Record<Locale, string> = {
+  sv: "översatt",
+  fi: "käännös ruotsista",
+  en: "translated from Swedish",
+};
+
 export default async function CaseStudyView({
   locale,
   study,
@@ -40,6 +46,18 @@ export default async function CaseStudyView({
           {c.h1}
         </h1>
         <p className="mb-16 text-center font-dm text-lg leading-relaxed text-muted">{c.intro}</p>
+
+        {c.quote && (
+          <figure className="mb-16 border-l-2 border-accent pl-6">
+            <blockquote className="font-dm text-xl italic leading-relaxed text-white">
+              “{c.quote.text}”
+            </blockquote>
+            <figcaption className="mt-3 font-mono text-sm text-muted">
+              — {c.quote.author}
+              {c.quote.translated && ` (${translatedLabel[locale]})`}
+            </figcaption>
+          </figure>
+        )}
 
         <div className="mb-16 flex flex-col gap-6">
           {c.sections.map((section, i) => (
