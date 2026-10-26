@@ -18,6 +18,7 @@ export interface ServicePage {
   id: "training" | "consulting" | "chatbot" | "automation";
   serviceType: string;
   sharedFaq: number[];
+  caseStudyId?: string;
   content: Record<Locale, ServicePageContent>;
 }
 
@@ -331,6 +332,7 @@ export const servicePages: ServicePage[] = [
   {
     id: "automation",
     serviceType: "AI automation",
+    caseStudyId: "boat-dealer-margin",
     sharedFaq: [1, 3, 2],
     content: {
       sv: {
