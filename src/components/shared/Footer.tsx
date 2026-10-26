@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Instagram, Facebook, Youtube } from "lucide-react";
+import { Instagram, Facebook, Linkedin } from "lucide-react";
 
 export default function Footer() {
   const t = useTranslations("footer");
@@ -32,7 +32,7 @@ export default function Footer() {
             <p className="font-dm text-sm text-muted">{t("tagline")}</p>
             <div className="mt-6 flex gap-4">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/optelyai/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted transition-colors hover:text-accent"
@@ -41,7 +41,7 @@ export default function Footer() {
                 <Instagram size={18} />
               </a>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=61584709153263"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted transition-colors hover:text-accent"
@@ -50,13 +50,13 @@ export default function Footer() {
                 <Facebook size={18} />
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.linkedin.com/company/145356229/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted transition-colors hover:text-accent"
-                aria-label="YouTube"
+                aria-label="LinkedIn"
               >
-                <Youtube size={18} />
+                <Linkedin size={18} />
               </a>
             </div>
           </div>

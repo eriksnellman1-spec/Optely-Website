@@ -72,7 +72,7 @@ const localBusinessSchema = {
   "@type": "ProfessionalService",
   name: "Optely",
   description:
-    "AI consulting and automation company in Ostrobothnia, Finland. We help businesses across Finland work smarter with AI — automation, chatbots and AI customer service, advice and custom AI solutions.",
+    "AI consulting and automation company in Jakobstad (Pietarsaari), Ostrobothnia, Finland. We help businesses across Finland work smarter with AI — automation, chatbots and AI customer service, advice and custom AI solutions.",
   url: SITE_URL,
   logo: `${SITE_URL}/logo.webp`,
   image: OG_IMAGE,
@@ -80,6 +80,7 @@ const localBusinessSchema = {
   email: "erik@optely.eu",
   address: {
     "@type": "PostalAddress",
+    addressLocality: "Jakobstad",
     addressRegion: "Pohjanmaa",
     addressCountry: "FI",
   },
@@ -88,8 +89,9 @@ const localBusinessSchema = {
     { "@type": "Person", name: "Erik Snellman" },
   ],
   sameAs: [
-    "https://www.instagram.com/optely",
-    "https://www.facebook.com/optely",
+    "https://www.instagram.com/optelyai/",
+    "https://www.facebook.com/profile.php?id=61584709153263",
+    "https://www.linkedin.com/company/145356229/",
   ],
 };
 

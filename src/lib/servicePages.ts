@@ -29,7 +29,7 @@ export const servicePages: ServicePage[] = [
     content: {
       sv: {
         slug: "ai-utbildning",
-        metaTitle: "AI-utbildning och AI-kurs för företag | Optely – Österbotten, Finland",
+        metaTitle: "AI-utbildning och AI-kurs för företag | Optely – Jakobstad, Finland",
         metaDescription:
           "Skräddarsydd AI-utbildning och AI-kurs för personal, chefer och hela företag: strategi, praktisk tillämpning och utbildning. Begär en offert från Optely.",
         h1: "AI-utbildning för företag",
@@ -74,7 +74,7 @@ export const servicePages: ServicePage[] = [
       },
       fi: {
         slug: "tekoalykoulutus",
-        metaTitle: "Tekoälykoulutus yrityksille | Optely – Pohjanmaa, Suomi",
+        metaTitle: "Tekoälykoulutus yrityksille | Optely – Pietarsaari, Suomi",
         metaDescription:
           "Räätälöity tekoälykoulutus henkilöstölle, esihenkilöille ja koko yritykselle: strategia, käytännön soveltaminen ja koulutus. Pyydä tarjous Optelylta.",
         h1: "Tekoälykoulutus yrityksille",
@@ -119,7 +119,7 @@ export const servicePages: ServicePage[] = [
       },
       en: {
         slug: "ai-training",
-        metaTitle: "AI Training for Businesses | Optely – Ostrobothnia, Finland",
+        metaTitle: "AI Training for Businesses | Optely – Jakobstad, Finland",
         metaDescription:
           "Tailored AI training for staff, managers and whole companies: strategy, practical application and training. Request a quote from Optely.",
         h1: "AI training for businesses",
@@ -171,7 +171,7 @@ export const servicePages: ServicePage[] = [
     content: {
       sv: {
         slug: "ai-konsult",
-        metaTitle: "AI-konsult för företag | Optely – Österbotten, Finland",
+        metaTitle: "AI-konsult för företag | Optely – Jakobstad, Finland",
         metaDescription:
           "Optely är AI-konsulten som kartlägger var AI gör mest nytta i ditt företag, tar fram en tydlig plan och hjälper er hela vägen till en färdig lösning.",
         h1: "AI-konsult för företag",
@@ -200,7 +200,7 @@ export const servicePages: ServicePage[] = [
       },
       fi: {
         slug: "tekoalykonsultointi",
-        metaTitle: "Tekoälykonsultointi yrityksille | Optely – Pohjanmaa, Suomi",
+        metaTitle: "Tekoälykonsultointi yrityksille | Optely – Pietarsaari, Suomi",
         metaDescription:
           "Optely on tekoälykonsultti, joka kartoittaa, missä tekoäly hyödyttää yritystäsi eniten, laatii selkeän suunnitelman ja vie ratkaisun valmiiksi asti.",
         h1: "Tekoälykonsultointi yrityksille",
@@ -229,7 +229,7 @@ export const servicePages: ServicePage[] = [
       },
       en: {
         slug: "ai-consulting",
-        metaTitle: "AI Consulting for Businesses | Optely – Ostrobothnia, Finland",
+        metaTitle: "AI Consulting for Businesses | Optely – Jakobstad, Finland",
         metaDescription:
           "Optely is the AI consultant that maps where AI helps your business most, builds a clear plan and takes you all the way to a finished solution.",
         h1: "AI consulting for businesses",
@@ -335,7 +335,7 @@ export const servicePages: ServicePage[] = [
     content: {
       sv: {
         slug: "ai-automation",
-        metaTitle: "AI-automation för företag | Optely – Österbotten, Finland",
+        metaTitle: "AI-automation för företag | Optely – Jakobstad, Finland",
         metaDescription:
           "Låt AI sköta de återkommande arbetsuppgifterna. Optely automatiserar processer och e-post och kopplar ihop programmen ni redan använder.",
         h1: "AI-automation för företag",
@@ -356,7 +356,7 @@ export const servicePages: ServicePage[] = [
       },
       fi: {
         slug: "ai-automaatio",
-        metaTitle: "AI-automaatio yrityksille | Optely – Pohjanmaa, Suomi",
+        metaTitle: "AI-automaatio yrityksille | Optely – Pietarsaari, Suomi",
         metaDescription:
           "Anna tekoälyn hoitaa toistuvat työtehtävät. Optely automatisoi prosessit ja sähköpostin ja yhdistää jo käyttämänne ohjelmat.",
         h1: "AI-automaatio yrityksille",
@@ -377,7 +377,7 @@ export const servicePages: ServicePage[] = [
       },
       en: {
         slug: "ai-automation",
-        metaTitle: "AI Automation for Businesses | Optely – Ostrobothnia, Finland",
+        metaTitle: "AI Automation for Businesses | Optely – Jakobstad, Finland",
         metaDescription:
           "Let AI handle the repetitive tasks. Optely automates processes and email and connects the programs you already use.",
         h1: "AI automation for businesses",
