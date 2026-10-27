@@ -1,4 +1,4 @@
-// Google Calendar access for the booking chatbot: free/busy lookup and event creation
+// Google Calendar access for the booking chatbot: availability lookup and event creation
 // with a Google Meet link. Uses an OAuth refresh token for the calendar owner's account
 // (see docs/chatbot-setup.md). All times are offered in Finnish time.
 
@@ -22,48 +22,56 @@ export function calendarConfigured() {
 
 const calendarId = () => process.env.GOOGLE_CALENDAR_ID || "primary";
 
-// Calendars whose events block bookings. Meetings are still created in calendarId().
-// - Every calendar shown in the account's Google Calendar list (so newly added imports,
-//   e.g. a school timetable, count automatically). Needs the calendar.calendarlist.readonly
-//   scope on the refresh token; without it this part is skipped.
-// - Plus any IDs in GOOGLE_BUSY_CALENDAR_IDS (comma-separated), as a manual fallback.
+// Which events block a booking (owner's rules):
+// - Every timed event in the other calendars shown in Google Calendar (e.g. imported
+//   Wilma school timetables). New imports count automatically; needs the
+//   calendar.calendarlist.readonly scope, otherwise only GOOGLE_BUSY_CALENDAR_IDS is used.
+// - In the owner's own calendar only meetings with other people (events with guests,
+//   which includes meetings this bot books) and work shifts (titles in WORK_TITLE).
+//   Gym, calls, reminders etc. can be moved, so they don't block.
+// - All-day events and events marked "Free" never block.
+const WORK_TITLE = /^(?!deep work$).*\bwork$/i; // "Work", "Safercuts work" - not "Deep work"
 const CALENDAR_LIST_TTL_MS = 10 * 60_000;
-let cachedCalendarList: { ids: string[]; expires: number } | null = null;
+let cachedCalendarList: { ids: string[]; primaryId: string | null; expires: number } | null = null;
 
-async function listedCalendarIds(): Promise<string[]> {
-  if (cachedCalendarList && cachedCalendarList.expires > Date.now()) return cachedCalendarList.ids;
+async function calendarList() {
+  if (cachedCalendarList && cachedCalendarList.expires > Date.now()) return cachedCalendarList;
   const ids: string[] = [];
+  let primaryId: string | null = null;
   let pageToken = "";
   do {
     const res = await fetch(
       `https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=250${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ""}`,
       { headers: { Authorization: `Bearer ${await accessToken()}` } }
     );
-    if (res.status === 403) return []; // token lacks the calendar-list scope
+    if (res.status === 403) return { ids: [], primaryId: null }; // token lacks the calendar-list scope
     if (!res.ok) throw new Error(`Google calendarList error ${res.status}`);
     const data = (await res.json()) as {
-      items?: { id: string; selected?: boolean; hidden?: boolean; deleted?: boolean }[];
+      items?: { id: string; primary?: boolean; selected?: boolean; hidden?: boolean; deleted?: boolean }[];
       nextPageToken?: string;
     };
     for (const c of data.items ?? []) {
-      // Only calendars that are switched on in Google Calendar; public holiday calendars
-      // don't mark anyone busy, so leave them out
-      if (c.selected && !c.hidden && !c.deleted && !c.id.endsWith("#holiday@group.v.calendar.google.com")) {
+      if (c.primary) primaryId = c.id;
+      // Only calendars switched on in Google Calendar; holiday calendars never block
+      else if (c.selected && !c.hidden && !c.deleted && !c.id.endsWith("#holiday@group.v.calendar.google.com")) {
         ids.push(c.id);
       }
     }
     pageToken = data.nextPageToken ?? "";
   } while (pageToken);
-  cachedCalendarList = { ids, expires: Date.now() + CALENDAR_LIST_TTL_MS };
-  return ids;
+  cachedCalendarList = { ids, primaryId, expires: Date.now() + CALENDAR_LIST_TTL_MS };
+  return cachedCalendarList;
 }
 
-async function busyCalendarIds() {
+/** Other calendars (all their timed events block), excluding the owner's own calendar. */
+async function otherCalendarIds() {
+  const { ids, primaryId } = await calendarList();
+  const own = new Set([calendarId(), primaryId].filter(Boolean));
   const extra = (process.env.GOOGLE_BUSY_CALENDAR_IDS ?? "")
     .split(",")
     .map((id) => id.trim())
     .filter(Boolean);
-  return Array.from(new Set([calendarId(), ...(await listedCalendarIds()), ...extra]));
+  return Array.from(new Set([...ids, ...extra])).filter((id) => !own.has(id));
 }
 
 // ---------- time zone helpers (no date library needed) ----------
@@ -156,30 +164,58 @@ async function accessToken() {
   return data.access_token;
 }
 
+interface CalEvent {
+  summary?: string;
+  status?: string;
+  transparency?: string;
+  start?: { dateTime?: string; date?: string };
+  end?: { dateTime?: string; date?: string };
+  attendees?: { self?: boolean; resource?: boolean }[];
+}
+
+async function listEvents(id: string, from: Date, to: Date) {
+  const events: CalEvent[] = [];
+  let pageToken = "";
+  do {
+    const params = new URLSearchParams({
+      timeMin: from.toISOString(),
+      timeMax: to.toISOString(),
+      singleEvents: "true",
+      maxResults: "250",
+      fields: "items(summary,status,transparency,start,end,attendees(self,resource)),nextPageToken",
+    });
+    if (pageToken) params.set("pageToken", pageToken);
+    const res = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(id)}/events?${params}`,
+      { headers: { Authorization: `Bearer ${await accessToken()}` } }
+    );
+    // Fail closed: if a calendar can't be read we can't know the time is free
+    if (!res.ok) throw new Error(`Google events error ${res.status} for ${id}`);
+    const data = (await res.json()) as { items?: CalEvent[]; nextPageToken?: string };
+    events.push(...(data.items ?? []));
+    pageToken = data.nextPageToken ?? "";
+  } while (pageToken);
+  return events;
+}
+
+const isTimedBusy = (e: CalEvent) =>
+  e.status !== "cancelled" && e.transparency !== "transparent" && !!e.start?.dateTime && !!e.end?.dateTime;
+
+const hasGuests = (e: CalEvent) => (e.attendees ?? []).some((a) => !a.self && !a.resource);
+
 async function busyIntervals(from: Date, to: Date) {
-  const res = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${await accessToken()}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      timeMin: new Date(from.getTime() - BUFFER_MINUTES * 60000).toISOString(),
-      timeMax: new Date(to.getTime() + BUFFER_MINUTES * 60000).toISOString(),
-      timeZone: TIME_ZONE,
-      items: (await busyCalendarIds()).map((id) => ({ id })),
-    }),
-  });
-  if (!res.ok) throw new Error(`Google freeBusy error ${res.status}`);
-  const data = (await res.json()) as {
-    calendars: Record<string, { busy?: { start: string; end: string }[]; errors?: unknown[] }>;
-  };
-  const calendars = Object.entries(data.calendars ?? {});
-  // Fail closed: if any calendar can't be read we can't know the time is free
-  const failed = calendars.filter(([, cal]) => cal.errors?.length).map(([id]) => id);
-  if (calendars.length === 0 || failed.length) {
-    throw new Error(`Google freeBusy calendar error: ${failed.join(", ")}`);
-  }
-  const events = calendars.flatMap(([, cal]) =>
-    (cal.busy ?? []).map((b) => ({ start: new Date(b.start), end: new Date(b.end) }))
-  );
+  const pad = BUFFER_MINUTES * 60000;
+  const qFrom = new Date(from.getTime() - pad);
+  const qTo = new Date(to.getTime() + pad);
+  const [own, ...others] = await Promise.all([
+    listEvents(calendarId(), qFrom, qTo),
+    ...(await otherCalendarIds()).map((id) => listEvents(id, qFrom, qTo)),
+  ]);
+  const blocking = [
+    ...own.filter((e) => isTimedBusy(e) && (hasGuests(e) || WORK_TITLE.test((e.summary ?? "").trim()))),
+    ...others.flat().filter(isTimedBusy),
+  ];
+  const events = blocking.map((e) => ({ start: new Date(e.start!.dateTime!), end: new Date(e.end!.dateTime!) }));
   const blocks: { start: Date; end: Date }[] = [];
   const lastDate = utcToHelsinki(to).date;
   for (let date = utcToHelsinki(from).date; date <= lastDate; date = addDays(date, 1)) {
@@ -189,7 +225,6 @@ async function busyIntervals(from: Date, to: Date) {
       blocks.push({ start: helsinkiToUtc(date, b.start), end: helsinkiToUtc(date, b.end) });
     }
   }
-  const pad = BUFFER_MINUTES * 60000;
   return [
     ...events.map((b) => ({ start: new Date(b.start.getTime() - pad), end: new Date(b.end.getTime() + pad) })),
     ...blocks,
