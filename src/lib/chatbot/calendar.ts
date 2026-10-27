@@ -19,6 +19,16 @@ export function calendarConfigured() {
 
 const calendarId = () => process.env.GOOGLE_CALENDAR_ID || "primary";
 
+// Other calendars that also block bookings (e.g. an imported school or work schedule).
+// Comma-separated calendar IDs; meetings are still created in calendarId().
+const busyCalendarIds = () => [
+  calendarId(),
+  ...(process.env.GOOGLE_BUSY_CALENDAR_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean),
+];
+
 // ---------- time zone helpers (no date library needed) ----------
 
 function offsetMinutes(date: Date, timeZone: string) {
@@ -117,16 +127,22 @@ async function busyIntervals(from: Date, to: Date) {
       timeMin: from.toISOString(),
       timeMax: to.toISOString(),
       timeZone: TIME_ZONE,
-      items: [{ id: calendarId() }],
+      items: busyCalendarIds().map((id) => ({ id })),
     }),
   });
   if (!res.ok) throw new Error(`Google freeBusy error ${res.status}`);
   const data = (await res.json()) as {
     calendars: Record<string, { busy?: { start: string; end: string }[]; errors?: unknown[] }>;
   };
-  const cal = Object.values(data.calendars)[0];
-  if (!cal || cal.errors?.length) throw new Error("Google freeBusy calendar error");
-  return (cal.busy ?? []).map((b) => ({ start: new Date(b.start), end: new Date(b.end) }));
+  const calendars = Object.entries(data.calendars ?? {});
+  // Fail closed: if any calendar can't be read we can't know the time is free
+  const failed = calendars.filter(([, cal]) => cal.errors?.length).map(([id]) => id);
+  if (calendars.length === 0 || failed.length) {
+    throw new Error(`Google freeBusy calendar error: ${failed.join(", ")}`);
+  }
+  return calendars.flatMap(([, cal]) =>
+    (cal.busy ?? []).map((b) => ({ start: new Date(b.start), end: new Date(b.end) }))
+  );
 }
 
 const overlaps = (s: Date, e: Date, busy: { start: Date; end: Date }[]) =>
