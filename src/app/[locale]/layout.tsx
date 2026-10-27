@@ -6,6 +6,7 @@ import { syne, dmSans, jetbrainsMono } from "@/lib/fonts";
 import Navbar from "@/components/navigation/Navbar";
 import Footer from "@/components/shared/Footer";
 import CursorGlow from "@/components/shared/CursorGlow";
+import ChatWidget from "@/components/ChatWidget";
 import { SITE_URL, OG_IMAGE, localeNames, buildCanonical, buildAlternates } from "@/lib/seo";
 import "../globals.css";
 
@@ -123,6 +124,8 @@ export default async function LocaleLayout({
           <Navbar />
           <main>{children}</main>
           <Footer />
+          {/* Shown once the API keys are set up in Vercel (docs/chatbot-setup.md) */}
+          {process.env.NEXT_PUBLIC_CHATBOT_ENABLED === "true" && <ChatWidget />}
         </NextIntlClientProvider>
       </body>
     </html>
