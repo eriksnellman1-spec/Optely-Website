@@ -48,7 +48,7 @@ export const caseStudies: CaseStudy[] = [
           },
           {
             title: "Lösningen",
-            text: "Vi byggde en automation i n8n som kopplar kassasystemet Tehden till ett kalkylark. Automationen:",
+            text: "Vi byggde en automation i n8n som kopplar kassasystemet Tehden till ett Google Sheets-ark. Automationen:",
             items: [
               "hämtar de begagnade produkterna och deras inköpspris",
               "hittar arbete och delar för varje produkt via ordernumret och räknar ut det tillagda värdet – arbetet räknas med ett internt timpris",
@@ -82,7 +82,7 @@ export const caseStudies: CaseStudy[] = [
           },
           {
             title: "Ratkaisu",
-            text: "Rakensimme n8n-automaation, joka yhdistää Tehden-kassajärjestelmän laskentataulukkoon. Automaatio:",
+            text: "Rakensimme n8n-automaation, joka yhdistää Tehden-kassajärjestelmän Google Sheets -taulukkoon. Automaatio:",
             items: [
               "hakee käytetyt tuotteet ja niiden ostohinnat",
               "löytää kunkin tuotteen työt ja osat tilausnumeron perusteella ja laskee lisätyn arvon – työ lasketaan sisäisellä tuntihinnalla",
@@ -116,7 +116,7 @@ export const caseStudies: CaseStudy[] = [
           },
           {
             title: "The solution",
-            text: "We built an n8n automation that connects the Tehden POS system to a spreadsheet. The automation:",
+            text: "We built an n8n automation that connects the Tehden POS system to a Google Sheets spreadsheet. The automation:",
             items: [
               "fetches the used products and their purchase prices",
               "finds labour and parts for each product via the order number and calculates the added value – labour is counted at an internal hourly rate",
@@ -127,6 +127,80 @@ export const caseStudies: CaseStudy[] = [
           {
             title: "The result",
             text: "OD Center now sees straight away what each used product has cost and the margin it leaves – without calculating by hand.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "timber-merchant-website",
+    content: {
+      sv: {
+        slug: "kundcase-ny-hemsida-och-sociala-medier",
+        metaTitle: "Kundcase Holmängs Trävaruhandel: Ny hemsida och sociala medier | Optely",
+        metaDescription:
+          "Hur Optely gav Holmängs Trävaruhandel en ny hemsida och startade företagets sociala medier. I dag syns Holmängs på Google och är aktivt på sociala medier.",
+        h1: "Holmängs Trävaruhandel: ny hemsida och aktiva sociala medier",
+        intro:
+          "Holmängs Trävaruhandel hade en gammal och dålig hemsida. Optely byggde en ny hemsida och startade företagets sociala medier – i dag syns Holmängs på Google och är aktivt på sociala medier.",
+        sections: [
+          {
+            title: "Utmaningen",
+            text: "Holmängs hade en gammal hemsida som inte fungerade bra, och företaget var inte igång med sociala medier.",
+          },
+          {
+            title: "Lösningen",
+            text: "Optely byggde en ny hemsida åt Holmängs och startade företagets sociala medier, med ett nytt inlägg varje månad.",
+          },
+          {
+            title: "Resultatet",
+            text: "I dag syns Holmängs på Google och är aktivt på sociala medier.",
+          },
+        ],
+      },
+      fi: {
+        slug: "asiakastarina-uusi-verkkosivusto-ja-some",
+        metaTitle: "Asiakastarina Holmängs Trävaruhandel: Uusi verkkosivusto ja some | Optely",
+        metaDescription:
+          "Näin Optely teki Holmängs Trävaruhandelille uuden verkkosivuston ja käynnisti yrityksen sosiaalisen median. Nyt Holmängs näkyy Googlessa ja on aktiivinen somessa.",
+        h1: "Holmängs Trävaruhandel: uusi verkkosivusto ja aktiivinen some",
+        intro:
+          "Holmängs Trävaruhandelilla oli vanha ja huono verkkosivusto. Optely rakensi uuden verkkosivuston ja käynnisti yrityksen sosiaalisen median – nyt Holmängs näkyy Googlessa ja on aktiivinen somessa.",
+        sections: [
+          {
+            title: "Haaste",
+            text: "Holmängsin verkkosivusto oli vanha eikä toiminut hyvin, eikä yritys ollut vielä aloittanut sosiaalisen median käyttöä.",
+          },
+          {
+            title: "Ratkaisu",
+            text: "Optely rakensi Holmängsille uuden verkkosivuston ja käynnisti yrityksen sosiaalisen median, jonne julkaistaan uusi päivitys kerran kuukaudessa.",
+          },
+          {
+            title: "Tulos",
+            text: "Nyt Holmängs näkyy Googlessa ja on aktiivinen sosiaalisessa mediassa.",
+          },
+        ],
+      },
+      en: {
+        slug: "case-study-new-website-and-social-media",
+        metaTitle: "Case study Holmängs Trävaruhandel: New website and social media | Optely",
+        metaDescription:
+          "How Optely gave Holmängs Trävaruhandel a new website and started the company's social media. Today Holmängs shows up on Google and is active on social media.",
+        h1: "Holmängs Trävaruhandel: a new website and active social media",
+        intro:
+          "Holmängs Trävaruhandel had an old, poor website. Optely built a new website and started the company's social media – today Holmängs shows up on Google and is active on social media.",
+        sections: [
+          {
+            title: "The challenge",
+            text: "Holmängs had an old website that didn't work well, and the company hadn't got started with social media.",
+          },
+          {
+            title: "The solution",
+            text: "Optely built a new website for Holmängs and started the company's social media, with a new post every month.",
+          },
+          {
+            title: "The result",
+            text: "Today Holmängs shows up on Google and is active on social media.",
           },
         ],
       },
