@@ -20,6 +20,7 @@ const text = {
     placeholder: "Skriv ett meddelande…",
     send: "Skicka",
     notice: "Chatten använder AI. Vid bokning används ditt namn och din e-post för mötesinbjudan.",
+    privacy: "Integritetspolicy",
     error: `Något gick fel. Försök igen, boka via ${CALENDLY} eller mejla erik@optely.eu.`,
     busy: "Många frågor just nu. Vänta en stund och försök igen.",
   },
@@ -33,6 +34,7 @@ const text = {
     placeholder: "Kirjoita viesti…",
     send: "Lähetä",
     notice: "Chat käyttää tekoälyä. Varauksessa nimeäsi ja sähköpostiasi käytetään kokouskutsuun.",
+    privacy: "Tietosuojaseloste",
     error: `Jotain meni pieleen. Yritä uudelleen, varaa ${CALENDLY} tai lähetä sähköpostia erik@optely.eu.`,
     busy: "Paljon kysymyksiä juuri nyt. Odota hetki ja yritä uudelleen.",
   },
@@ -46,6 +48,7 @@ const text = {
     placeholder: "Write a message…",
     send: "Send",
     notice: "This chat uses AI. If you book, your name and email are used for the meeting invitation.",
+    privacy: "Privacy policy",
     error: `Something went wrong. Try again, book at ${CALENDLY} or email erik@optely.eu.`,
     busy: "Lots of questions right now. Please wait a moment and try again.",
   },
@@ -205,7 +208,12 @@ export default function ChatWidget() {
                 <Send size={16} />
               </button>
             </div>
-            <p className="mt-2 font-dm text-[11px] leading-snug text-muted">{t.notice}</p>
+            <p className="mt-2 font-dm text-[11px] leading-snug text-muted">
+              {t.notice}{" "}
+              <a href={locale === "sv" ? "/privacy" : `/${locale}/privacy`} className="underline">
+                {t.privacy}
+              </a>
+            </p>
           </form>
         </div>
       )}
