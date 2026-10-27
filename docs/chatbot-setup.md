@@ -60,7 +60,7 @@ Gör sedan en ny deploy: **Deployments → senaste → ⋯ → Redeploy**.
   - Alla händelser med klockslag i *andra* ikryssade kalendrar, t.ex. importerade Wilma-scheman (nya importer räknas automatiskt inom 10 minuter). Kryssa ur en kalender i Google Kalender för att den inte ska påverka.
   - I huvudkalendern bara möten med andra personer (händelser med gäster, inklusive de möten boten bokar) och arbetspass vars titel slutar på "work" (t.ex. "Work", "Safercuts work" – men inte "Deep work"). Regeln finns i `WORK_TITLE` i `src/lib/chatbot/calendar.ts`.
   - Allt annat i huvudkalendern (gym, ringpass, påminnelser), alla heldagshändelser och händelser markerade som "Ledig" blockerar inte.
-  - Lunch 10:50–11:45 på vardagar, och 15 minuters marginal runt allt som blockerar. Mötena skapas alltid i huvudkalendern.
+  - Lunch 10:50–11:45 på vardagar, 30 minuters körtid före dagens första lektion (`COMMUTE_MINUTES`), och 15 minuters marginal runt allt som blockerar. Mötena skapas alltid i huvudkalendern.
 
 - **Kostnad:** varje meddelande kostar en liten summa hos Anthropic (modellen `claude-opus-5-5`). Följ förbrukningen under Usage i Anthropic Console.
 - **Stänga av:** sätt `NEXT_PUBLIC_CHATBOT_ENABLED` till `false` och gör en ny deploy.
