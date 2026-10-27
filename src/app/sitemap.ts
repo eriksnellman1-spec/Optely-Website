@@ -4,7 +4,7 @@ import { servicePages, servicePagePath, type Locale } from "@/lib/servicePages";
 import { caseStudies, caseStudyPath } from "@/lib/caseStudies";
 
 const locales = ["sv", "fi", "en"];
-const pages = ["", "/services", "/about", "/contact", "/process", "/privacy"];
+const pages = ["", "/services", "/cases", "/about", "/contact", "/process", "/privacy"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
