@@ -8,6 +8,9 @@ const DAY_START_HOUR = 8; // first slot 08:00
 const DAY_END_HOUR = 16; // last slot ends 16:00
 const MIN_NOTICE_MINUTES = 180; // no bookings sooner than 3 hours from now
 const MAX_DAYS_AHEAD = 30;
+const BUFFER_MINUTES = 15; // free time required before and after every other event
+// Times that are never bookable on weekdays, in Finnish time (school lunch break)
+const DAILY_BLOCKS = [{ start: "10:50", end: "11:45" }];
 
 export function calendarConfigured() {
   return Boolean(
@@ -124,8 +127,8 @@ async function busyIntervals(from: Date, to: Date) {
     method: "POST",
     headers: { Authorization: `Bearer ${await accessToken()}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      timeMin: from.toISOString(),
-      timeMax: to.toISOString(),
+      timeMin: new Date(from.getTime() - BUFFER_MINUTES * 60000).toISOString(),
+      timeMax: new Date(to.getTime() + BUFFER_MINUTES * 60000).toISOString(),
       timeZone: TIME_ZONE,
       items: busyCalendarIds().map((id) => ({ id })),
     }),
@@ -140,9 +143,21 @@ async function busyIntervals(from: Date, to: Date) {
   if (calendars.length === 0 || failed.length) {
     throw new Error(`Google freeBusy calendar error: ${failed.join(", ")}`);
   }
-  return calendars.flatMap(([, cal]) =>
+  const events = calendars.flatMap(([, cal]) =>
     (cal.busy ?? []).map((b) => ({ start: new Date(b.start), end: new Date(b.end) }))
   );
+  const blocks: { start: Date; end: Date }[] = [];
+  const lastDate = utcToHelsinki(to).date;
+  for (let date = utcToHelsinki(from).date; date <= lastDate; date = addDays(date, 1)) {
+    for (const b of DAILY_BLOCKS) {
+      blocks.push({ start: helsinkiToUtc(date, b.start), end: helsinkiToUtc(date, b.end) });
+    }
+  }
+  const pad = BUFFER_MINUTES * 60000;
+  return [
+    ...events.map((b) => ({ start: new Date(b.start.getTime() - pad), end: new Date(b.end.getTime() + pad) })),
+    ...blocks,
+  ];
 }
 
 const overlaps = (s: Date, e: Date, busy: { start: Date; end: Date }[]) =>
