@@ -45,6 +45,7 @@ I Vercel-projektet som har domänen optely.eu: **Settings → Environment Variab
 | `GOOGLE_CLIENT_SECRET` | Client secret från steg 2 |
 | `GOOGLE_REFRESH_TOKEN` | refresh token från steg 2 |
 | `GOOGLE_CALENDAR_ID` | valfri – lämna tom för huvudkalendern |
+| `GOOGLE_BUSY_CALENDAR_IDS` | valfri – andra kalendrar som också ska räknas som upptagen tid (t.ex. ett importerat skol- eller jobbschema), kalender-ID:n separerade med komma. Mötena skapas ändå i huvudkalendern. Hittas i Google Kalender under kalenderns inställningar → "Kalender-ID". |
 | `NEXT_PUBLIC_CHATBOT_ENABLED` | `true` |
 
 Gör sedan en ny deploy: **Deployments → senaste → ⋯ → Redeploy**.
