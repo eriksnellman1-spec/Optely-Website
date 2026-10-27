@@ -7,6 +7,8 @@ import ProcessSteps from "@/components/home/ProcessSteps";
 import WhyOptely from "@/components/home/WhyOptely";
 import BookingSection from "@/components/home/BookingSection";
 import FAQ from "@/components/home/FAQ";
+import CaseStudies from "@/components/home/CaseStudies";
+import type { Locale } from "@/lib/servicePages";
 import { getTranslations } from "next-intl/server";
 
 export default async function HomePage({
@@ -38,6 +40,7 @@ export default async function HomePage({
       <Services />
       <HowWeWork />
       <ProcessSteps />
+      <CaseStudies locale={locale as Locale} />
       <WhyOptely />
       <BookingSection />
       <FAQ />

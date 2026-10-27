@@ -11,7 +11,8 @@
     "vvs": "The HVAC Generator",
     "contact": "Kontakt",
     "cta": "Boka samtal",
-    "nav_select": "Välj sida"
+    "nav_select": "Välj sida",
+    "cases": "Kundcase"
   },
   "hero": {
     "badge": "AI-konsult & Automation",
@@ -164,7 +165,8 @@
     "contact": "Kontakt",
     "rights": "Alla rättigheter förbehållna.",
     "location": "Jakobstad, Finland",
-    "privacy": "Integritetspolicy"
+    "privacy": "Integritetspolicy",
+    "cases": "Kundcase"
   },
   "vvs": {
     "meta_title": "The HVAC Generator — Optely | AI-automation för VVS-branschen",
@@ -224,5 +226,10 @@
     "sub": "Vi svarar vanligtvis inom 24 timmar",
     "email_label": "E-post",
     "phone_label": "Telefon"
+  },
+  "cases": {
+    "title": "Kundcase",
+    "sub": "Så har vi hjälpt våra kunder – riktiga projekt och resultat.",
+    "all": "Se alla kundcase"
   }
 }

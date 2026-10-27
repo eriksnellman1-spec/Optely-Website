@@ -10,6 +10,7 @@ export default function Footer() {
 
   const links = [
     { href: `${prefix}/services`, label: t("services") },
+    { href: `${prefix}/cases`, label: t("cases") },
     { href: `${prefix}/about`, label: t("about") },
     { href: `${prefix}/contact`, label: t("contact") },
   ];

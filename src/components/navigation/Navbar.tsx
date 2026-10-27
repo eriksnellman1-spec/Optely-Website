@@ -26,6 +26,7 @@ export default function Navbar() {
 
   const links = [
     { href: `${prefix}/services`, label: t("services") },
+    { href: `${prefix}/cases`, label: t("cases") },
     { href: `${prefix}/about`, label: t("about") },
     { href: `${prefix}/contact`, label: t("contact") },
   ];
@@ -33,6 +34,7 @@ export default function Navbar() {
   const pageLinks = [
     { href: prefix || "/", label: t("home") },
     { href: `${prefix}/services`, label: t("services") },
+    { href: `${prefix}/cases`, label: t("cases") },
     { href: `${prefix}/about`, label: t("about") },
     { href: `${prefix}/process`, label: t("process") },
     { href: `${prefix}/contact`, label: t("contact") },

@@ -11,7 +11,8 @@
     "vvs": "The HVAC Generator",
     "contact": "Yhteystiedot",
     "cta": "Varaa tapaaminen",
-    "nav_select": "Valitse sivu"
+    "nav_select": "Valitse sivu",
+    "cases": "Asiakastarinat"
   },
   "hero": {
     "badge": "AI-konsultointi & Automaatio",
@@ -164,7 +165,8 @@
     "contact": "Yhteystiedot",
     "rights": "Kaikki oikeudet pidätetään.",
     "location": "Pietarsaari, Suomi",
-    "privacy": "Tietosuojaseloste"
+    "privacy": "Tietosuojaseloste",
+    "cases": "Asiakastarinat"
   },
   "vvs": {
     "meta_title": "The HVAC Generator — Optely | AI-automaatio LVI-alalle",
@@ -224,5 +226,10 @@
     "sub": "Vastaamme yleensä 24 tunnin kuluessa",
     "email_label": "Sähköposti",
     "phone_label": "Puhelin"
+  },
+  "cases": {
+    "title": "Asiakastarinat",
+    "sub": "Näin olemme auttaneet asiakkaitamme – todellisia projekteja ja tuloksia.",
+    "all": "Katso kaikki asiakastarinat"
   }
 }
