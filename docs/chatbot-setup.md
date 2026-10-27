@@ -29,7 +29,7 @@ Använd det Google-konto vars kalender mötena ska hamna i.
 2. Klicka på kugghjulet uppe till höger → kryssa i **Use your own OAuth credentials** → klistra in Client ID och Client secret.
 3. I rutan "Input your own scopes" till vänster, klistra in:
    ```
-   https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.freebusy
+   https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.freebusy https://www.googleapis.com/auth/calendar.calendarlist.readonly
    ```
    och klicka **Authorize APIs**. Logga in med kalenderkontot och godkänn (klicka "Advanced → Go to Optely chatbot" om Google varnar).
 4. Klicka **Exchange authorization code for tokens** och kopiera **Refresh token**.
@@ -45,7 +45,7 @@ I Vercel-projektet som har domänen optely.eu: **Settings → Environment Variab
 | `GOOGLE_CLIENT_SECRET` | Client secret från steg 2 |
 | `GOOGLE_REFRESH_TOKEN` | refresh token från steg 2 |
 | `GOOGLE_CALENDAR_ID` | valfri – lämna tom för huvudkalendern |
-| `GOOGLE_BUSY_CALENDAR_IDS` | valfri – andra kalendrar som också ska räknas som upptagen tid (t.ex. ett importerat skol- eller jobbschema), kalender-ID:n separerade med komma. Mötena skapas ändå i huvudkalendern. Hittas i Google Kalender under kalenderns inställningar → "Kalender-ID". |
+| `GOOGLE_BUSY_CALENDAR_IDS` | valfri – behövs normalt inte. Boten räknar automatiskt med alla kalendrar som är ikryssade i Google Kalender (t.ex. importerade skolscheman), förutsatt att refresh token har behörigheten `calendar.calendarlist.readonly`. Här kan du lägga till extra kalender-ID:n, separerade med komma. |
 | `NEXT_PUBLIC_CHATBOT_ENABLED` | `true` |
 
 Gör sedan en ny deploy: **Deployments → senaste → ⋯ → Redeploy**.
@@ -55,6 +55,8 @@ Gör sedan en ny deploy: **Deployments → senaste → ⋯ → Redeploy**.
 Öppna optely.eu, klicka på chattbubblan nere till höger och boka ett möte med din egen e-post. Mötet ska dyka upp i kalendern med en Google Meet-länk, och inbjudan ska komma till e-posten.
 
 ## Att veta
+
+- **Flera kalendrar:** alla kalendrar som är ikryssade i vänsterlistan i Google Kalender räknas som upptagen tid (helgdagskalendrar undantagna). En ny importerad kalender räknas automatiskt inom 10 minuter. Vill du att en kalender inte ska påverka bokningarna, kryssa ur den i Google Kalender. Mötena skapas alltid i huvudkalendern.
 
 - **Kostnad:** varje meddelande kostar en liten summa hos Anthropic (modellen `claude-opus-5-5`). Följ förbrukningen under Usage i Anthropic Console.
 - **Stänga av:** sätt `NEXT_PUBLIC_CHATBOT_ENABLED` till `false` och gör en ny deploy.

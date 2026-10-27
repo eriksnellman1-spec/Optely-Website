@@ -22,15 +22,49 @@ export function calendarConfigured() {
 
 const calendarId = () => process.env.GOOGLE_CALENDAR_ID || "primary";
 
-// Other calendars that also block bookings (e.g. an imported school or work schedule).
-// Comma-separated calendar IDs; meetings are still created in calendarId().
-const busyCalendarIds = () => [
-  calendarId(),
-  ...(process.env.GOOGLE_BUSY_CALENDAR_IDS ?? "")
+// Calendars whose events block bookings. Meetings are still created in calendarId().
+// - Every calendar shown in the account's Google Calendar list (so newly added imports,
+//   e.g. a school timetable, count automatically). Needs the calendar.calendarlist.readonly
+//   scope on the refresh token; without it this part is skipped.
+// - Plus any IDs in GOOGLE_BUSY_CALENDAR_IDS (comma-separated), as a manual fallback.
+const CALENDAR_LIST_TTL_MS = 10 * 60_000;
+let cachedCalendarList: { ids: string[]; expires: number } | null = null;
+
+async function listedCalendarIds(): Promise<string[]> {
+  if (cachedCalendarList && cachedCalendarList.expires > Date.now()) return cachedCalendarList.ids;
+  const ids: string[] = [];
+  let pageToken = "";
+  do {
+    const res = await fetch(
+      `https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=250${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ""}`,
+      { headers: { Authorization: `Bearer ${await accessToken()}` } }
+    );
+    if (res.status === 403) return []; // token lacks the calendar-list scope
+    if (!res.ok) throw new Error(`Google calendarList error ${res.status}`);
+    const data = (await res.json()) as {
+      items?: { id: string; selected?: boolean; hidden?: boolean; deleted?: boolean }[];
+      nextPageToken?: string;
+    };
+    for (const c of data.items ?? []) {
+      // Only calendars that are switched on in Google Calendar; public holiday calendars
+      // don't mark anyone busy, so leave them out
+      if (c.selected && !c.hidden && !c.deleted && !c.id.endsWith("#holiday@group.v.calendar.google.com")) {
+        ids.push(c.id);
+      }
+    }
+    pageToken = data.nextPageToken ?? "";
+  } while (pageToken);
+  cachedCalendarList = { ids, expires: Date.now() + CALENDAR_LIST_TTL_MS };
+  return ids;
+}
+
+async function busyCalendarIds() {
+  const extra = (process.env.GOOGLE_BUSY_CALENDAR_IDS ?? "")
     .split(",")
     .map((id) => id.trim())
-    .filter(Boolean),
-];
+    .filter(Boolean);
+  return Array.from(new Set([calendarId(), ...(await listedCalendarIds()), ...extra]));
+}
 
 // ---------- time zone helpers (no date library needed) ----------
 
@@ -130,7 +164,7 @@ async function busyIntervals(from: Date, to: Date) {
       timeMin: new Date(from.getTime() - BUFFER_MINUTES * 60000).toISOString(),
       timeMax: new Date(to.getTime() + BUFFER_MINUTES * 60000).toISOString(),
       timeZone: TIME_ZONE,
-      items: busyCalendarIds().map((id) => ({ id })),
+      items: (await busyCalendarIds()).map((id) => ({ id })),
     }),
   });
   if (!res.ok) throw new Error(`Google freeBusy error ${res.status}`);
