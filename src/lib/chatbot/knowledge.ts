@@ -4,7 +4,7 @@
 import sv from "../../../messages/sv.json";
 import { servicePages } from "@/lib/servicePages";
 import { caseStudies } from "@/lib/caseStudies";
-import { MEETING_MINUTES } from "@/lib/chatbot/calendar";
+import { MEETING_MINUTES, DAY_START_HOUR, DAY_END_HOUR } from "@/lib/chatbot/calendar";
 
 function list(items: string[]) {
   return items.map((i) => `- ${i}`).join("\n");
@@ -64,7 +64,7 @@ ${faq}
 ${cases}
 
 # Möten
-Ett kostnadsfritt introduktionssamtal på ${MEETING_MINUTES} minuter via Google Meet. Bokningsbara tider: måndag–fredag 08:00–16:00 finsk tid. Inbjudan med Meet-länk skickas till kundens e-post.`;
+Ett kostnadsfritt introduktionssamtal på ${MEETING_MINUTES} minuter via Google Meet. Bokningsbara tider: alla dagar ${String(DAY_START_HOUR).padStart(2, "0")}:00–${DAY_END_HOUR}:00 finsk tid, när Erik är ledig. Inbjudan med Meet-länk skickas till kundens e-post.`;
 
 export const SYSTEM_PROMPT = `You are the assistant on the website of Optely, an AI consulting and automation company. You answer visitors' questions about Optely and book introductory meetings with Erik Snellman directly into his calendar.
 

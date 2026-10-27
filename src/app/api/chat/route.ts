@@ -34,7 +34,7 @@ const tools: Anthropic.Beta.BetaTool[] = [
   {
     name: "get_available_slots",
     description:
-      "Get free 15-minute meeting times in Erik's calendar, in Finnish time (Europe/Helsinki). Returns weekdays with their free start times (HH:MM). Use before offering times.",
+      "Get free 15-minute meeting times in Erik's calendar, in Finnish time (Europe/Helsinki). Returns days (any day of the week, 06:00-22:00) with their free start times (HH:MM). Use before offering times.",
     strict: true,
     input_schema: {
       type: "object",
@@ -43,12 +43,12 @@ const tools: Anthropic.Beta.BetaTool[] = [
           type: "string",
           description: "First date to look at, YYYY-MM-DD. Use today's date unless the visitor asked for a later date.",
         },
-        weekdays: {
+        days: {
           type: "integer",
-          description: "How many weekdays to return, 1-10. Usually 3.",
+          description: "How many consecutive days to return, 1-10. Usually 3.",
         },
       },
-      required: ["start_date", "weekdays"],
+      required: ["start_date", "days"],
       additionalProperties: false,
     },
   },
@@ -87,9 +87,9 @@ async function runTool(name: string, input: unknown, ip: string): Promise<{ text
   const args = (input ?? {}) as Record<string, unknown>;
   try {
     if (name === "get_available_slots") {
-      const weekdays = Math.min(10, Math.max(1, Math.round(Number(args.weekdays) || 3)));
+      const count = Math.min(10, Math.max(1, Math.round(Number(args.days) || 3)));
       const start = typeof args.start_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(args.start_date) ? args.start_date : undefined;
-      const days = await availableSlots(start, weekdays);
+      const days = await availableSlots(start, count);
       return { text: JSON.stringify({ timeZone: "Europe/Helsinki", days }) };
     }
     if (name === "book_meeting") {

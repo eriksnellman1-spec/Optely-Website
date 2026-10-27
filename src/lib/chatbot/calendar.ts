@@ -4,8 +4,8 @@
 
 export const TIME_ZONE = "Europe/Helsinki";
 export const MEETING_MINUTES = 15;
-const DAY_START_HOUR = 8; // first slot 08:00
-const DAY_END_HOUR = 16; // last slot ends 16:00
+export const DAY_START_HOUR = 6; // first slot 06:00
+export const DAY_END_HOUR = 22; // last slot ends 22:00 (every day of the week)
 const MIN_NOTICE_MINUTES = 180; // no bookings sooner than 3 hours from now
 const MAX_DAYS_AHEAD = 30;
 const BUFFER_MINUTES = 15; // free time required before and after every other event
@@ -149,6 +149,8 @@ async function busyIntervals(from: Date, to: Date) {
   const blocks: { start: Date; end: Date }[] = [];
   const lastDate = utcToHelsinki(to).date;
   for (let date = utcToHelsinki(from).date; date <= lastDate; date = addDays(date, 1)) {
+    const wd = weekdayOf(date);
+    if (wd === 0 || wd === 6) continue;
     for (const b of DAILY_BLOCKS) {
       blocks.push({ start: helsinkiToUtc(date, b.start), end: helsinkiToUtc(date, b.end) });
     }
@@ -165,7 +167,7 @@ const overlaps = (s: Date, e: Date, busy: { start: Date; end: Date }[]) =>
 
 // ---------- what the chatbot tools call ----------
 
-export async function availableSlots(startDate: string | undefined, weekdays: number) {
+export async function availableSlots(startDate: string | undefined, count: number) {
   const now = new Date();
   const earliest = new Date(now.getTime() + MIN_NOTICE_MINUTES * 60000);
   const latest = new Date(now.getTime() + MAX_DAYS_AHEAD * 86400000);
@@ -173,9 +175,8 @@ export async function availableSlots(startDate: string | undefined, weekdays: nu
   let date = startDate && startDate > today ? startDate : today;
 
   const days: string[] = [];
-  for (let i = 0; days.length < weekdays && i < MAX_DAYS_AHEAD + 7; i++) {
-    const wd = weekdayOf(date);
-    if (wd !== 0 && wd !== 6) days.push(date);
+  for (let i = 0; i < count && i <= MAX_DAYS_AHEAD; i++) {
+    days.push(date);
     date = addDays(date, 1);
   }
   if (days.length === 0) return [];
@@ -213,8 +214,6 @@ export async function bookMeeting(req: BookingRequest) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(req.date) || !slotTimes().includes(req.time)) {
     throw new BookingError("That time is not a bookable slot.");
   }
-  const wd = weekdayOf(req.date);
-  if (wd === 0 || wd === 6) throw new BookingError("Meetings can only be booked Monday to Friday.");
   const start = helsinkiToUtc(req.date, req.time);
   const end = new Date(start.getTime() + MEETING_MINUTES * 60000);
   const now = Date.now();
