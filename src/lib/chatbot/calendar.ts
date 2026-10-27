@@ -9,6 +9,7 @@ export const DAY_END_HOUR = 22; // last slot ends 22:00 (every day of the week)
 const MIN_NOTICE_MINUTES = 180; // no bookings sooner than 3 hours from now
 const MAX_DAYS_AHEAD = 30;
 const BUFFER_MINUTES = 15; // free time required before and after every other event
+const COMMUTE_MINUTES = 30; // driving to school: kept free before the day's first lesson
 // Times that are never bookable on weekdays, in Finnish time (school lunch break)
 const DAILY_BLOCKS = [{ start: "10:50", end: "11:45" }];
 
@@ -217,6 +218,17 @@ async function busyIntervals(from: Date, to: Date) {
   ];
   const events = blocking.map((e) => ({ start: new Date(e.start!.dateTime!), end: new Date(e.end!.dateTime!) }));
   const blocks: { start: Date; end: Date }[] = [];
+  // Commute: block the time before the first event of each day in the school calendars
+  const firstOfDay = new Map<string, Date>();
+  for (const e of others.flat().filter(isTimedBusy)) {
+    const start = new Date(e.start!.dateTime!);
+    const day = utcToHelsinki(start).date;
+    const current = firstOfDay.get(day);
+    if (!current || start < current) firstOfDay.set(day, start);
+  }
+  for (const start of Array.from(firstOfDay.values())) {
+    blocks.push({ start: new Date(start.getTime() - COMMUTE_MINUTES * 60000), end: start });
+  }
   const lastDate = utcToHelsinki(to).date;
   for (let date = utcToHelsinki(from).date; date <= lastDate; date = addDays(date, 1)) {
     const wd = weekdayOf(date);
