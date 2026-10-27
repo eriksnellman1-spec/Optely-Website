@@ -1,6 +1,6 @@
 # Bokningschatboten – installation
 
-Chatboten (`src/components/ChatWidget.tsx`, `src/app/api/chat/route.ts`) svarar på frågor utifrån hemsidans innehåll och bokar 15 minuters Google Meet-möten direkt i Google Kalender (mån–fre 08–16, finsk tid). Den syns på sidan först när alla nycklar nedan är inlagda i Vercel.
+Chatboten (`src/components/ChatWidget.tsx`, `src/app/api/chat/route.ts`) svarar på frågor utifrån hemsidans innehåll och bokar 15 minuters Google Meet-möten direkt i Google Kalender (alla dagar 06–22 finsk tid, med 15 minuters marginal runt andra händelser och spärrad lunch 10:50–11:45 på vardagar). Den syns på sidan först när alla nycklar nedan är inlagda i Vercel.
 
 ## 1. Anthropic API-nyckel
 
