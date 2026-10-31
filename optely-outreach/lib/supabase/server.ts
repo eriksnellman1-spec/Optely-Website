@@ -11,8 +11,9 @@ import type { Database } from "./types";
  * Kör som den inloggade användaren (RLS gäller).
  */
 export async function createClient() {
-  const { url, anonKey } = requirePublicSupabaseEnv();
+  // cookies() först – gör anroparen dynamisk så att den aldrig förrenderas vid build.
   const cookieStore = await cookies();
+  const { url, anonKey } = requirePublicSupabaseEnv();
 
   return createServerClient<Database>(url, anonKey, {
     cookies: {
