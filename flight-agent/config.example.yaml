@@ -1,0 +1,14 @@
+# Kopiera till config.yaml och justera.
+home_airports: [ARN, NYO]      # flygplatser du kan åka från/landa på
+destinations: []               # tomt = vart som helst; t.ex. [BCN, LIS, AGP]
+currency: SEK
+months_ahead: 3
+earliest_departure_hour: 7     # inga flyg före 07:00
+latest_arrival_hour: 23        # ingen landning efter 23:00
+after_work_hour: 17            # på arbetsdagar: åk tidigast 17:00
+deal_threshold: 1000           # t/r under detta pris → notis
+max_results: 25
+providers: [demo]              # byt till [ryanair] för riktiga priser
+vacation_keywords: [semester, ledig, vacation, holiday, resa]
+min_nights: 1
+max_nights: 16
