@@ -19,7 +19,7 @@ export function Sidebar({ openCallTasks }: { openCallTasks: number }) {
     <aside
       data-collapsed={collapsed}
       className={cn(
-        "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-border bg-surface transition-[width] duration-150 md:flex",
+        "sticky top-0 max-md:hidden h-dvh shrink-0 flex-col border-r border-border bg-surface transition-[width] duration-150 md:flex",
         collapsed ? "w-[52px]" : "w-[216px]",
       )}
     >

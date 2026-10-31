@@ -26,10 +26,10 @@ export function CompanyTable({ companies }: { companies: Row[] }) {
         <thead>
           <tr className="h-8 border-b border-border text-left text-[11px] font-medium tracking-wide text-subtle uppercase">
             <th className="px-3 font-medium">Bolag</th>
-            <th className="hidden w-32 px-3 font-medium sm:table-cell">Ort</th>
+            <th className="max-sm:hidden w-32 px-3 font-medium sm:table-cell">Ort</th>
             <th className="w-32 px-3 font-medium">Status</th>
-            <th className="hidden w-24 px-3 text-right font-medium md:table-cell">Kontakter</th>
-            <th className="hidden w-36 px-3 text-right font-medium sm:table-cell">Senaste aktivitet</th>
+            <th className="max-md:hidden w-24 px-3 text-right font-medium md:table-cell">Kontakter</th>
+            <th className="max-sm:hidden w-36 px-3 text-right font-medium sm:table-cell">Senaste aktivitet</th>
           </tr>
         </thead>
         <tbody>
@@ -60,9 +60,9 @@ export function CompanyTable({ companies }: { companies: Row[] }) {
                   <div className="truncate text-xs text-subtle sm:hidden">
                     {[c.city, c.industry].filter(Boolean).join(" · ")}
                   </div>
-                  <div className="hidden truncate text-xs text-subtle sm:block md:hidden">{c.industry}</div>
+                  <div className="max-sm:hidden truncate text-xs text-subtle sm:block md:hidden">{c.industry}</div>
                 </td>
-                <td className="hidden truncate px-3 text-muted-foreground sm:table-cell">{c.city ?? "–"}</td>
+                <td className="max-sm:hidden truncate px-3 text-muted-foreground sm:table-cell">{c.city ?? "–"}</td>
                 <td className="px-3">
                   {status && (
                     <span className="inline-flex items-center gap-2 text-xs">
@@ -71,11 +71,11 @@ export function CompanyTable({ companies }: { companies: Row[] }) {
                     </span>
                   )}
                 </td>
-                <td className="hidden px-3 text-right font-mono text-muted-foreground tabular-nums md:table-cell">
+                <td className="max-md:hidden px-3 text-right font-mono text-muted-foreground tabular-nums md:table-cell">
                   {c.contact_count ?? 0}
                 </td>
                 <td
-                  className="hidden px-3 text-right font-mono text-xs text-muted-foreground tabular-nums sm:table-cell"
+                  className="max-sm:hidden px-3 text-right font-mono text-xs text-muted-foreground tabular-nums sm:table-cell"
                   title={c.last_activity_at ? formatDateTime(c.last_activity_at) : undefined}
                 >
                   {formatRelative(c.last_activity_at, now)}

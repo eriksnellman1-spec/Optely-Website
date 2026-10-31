@@ -64,7 +64,7 @@ export function ContactsFilters({
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const t = e.target as HTMLElement | null;
-      if (e.key !== "/" || e.metaKey || e.ctrlKey) return;
+      if (e.defaultPrevented || e.key !== "/" || e.metaKey || e.ctrlKey) return;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       e.preventDefault();
       inputRef.current?.focus();

@@ -34,18 +34,18 @@ export function Topbar({
       <LogoMark className="size-5 md:hidden" />
 
       <div className="flex min-w-0 items-center gap-2 text-sm">
-        <CalendarDays className="hidden size-4 text-subtle sm:block" />
+        <CalendarDays className="max-sm:hidden size-4 text-subtle sm:block" />
         <span className="capitalize text-muted-foreground">{weekdayLabel}</span>
         <span className="font-mono text-xs text-foreground tabular-nums">{dateLabel}</span>
       </div>
 
-      <div className="hidden h-4 w-px bg-border sm:block" />
+      <div className="max-sm:hidden h-4 w-px bg-border sm:block" />
 
       <div className="flex min-w-0 items-center gap-2 text-sm" title="Dagens kanal enligt veckoplanen">
         {todayPlan ? (
           <>
             <StatusDot tone={CHANNEL_TONE[todayPlan.channel] ?? "neutral"} />
-            <span className="hidden text-subtle sm:inline">I dag:</span>
+            <span className="max-sm:hidden text-subtle sm:inline">I dag:</span>
             <span className="truncate">{todayPlan.label}</span>
           </>
         ) : (
@@ -55,14 +55,14 @@ export function Topbar({
 
       <div className="ml-auto flex items-center gap-2">
         {goPending && (
-          <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
+          <span className="max-sm:hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
             <Kbd>g</Kbd> gå till …
           </span>
         )}
         <button
           type="button"
           onClick={() => openDialog("palette")}
-          className="hidden h-7 items-center gap-2 rounded-md border border-border bg-surface px-2 text-xs text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground sm:flex"
+          className="max-sm:hidden h-7 items-center gap-2 rounded-md border border-border bg-surface px-2 text-xs text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground sm:flex"
         >
           <Search className="size-3.5" />
           Sök eller hoppa till…
