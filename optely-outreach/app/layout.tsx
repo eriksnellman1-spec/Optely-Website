@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   title: { default: "Optely O.R.", template: "%s · Optely O.R." },
   description: "Optely Outreach Runtime – från kall kontakt till bokat möte.",
   robots: { index: false, follow: false },
+  applicationName: "Optely O.R.",
+  appleWebApp: { capable: true, title: "Optely O.R.", statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
