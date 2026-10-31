@@ -21,15 +21,17 @@ export function CompanyTable({ companies }: { companies: Row[] }) {
   const now = new Date();
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface">
+    // Kolumnerna anpassar sig efter tabellens egen bredd (container queries), inte fönstrets –
+    // annars äter sidomenyn upp platsen för bolagsnamnet i mellanstora fönster.
+    <div className="@container overflow-hidden rounded-lg border border-border bg-surface">
       <table className="w-full table-fixed text-sm">
         <thead>
           <tr className="h-8 border-b border-border text-left text-[11px] font-medium tracking-wide text-subtle uppercase">
             <th className="px-3 font-medium">Bolag</th>
-            <th className="max-sm:hidden w-32 px-3 font-medium sm:table-cell">Ort</th>
+            <th className="w-32 px-3 font-medium @max-2xl:hidden">Ort</th>
             <th className="w-32 px-3 font-medium">Status</th>
-            <th className="max-md:hidden w-24 px-3 text-right font-medium md:table-cell">Kontakter</th>
-            <th className="max-sm:hidden w-36 px-3 text-right font-medium sm:table-cell">Senaste aktivitet</th>
+            <th className="w-24 px-3 text-right font-medium @max-3xl:hidden">Kontakter</th>
+            <th className="w-36 px-3 text-right font-medium @max-2xl:hidden">Senaste aktivitet</th>
           </tr>
         </thead>
         <tbody>
@@ -57,12 +59,13 @@ export function CompanyTable({ companies }: { companies: Row[] }) {
                       </span>
                     )}
                   </div>
-                  <div className="truncate text-xs text-subtle sm:hidden">
-                    {[c.city, c.industry].filter(Boolean).join(" · ")}
+                  <div className="truncate text-xs text-subtle @2xl:hidden">
+                    {[c.city, c.industry, c.last_activity_at && formatRelative(c.last_activity_at, now)]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </div>
-                  <div className="max-sm:hidden truncate text-xs text-subtle sm:block md:hidden">{c.industry}</div>
                 </td>
-                <td className="max-sm:hidden truncate px-3 text-muted-foreground sm:table-cell">{c.city ?? "–"}</td>
+                <td className="truncate px-3 text-muted-foreground @max-2xl:hidden">{c.city ?? "–"}</td>
                 <td className="px-3">
                   {status && (
                     <span className="inline-flex items-center gap-2 text-xs">
@@ -71,11 +74,11 @@ export function CompanyTable({ companies }: { companies: Row[] }) {
                     </span>
                   )}
                 </td>
-                <td className="max-md:hidden px-3 text-right font-mono text-muted-foreground tabular-nums md:table-cell">
+                <td className="px-3 text-right font-mono text-muted-foreground tabular-nums @max-3xl:hidden">
                   {c.contact_count ?? 0}
                 </td>
                 <td
-                  className="max-sm:hidden px-3 text-right font-mono text-xs text-muted-foreground tabular-nums sm:table-cell"
+                  className="px-3 text-right font-mono text-xs text-muted-foreground tabular-nums @max-2xl:hidden"
                   title={c.last_activity_at ? formatDateTime(c.last_activity_at) : undefined}
                 >
                   {formatRelative(c.last_activity_at, now)}
