@@ -215,7 +215,7 @@ export function BrainEditor({ entries: initial, initialId }: { entries: ContextE
             </div>
           ))}
         </nav>
-        <p className="hidden px-2 text-xs text-subtle md:block">
+        <p className="max-md:hidden px-2 text-xs text-subtle md:block">
           <Kbd>j</Kbd> <Kbd>k</Kbd> byter post · <Kbd keys={["⌘", "S"]} /> sparar
         </p>
       </aside>
@@ -270,7 +270,7 @@ export function BrainEditor({ entries: initial, initialId }: { entries: ContextE
             <span className="font-mono tabular-nums">
               {draft.content.length.toLocaleString("sv-FI")} tecken
             </span>
-            <span className="hidden sm:inline">Uppdaterad {formatDateTime(selected.updated_at)}</span>
+            <span className="max-sm:hidden sm:inline">Uppdaterad {formatDateTime(selected.updated_at)}</span>
             <div className="ml-auto flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={remove} aria-label="Ta bort posten">
                 <Trash2 />
@@ -286,7 +286,7 @@ export function BrainEditor({ entries: initial, initialId }: { entries: ContextE
               <Button size="sm" onClick={save} disabled={!dirty || saving}>
                 <Save />
                 {saving ? "Sparar…" : "Spara"}
-                <Kbd keys={["⌘", "S"]} className="ml-1 hidden sm:inline-flex [&_kbd]:border-black/20 [&_kbd]:bg-black/10 [&_kbd]:text-brand-foreground" />
+                <Kbd keys={["⌘", "S"]} className="ml-1 max-sm:hidden sm:inline-flex [&_kbd]:border-black/20 [&_kbd]:bg-black/10 [&_kbd]:text-brand-foreground" />
               </Button>
             </div>
           </div>
