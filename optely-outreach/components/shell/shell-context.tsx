@@ -66,12 +66,12 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
       if (dialog !== null) return;
 
       if (goTimer.current) {
+        // Andra tangenten i en g-sekvens tillhör alltid navigeringen – stoppa vyernas egna genvägar.
+        e.preventDefault();
+        e.stopImmediatePropagation();
         const item = NAV_ITEMS.find((n) => n.key === e.key.toLowerCase());
         clearGo();
-        if (item) {
-          e.preventDefault();
-          router.push(item.href);
-        }
+        if (item) router.push(item.href);
         return;
       }
 
@@ -79,6 +79,7 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
         e.preventDefault();
         setDialog("shortcuts");
       } else if (e.key === "g") {
+        e.preventDefault();
         setGoPending(true);
         goTimer.current = setTimeout(clearGo, 1200);
       } else if (e.key === "[") {
@@ -90,9 +91,10 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    window.addEventListener("keydown", onKeyDown);
+    // Capture-fas: skalets genvägar körs före vyernas egna lyssnare.
+    window.addEventListener("keydown", onKeyDown, true);
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keydown", onKeyDown, true);
       if (goTimer.current) clearTimeout(goTimer.current);
     };
   }, [dialog, router, toggleSidebar]);

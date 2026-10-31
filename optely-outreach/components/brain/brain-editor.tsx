@@ -110,6 +110,7 @@ export function BrainEditor({ entries: initial, initialId }: { entries: ContextE
         save();
         return;
       }
+      if (e.defaultPrevented) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
