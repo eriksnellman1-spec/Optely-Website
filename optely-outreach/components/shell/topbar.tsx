@@ -62,7 +62,7 @@ export function Topbar({
         <button
           type="button"
           onClick={() => openDialog("palette")}
-          className="max-sm:hidden h-7 items-center gap-2 rounded-md border border-border bg-surface px-2 text-xs text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground sm:flex"
+          className="max-lg:hidden h-7 items-center gap-2 rounded-md border border-border bg-surface px-2 text-xs text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground lg:flex"
         >
           <Search className="size-3.5" />
           Sök eller hoppa till…
