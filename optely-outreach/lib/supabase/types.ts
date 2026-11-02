@@ -118,8 +118,14 @@ export type Database = {
           industry: string | null
           last_activity_at: string | null
           name: string
+          next_action_at: string | null
           notes: string | null
+          nurture_until: string | null
           revenue_eur: number | null
+          sequence_contact_id: string | null
+          sequence_round: number
+          sequence_started_at: string | null
+          sequence_step: number | null
           source: string | null
           status: Database["public"]["Enums"]["company_status"]
           updated_at: string
@@ -136,8 +142,14 @@ export type Database = {
           industry?: string | null
           last_activity_at?: string | null
           name: string
+          next_action_at?: string | null
           notes?: string | null
+          nurture_until?: string | null
           revenue_eur?: number | null
+          sequence_contact_id?: string | null
+          sequence_round?: number
+          sequence_started_at?: string | null
+          sequence_step?: number | null
           source?: string | null
           status?: Database["public"]["Enums"]["company_status"]
           updated_at?: string
@@ -154,14 +166,28 @@ export type Database = {
           industry?: string | null
           last_activity_at?: string | null
           name?: string
+          next_action_at?: string | null
           notes?: string | null
+          nurture_until?: string | null
           revenue_eur?: number | null
+          sequence_contact_id?: string | null
+          sequence_round?: number
+          sequence_started_at?: string | null
+          sequence_step?: number | null
           source?: string | null
           status?: Database["public"]["Enums"]["company_status"]
           updated_at?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "companies_sequence_contact_id_fkey"
+            columns: ["sequence_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contacts: {
         Row: {
@@ -270,9 +296,11 @@ export type Database = {
           queued_at: string | null
           reviewed_at: string | null
           sent_at: string | null
+          sequence_round: number
           sequence_step: number
           status: Database["public"]["Enums"]["email_status"]
           subject: string
+          template: string | null
           updated_at: string
         }
         Insert: {
@@ -289,9 +317,11 @@ export type Database = {
           queued_at?: string | null
           reviewed_at?: string | null
           sent_at?: string | null
+          sequence_round?: number
           sequence_step?: number
           status?: Database["public"]["Enums"]["email_status"]
           subject: string
+          template?: string | null
           updated_at?: string
         }
         Update: {
@@ -308,9 +338,11 @@ export type Database = {
           queued_at?: string | null
           reviewed_at?: string | null
           sent_at?: string | null
+          sequence_round?: number
           sequence_step?: number
           status?: Database["public"]["Enums"]["email_status"]
           subject?: string
+          template?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -580,6 +612,8 @@ export type Database = {
           partner_id: string | null
           priority: number
           reply_id: string | null
+          sequence_round: number | null
+          sequence_step: number | null
           status: Database["public"]["Enums"]["task_status"]
           title: string
           type: Database["public"]["Enums"]["task_type"]
@@ -596,6 +630,8 @@ export type Database = {
           partner_id?: string | null
           priority?: number
           reply_id?: string | null
+          sequence_round?: number | null
+          sequence_step?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           title: string
           type?: Database["public"]["Enums"]["task_type"]
@@ -612,6 +648,8 @@ export type Database = {
           partner_id?: string | null
           priority?: number
           reply_id?: string | null
+          sequence_round?: number | null
+          sequence_step?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           title?: string
           type?: Database["public"]["Enums"]["task_type"]
@@ -697,9 +735,68 @@ export type Database = {
         }
         Relationships: []
       }
+      ringpass_queue: {
+        Row: {
+          city: string | null
+          company_id: string | null
+          company_name: string | null
+          company_notes: string | null
+          company_status: Database["public"]["Enums"]["company_status"] | null
+          contact_id: string | null
+          description: string | null
+          due_at: string | null
+          email: string | null
+          first_name: string | null
+          industry: string | null
+          last_name: string | null
+          phone: string | null
+          priority: number | null
+          reply_id: string | null
+          role: string | null
+          sequence_round: number | null
+          sequence_step: number | null
+          task_id: string | null
+          task_sequence_step: number | null
+          task_type: Database["public"]["Enums"]["task_type"] | null
+          title: string | null
+          website: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      advance_sequence: {
+        Args: { p_company_id: string; p_from_step: number }
+        Returns: undefined
+      }
+      apply_call_outcome: {
+        Args: { p_task_id: string; p_outcome: string; p_notes?: string; p_voicemail?: boolean; p_payload?: Json }
+        Returns: Json
+      }
+      create_template_email: {
+        Args: { p_company_id: string; p_contact_id: string; p_template: string; p_step: number; p_round: number; p_vars?: Json; p_status?: Database["public"]["Enums"]["email_status"] }
+        Returns: string
+      }
+      helsinki_today: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      next_channel_date: {
+        Args: { p_channel: string; p_after?: string }
+        Returns: string
+      }
+      run_daily_sequence: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      sequence_channel: {
+        Args: { p_step: number }
+        Returns: string
+      }
+      sequence_step_label: {
+        Args: { p_step: number }
+        Returns: string
+      }
     }
     Enums: {
       call_outcome:
@@ -724,6 +821,7 @@ export type Database = {
         | "meeting_booked"
         | "customer"
         | "lost"
+        | "nurture"
       context_kind:
         | "profile"
         | "offer"
@@ -732,6 +830,7 @@ export type Database = {
         | "script"
         | "objection"
         | "tone"
+        | "template"
         | "other"
       email_status:
         | "draft"
@@ -882,8 +981,8 @@ export const Constants = {
     Enums: {
       call_outcome: ["no_answer", "voicemail", "callback", "interested", "not_interested", "meeting_booked", "wrong_person"],
       campaign_status: ["draft", "active", "paused", "completed"],
-      company_status: ["new", "researching", "contacted", "replied", "warm", "meeting_booked", "customer", "lost"],
-      context_kind: ["profile", "offer", "icp", "case", "script", "objection", "tone", "other"],
+      company_status: ["new", "researching", "contacted", "replied", "warm", "meeting_booked", "customer", "lost", "nurture"],
+      context_kind: ["profile", "offer", "icp", "case", "script", "objection", "tone", "template", "other"],
       email_status: ["draft", "pending_review", "approved", "rejected", "queued", "sent", "bounced", "replied", "failed"],
       meeting_status: ["scheduled", "held", "no_show", "cancelled"],
       partner_type: ["it", "accounting", "web", "marketing", "other"],

@@ -20,9 +20,11 @@ truncate
   public.campaigns,
   public.contacts,
   public.companies,
-  public.partners,
-  public.context_entries
+  public.partners
 restart identity cascade;
+
+-- Mejlmallarna (kind 'template', från migration 0003) behålls – resten av Företagshjärnan läses in nedan.
+delete from public.context_entries where kind::text <> 'template';
 
 -- Små hjälpare för läsbara, stabila id:n (finns bara under den här sessionen).
 create function pg_temp.co(n int) returns uuid language sql immutable as
@@ -391,5 +393,19 @@ $md$# Skrivregler
 - Inga ord som "revolutionerande", "AI-driven", "synergier".
 - Max 80 ord per mejl. En fråga i slutet.
 $md$, 100);
+
+-- -----------------------------------------------------------------------------
+-- Uppföljningssekvensen (migration 0003): bolag som fått Mejl 1 utan svar har
+-- Samtal 1 förfallet i dag, så att Ringpasset har något att visa direkt.
+-- -----------------------------------------------------------------------------
+
+do $$
+begin
+  if to_regproc('public.run_daily_sequence') is not null then
+    update public.companies set next_action_at = public.helsinki_today() where sequence_step is not null;
+    perform public.run_daily_sequence();
+  end if;
+end;
+$$;
 
 commit;
