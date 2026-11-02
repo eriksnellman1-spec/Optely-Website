@@ -14,7 +14,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
-import type { Outcome, OutcomeInput } from "@/lib/actions/ringpass";
+import { Textarea } from "@/components/ui/textarea";
+import type { OutcomeInput } from "@/lib/actions/ringpass";
+import type { Outcome } from "@/lib/sequence";
 import { cn } from "@/lib/utils";
 import type { QueueItem } from "./ringpass-view";
 
@@ -31,53 +33,63 @@ function at(day: Date, h: number, m = 0) {
   d.setHours(h, m, 0, 0);
   return d;
 }
-/** Nästa vardag (mån–fre) efter `from`. */
 function nextWeekday(from: Date) {
   const d = new Date(from);
   do d.setDate(d.getDate() + 1);
   while (d.getDay() === 0 || d.getDay() === 6);
   return d;
 }
+function addMonths(from: Date, months: number) {
+  const d = new Date(from);
+  d.setMonth(d.getMonth() + months);
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  return at(d, 9);
+}
 
-const TITLES: Partial<Record<Outcome, { title: string; description: string }>> = {
-  callback: { title: "Ring tillbaka", description: "Samtalet läggs överst i kön vid vald tid." },
-  interested: {
-    title: "Intresserad",
-    description: "Bolaget blir varmt och får ett mejl med två mötestider. En uppföljning bokas.",
+const META: Partial<Record<Outcome, { title: string; description: string }>> = {
+  booked: {
+    title: "Bokat",
+    description: "Behovssamtalet sparas. Bekräftelse-SMS köas (mejl om mobilnummer saknas) och kalenderhändelsen läggs i Att göra.",
   },
-  meeting_booked: { title: "Möte bokat", description: "Mötet sparas och en bekräftelse mejlas till kontakten." },
-  not_interested: { title: "Inte intresserad", description: "Ska vi höra av oss senare, eller släppa bolaget?" },
+  call_later: { title: "Ring senare", description: "Samtalet läggs exakt vid den tid du väljer." },
   wrong_person: {
     title: "Fel person",
-    description: "Lägg till rätt person. Sekvensen börjar om med Mejl 1, som väntar på ditt godkännande i Gatekeeper.",
+    description: "Rätt person sparas som ny huvudkontakt och hamnar överst i kön direkt.",
   },
+  send_info: {
+    title: "Skicka info",
+    description: "Mejlet skickas, en LinkedIn-påminnelse läggs i Att göra och ett nytt samtal läggs om 7 dagar.",
+  },
+  not_now: {
+    title: "Nej, inte nu",
+    description: "Bolaget blir Vilande och samtalet ligger färdigt till tidpunkten de angav.",
+  },
+  no_need: { title: "Nej, inget behov", description: "Status Nej. Alla kanaler stoppas för bolaget." },
   do_not_call: {
-    title: "Ring inte igen",
-    description: "Kontakten och bolaget markeras 'kontakta inte'. Inga fler samtal eller mejl skickas.",
+    title: "Ring ej",
+    description: "Kontakta ej i alla kanaler, permanent. Inga fler samtal, mejl eller SMS.",
   },
 };
 
 export function OutcomeDialog({
   outcome,
   item,
-  stepLabel,
-  dueLabel,
+  sendInfoTemplate,
   onCancel,
   onSubmit,
 }: {
   outcome: Outcome | null;
   item: QueueItem;
-  stepLabel: string | null;
-  dueLabel: string;
+  sendInfoTemplate: string;
   onCancel: () => void;
   onSubmit: (outcome: Outcome, payload?: Payload) => void;
 }) {
   const open = outcome !== null && outcome !== "no_answer";
-  const meta = outcome ? TITLES[outcome] : undefined;
+  const meta = outcome ? META[outcome] : undefined;
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className={cn("sm:max-w-md", outcome === "send_info" && "sm:max-w-xl")}>
         <DialogHeader>
           <DialogTitle>
             {meta?.title} · <span className="text-muted-foreground">{item.companyName}</span>
@@ -85,166 +97,127 @@ export function OutcomeDialog({
           <DialogDescription>{meta?.description}</DialogDescription>
         </DialogHeader>
         {open && outcome && (
-          <Body key={`${item.taskId}-${outcome}`} outcome={outcome} item={item} onCancel={onCancel} onSubmit={onSubmit} />
+          <Body
+            key={`${item.taskId}-${outcome}`}
+            outcome={outcome}
+            item={item}
+            sendInfoTemplate={sendInfoTemplate}
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+          />
         )}
-        <p className="sr-only">
-          {stepLabel} {dueLabel}
-        </p>
       </DialogContent>
     </Dialog>
   );
 }
 
+function splitTemplate(template: string, item: QueueItem) {
+  const filled = template
+    .replaceAll("{{förnamn}}", item.firstName ?? "")
+    .replaceAll("{{bolag}}", item.companyName);
+  const [first, ...rest] = filled.split("\n");
+  const hasSubject = /^\s*Ämne:/i.test(first);
+  return {
+    subject: hasSubject ? first.replace(/^\s*Ämne:\s*/i, "").trim() : "",
+    body: (hasSubject ? rest.join("\n") : filled).trim(),
+  };
+}
+
 function Body({
   outcome,
   item,
+  sendInfoTemplate,
   onCancel,
   onSubmit,
 }: {
   outcome: Outcome;
   item: QueueItem;
+  sendInfoTemplate: string;
   onCancel: () => void;
   onSubmit: (outcome: Outcome, payload?: Payload) => void;
 }) {
   const [now] = useState(() => new Date());
   const [error, setError] = useState<string | null>(null);
-
-  // --- Ring tillbaka
-  const presets = [
-    { label: "Om 2 timmar", date: new Date(Math.ceil((now.getTime() + 2 * 3600_000) / 900_000) * 900_000) },
-    { label: "I morgon 09:00", date: at(nextWeekday(now), 9) },
-    { label: "Om en vecka", date: at(new Date(now.getTime() + 7 * 86_400_000), 9) },
-  ];
-  const [callbackAt, setCallbackAt] = useState(toLocalInput(presets[0].date));
-
-  // --- Intresserad: två tider
   const d1 = nextWeekday(now);
-  const d2 = nextWeekday(d1);
-  const [time1, setTime1] = useState(toLocalInput(at(d1, 10)));
-  const [time2, setTime2] = useState(toLocalInput(at(d2, 13)));
 
-  // --- Möte bokat
+  // Bokat
   const [meetingAt, setMeetingAt] = useState(toLocalInput(at(d1, 10)));
-  const [minutes, setMinutes] = useState("45");
-  const [location, setLocation] = useState("Teams");
+  const [minutes, setMinutes] = useState("20");
+  const [location, setLocation] = useState("telefon");
 
-  // --- Fel person
-  const [person, setPerson] = useState({ first_name: "", last_name: "", role: "", phone: "", email: "" });
+  // Ring senare
+  const laterPresets = [
+    { label: "Om 1 timme", date: new Date(Math.ceil((now.getTime() + 3600_000) / 900_000) * 900_000) },
+    { label: "I eftermiddag 15:00", date: at(now, 15) },
+    { label: "I morgon 09:00", date: at(d1, 9) },
+  ].filter((p) => p.date > now);
+  const [laterAt, setLaterAt] = useState(toLocalInput(laterPresets[0]?.date ?? at(d1, 9)));
 
-  // Sifferval i "Inte intresserad" och Enter i bekräftelsen.
+  // Nej, inte nu
+  const notNowPresets = [
+    { label: "Om 1 månad", date: addMonths(now, 1) },
+    { label: "Om 3 månader", date: addMonths(now, 3) },
+    { label: "Om 6 månader", date: addMonths(now, 6) },
+  ];
+  const [notNowAt, setNotNowAt] = useState(toLocalInput(notNowPresets[1].date));
+
+  // Fel person
+  const [person, setPerson] = useState({ first_name: "", last_name: "", role: "", phone: "" });
+
+  // Skicka info – mallen förifylld, justeras varje gång
+  const [mail, setMail] = useState(() => splitTemplate(sendInfoTemplate, item));
+
+  // Siffror väljer snabbval i "Ring senare" och "Nej, inte nu".
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (outcome === "not_interested" && ["1", "2", "3"].includes(e.key)) {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
+      const i = Number(e.key) - 1;
+      if (outcome === "call_later" && laterPresets[i]) {
         e.preventDefault();
-        onSubmit("not_interested", { months: e.key === "1" ? 3 : e.key === "2" ? 6 : 0 });
+        setLaterAt(toLocalInput(laterPresets[i].date));
+      } else if (outcome === "not_now" && notNowPresets[i]) {
+        e.preventDefault();
+        setNotNowAt(toLocalInput(notNowPresets[i].date));
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [outcome, onSubmit]);
+  });
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (outcome === "callback") {
-      if (!callbackAt) return setError("Välj en tid.");
-      onSubmit("callback", { due_at: fromLocalInput(callbackAt) });
-    } else if (outcome === "interested") {
-      if (!time1 || !time2) return setError("Välj två tider.");
-      if (time1 === time2) return setError("Tiderna ska vara olika.");
-      onSubmit("interested", { times: [fromLocalInput(time1), fromLocalInput(time2)] });
-    } else if (outcome === "meeting_booked") {
-      if (!meetingAt) return setError("Välj tid för mötet.");
-      onSubmit("meeting_booked", { starts_at: fromLocalInput(meetingAt), minutes: Number(minutes), location });
-    } else if (outcome === "wrong_person") {
-      if (!person.first_name.trim()) return setError("Förnamn krävs.");
-      onSubmit("wrong_person", person);
-    } else if (outcome === "do_not_call") {
-      onSubmit("do_not_call");
+    switch (outcome) {
+      case "booked":
+        if (!meetingAt) return setError("Välj tid.");
+        return onSubmit("booked", { starts_at: fromLocalInput(meetingAt), minutes: Number(minutes), location });
+      case "call_later":
+        if (!laterAt) return setError("Välj tid.");
+        return onSubmit("call_later", { due_at: fromLocalInput(laterAt) });
+      case "not_now":
+        if (!notNowAt) return setError("Välj tidpunkt.");
+        return onSubmit("not_now", { due_at: fromLocalInput(notNowAt) });
+      case "wrong_person":
+        if (!person.first_name.trim() || !person.phone.trim()) return setError("Namn och nummer krävs.");
+        return onSubmit("wrong_person", person);
+      case "send_info":
+        if (!item.email) return setError("Kontakten saknar e-post – lägg till den i Kontakter först.");
+        if (!mail.body.trim()) return setError("Mejlet är tomt.");
+        return onSubmit("send_info", mail);
+      case "no_need":
+      case "do_not_call":
+        return onSubmit(outcome);
     }
   }
 
-  const footer = (label: string, destructive = false) => (
-    <DialogFooter className="pt-1">
-      <Button type="button" variant="ghost" onClick={onCancel}>
-        Avbryt <Kbd className="ml-1">Esc</Kbd>
-      </Button>
-      {/* Utan textfält (bekräftelse) ska Enter bekräfta – inte träffa "Avbryt". */}
-      <Button type="submit" variant={destructive ? "destructive" : "default"} autoFocus={outcome === "do_not_call"}>
-        {label} <Kbd className="ml-1 border-black/20 bg-black/10 text-current">↵</Kbd>
-      </Button>
-    </DialogFooter>
-  );
-
-  if (outcome === "not_interested") {
-    const options = [
-      { key: "1", months: 3, label: "Hör av dig om 3 månader" },
-      { key: "2", months: 6, label: "Hör av dig om 6 månader" },
-      { key: "3", months: 0, label: "Släpp bolaget (förlorad)" },
-    ];
-    return (
-      <div className="grid gap-2">
-        {options.map((o, i) => (
-          <Button
-            key={o.key}
-            autoFocus={i === 0}
-            variant="outline"
-            className={cn("h-10 justify-start", o.months === 0 && "text-status-red")}
-            onClick={() => onSubmit("not_interested", { months: o.months })}
-          >
-            <Kbd>{o.key}</Kbd>
-            {o.label}
-          </Button>
-        ))}
-      </div>
-    );
-  }
+  const confirmOnly = outcome === "no_need" || outcome === "do_not_call";
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      {outcome === "callback" && (
+      {outcome === "booked" && (
         <>
-          <div className="flex flex-wrap gap-1.5">
-            {presets.map((p) => (
-              <Button
-                key={p.label}
-                type="button"
-                size="sm"
-                variant={callbackAt === toLocalInput(p.date) ? "secondary" : "outline"}
-                onClick={() => setCallbackAt(toLocalInput(p.date))}
-              >
-                {p.label}
-              </Button>
-            ))}
-          </div>
-          <Field label="Tid">
-            <Input type="datetime-local" value={callbackAt} onChange={(e) => setCallbackAt(e.target.value)} autoFocus />
-          </Field>
-          {footer("Boka ring tillbaka")}
-        </>
-      )}
-
-      {outcome === "interested" && (
-        <>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Förslag 1">
-              <Input type="datetime-local" value={time1} onChange={(e) => setTime1(e.target.value)} autoFocus />
-            </Field>
-            <Field label="Förslag 2">
-              <Input type="datetime-local" value={time2} onChange={(e) => setTime2(e.target.value)} />
-            </Field>
-          </div>
-          <p className="text-xs text-subtle">
-            Mejlet går till {item.email ?? "kontakten (e-post saknas!)"} enligt mallen &quot;Två mötestider&quot; i
-            Företagshjärnan.
-          </p>
-          {footer("Skicka tider")}
-        </>
-      )}
-
-      {outcome === "meeting_booked" && (
-        <>
-          <Field label="Start">
+          <Field label="Tid för behovssamtalet">
             <Input type="datetime-local" value={meetingAt} onChange={(e) => setMeetingAt(e.target.value)} autoFocus />
           </Field>
           <div className="grid grid-cols-[8rem_1fr] gap-3">
@@ -254,58 +227,81 @@ function Body({
                 onChange={(e) => setMinutes(e.target.value)}
                 className="h-8 w-full rounded-md border border-input bg-surface px-2 text-sm"
               >
+                <option value="20">20 min</option>
                 <option value="30">30 min</option>
                 <option value="45">45 min</option>
-                <option value="60">60 min</option>
               </select>
             </Field>
-            <Field label="Plats">
-              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Teams, hos kunden…" />
+            <Field label="Var">
+              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="telefon, Teams, hos kunden…" />
             </Field>
           </div>
-          {footer("Spara möte")}
+          <p className="text-xs text-subtle">
+            Bekräftelse:{" "}
+            {item.phone ? `SMS till ${item.phone}` : item.email ? `mejl till ${item.email}` : "kontakten saknar nummer och e-post"}
+          </p>
+        </>
+      )}
+
+      {outcome === "call_later" && (
+        <>
+          <Presets presets={laterPresets} value={laterAt} onPick={setLaterAt} />
+          <Field label="Tid">
+            <Input type="datetime-local" value={laterAt} onChange={(e) => setLaterAt(e.target.value)} />
+          </Field>
+        </>
+      )}
+
+      {outcome === "not_now" && (
+        <>
+          <Presets presets={notNowPresets} value={notNowAt} onPick={setNotNowAt} />
+          <Field label="Hör av dig">
+            <Input type="datetime-local" value={notNowAt} onChange={(e) => setNotNowAt(e.target.value)} />
+          </Field>
         </>
       )}
 
       {outcome === "wrong_person" && (
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Förnamn">
+            <Input value={person.first_name} onChange={(e) => setPerson({ ...person, first_name: e.target.value })} autoFocus />
+          </Field>
+          <Field label="Efternamn">
+            <Input value={person.last_name} onChange={(e) => setPerson({ ...person, last_name: e.target.value })} />
+          </Field>
+          <Field label="Nummer">
+            <Input type="tel" value={person.phone} onChange={(e) => setPerson({ ...person, phone: e.target.value })} />
+          </Field>
+          <Field label="Roll">
+            <Input value={person.role} onChange={(e) => setPerson({ ...person, role: e.target.value })} placeholder="VD, ägare…" />
+          </Field>
+        </div>
+      )}
+
+      {outcome === "send_info" && (
         <>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Förnamn">
-              <Input
-                value={person.first_name}
-                onChange={(e) => setPerson({ ...person, first_name: e.target.value })}
-                autoFocus
-                required
-              />
-            </Field>
-            <Field label="Efternamn">
-              <Input value={person.last_name} onChange={(e) => setPerson({ ...person, last_name: e.target.value })} />
-            </Field>
-            <Field label="Roll">
-              <Input
-                value={person.role}
-                onChange={(e) => setPerson({ ...person, role: e.target.value })}
-                placeholder="VD, inköp…"
-              />
-            </Field>
-            <Field label="Telefon">
-              <Input type="tel" value={person.phone} onChange={(e) => setPerson({ ...person, phone: e.target.value })} />
-            </Field>
-            <Field label="E-post" className="col-span-2">
-              <Input type="email" value={person.email} onChange={(e) => setPerson({ ...person, email: e.target.value })} />
-            </Field>
-          </div>
-          {footer("Spara och börja om")}
+          <p className="text-xs text-subtle">Till: {item.email ?? "– kontakten saknar e-post –"}</p>
+          <Field label="Ämne">
+            <Input value={mail.subject} onChange={(e) => setMail({ ...mail, subject: e.target.value })} />
+          </Field>
+          <Field label="Text">
+            <Textarea
+              rows={10}
+              value={mail.body}
+              onChange={(e) => setMail({ ...mail, body: e.target.value })}
+              autoFocus
+              className="text-sm leading-6"
+            />
+          </Field>
         </>
       )}
 
-      {outcome === "do_not_call" && (
-        <>
-          <p className="text-sm">
-            {item.contactName ?? "Kontakten"} på {item.companyName} kontaktas aldrig igen.
-          </p>
-          {footer("Ring inte igen", true)}
-        </>
+      {confirmOnly && (
+        <p className="text-sm">
+          {outcome === "do_not_call"
+            ? `${item.contactName ?? "Kontakten"} på ${item.companyName} kontaktas aldrig igen.`
+            : `${item.companyName} får status Nej.`}
+        </p>
       )}
 
       {error && (
@@ -313,7 +309,49 @@ function Body({
           {error}
         </p>
       )}
+
+      <DialogFooter className="pt-1">
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          Avbryt <Kbd className="ml-1">Esc</Kbd>
+        </Button>
+        {/* Utan textfält ska Enter bekräfta – inte träffa "Avbryt". */}
+        <Button
+          type="submit"
+          variant={outcome === "do_not_call" || outcome === "no_need" ? "destructive" : "default"}
+          autoFocus={confirmOnly || outcome === "call_later" || outcome === "not_now"}
+        >
+          {outcome === "send_info" ? "Skicka" : "Spara"}
+          {outcome !== "send_info" && <Kbd className="ml-1 border-black/20 bg-black/10 text-current">↵</Kbd>}
+        </Button>
+      </DialogFooter>
     </form>
+  );
+}
+
+function Presets({
+  presets,
+  value,
+  onPick,
+}: {
+  presets: { label: string; date: Date }[];
+  value: string;
+  onPick: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {presets.map((p, i) => (
+        <Button
+          key={p.label}
+          type="button"
+          size="sm"
+          variant={value === toLocalInput(p.date) ? "secondary" : "outline"}
+          onClick={() => onPick(toLocalInput(p.date))}
+        >
+          <Kbd>{i + 1}</Kbd>
+          {p.label}
+        </Button>
+      ))}
+    </div>
   );
 }
 

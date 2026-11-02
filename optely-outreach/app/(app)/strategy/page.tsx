@@ -13,7 +13,7 @@ export default function StrategyPage() {
       icon={LineChart}
       emptyTitle="Strategy Room kommer här"
       emptyText="Nyckeltal från hela kedjan – skickade mejl, svarsfrekvens, samtal, bokade möten – och en kalkylator för hur mycket som behövs för att nå målen."
-      step={6}
+      phase="J (dashboard)"
       features={[
         "KPI:er vecka för vecka med förändring",
         "Kalkylator: mejl → svar → möten → kunder",

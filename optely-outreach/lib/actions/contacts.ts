@@ -10,6 +10,9 @@ export type NewContactInput = {
   companyId?: string | null;
   companyName?: string;
   companyCity?: string;
+  companyWebsite?: string;
+  /** Lägg till nytt bolag trots att dubblettkontrollen hittade en match. */
+  force?: boolean;
   firstName: string;
   lastName?: string;
   role?: string;
@@ -22,9 +25,13 @@ const clean = (v: string | undefined | null) => {
   return t.length ? t : null;
 };
 
-export async function createContact(
-  input: NewContactInput,
-): Promise<ActionResult<{ companyId: string; contactId: string }>> {
+export type Duplicate = { companyId: string | null; name: string; status: string | null; matchedOn: string };
+
+export type CreateContactResult =
+  | ActionResult<{ companyId: string; contactId: string }>
+  | { ok: false; error: string; duplicates: Duplicate[] };
+
+export async function createContact(input: NewContactInput): Promise<CreateContactResult> {
   const firstName = clean(input.firstName);
   const email = clean(input.email);
   if (!firstName) return { ok: false, error: "Förnamn krävs." };
@@ -38,9 +45,33 @@ export async function createContact(
   if (!companyId) {
     const name = clean(input.companyName);
     if (!name) return { ok: false, error: "Välj ett bolag eller ange namnet på ett nytt." };
+
+    // Dubblettkontroll (docs/saljsystem.md §2): namn, e-postdomän, telefon – mot bolag och partner.
+    if (!input.force) {
+      const { data: dups, error: dupError } = await supabase.rpc("find_company_duplicates", {
+        p_name: name,
+        p_website: clean(input.companyWebsite) ?? undefined,
+        p_email: email ?? undefined,
+        p_phone: clean(input.phone) ?? undefined,
+      });
+      if (dupError) return { ok: false, error: "Dubblettkontrollen misslyckades. Försök igen." };
+      if (dups && dups.length > 0) {
+        return {
+          ok: false,
+          error: "Bolaget verkar redan finnas.",
+          duplicates: dups.map((d) => ({
+            companyId: d.company_id,
+            name: d.name ?? "Okänt bolag",
+            status: d.status,
+            matchedOn: d.matched_on ?? "namn",
+          })),
+        };
+      }
+    }
+
     const { data, error } = await supabase
       .from("companies")
-      .insert({ name, city: clean(input.companyCity), source: "manuell" })
+      .insert({ name, city: clean(input.companyCity), website: clean(input.companyWebsite), source: "manuell" })
       .select("id")
       .single();
     if (error || !data) return { ok: false, error: "Kunde inte skapa bolaget." };

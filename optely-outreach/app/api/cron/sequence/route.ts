@@ -8,8 +8,8 @@ import { createServiceClient } from "@/lib/supabase/service";
  * GET /api/cron/sequence – körs dagligen av Vercel Cron (se vercel.json).
  * Vercel skickar "Authorization: Bearer <CRON_SECRET>".
  *
- * 1. run_daily_sequence(): återaktiverar vilande bolag, skapar dagens ringuppgifter
- *    och mejlsteg (idempotent – säkert att köra flera gånger).
+ * 1. run_daily_sequence(): återaktiverar vilande bolag och släpper in dagens kvot nya
+ *    bolag i ringkön på ringdagar (idempotent – säkert att köra flera gånger).
  * 2. Godkända sekvensmejl lämnas till utskicksadaptern.
  * 3. Körningen loggas i webhook_events (source 'cron').
  */
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     const summary = {
       reactivated: Number(result.reactivated ?? 0),
-      tasks_created: Number(result.tasks_created ?? 0),
+      released: Number(result.released ?? 0),
       emails_queued: dispatch.queued,
       emails_failed: dispatch.failed,
       provider: dispatch.provider,

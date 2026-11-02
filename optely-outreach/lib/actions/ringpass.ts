@@ -4,36 +4,20 @@ import { revalidatePath } from "next/cache";
 
 import type { ActionResult } from "@/lib/actions/types";
 import { dispatchEmails } from "@/lib/outbound/dispatch";
+import { OUTCOMES, type Outcome } from "@/lib/sequence";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/types";
 
-export type Outcome =
-  | "no_answer"
-  | "callback"
-  | "interested"
-  | "meeting_booked"
-  | "not_interested"
-  | "wrong_person"
-  | "do_not_call";
-
-const OUTCOMES: Outcome[] = [
-  "no_answer",
-  "callback",
-  "interested",
-  "meeting_booked",
-  "not_interested",
-  "wrong_person",
-  "do_not_call",
-];
+export type { Outcome };
 
 export type OutcomeInput = {
   taskId: string;
   outcome: Outcome;
   notes?: string;
   voicemail?: boolean;
-  /** callback: { due_at } · interested: { times: ISO[] } · meeting_booked: { starts_at, minutes, location }
-   *  not_interested: { months: 0 | 3 | 6 } · wrong_person: { first_name, last_name, role, phone, email } */
-  payload?: Record<string, string | number | string[] | undefined>;
+  /** booked: { starts_at, minutes, location } · call_later/not_now: { due_at } · send_info: { subject, body }
+   *  wrong_person: { first_name, last_name, role, phone } */
+  payload?: Record<string, string | number | undefined>;
 };
 
 const weekday = new Intl.DateTimeFormat("sv-FI", { timeZone: "Europe/Helsinki", weekday: "long" });
@@ -57,13 +41,14 @@ function parseDate(v: unknown): Date | null {
 }
 
 const MESSAGES: Record<Outcome, string> = {
-  no_answer: "Loggat – nästa steg är schemalagt",
-  callback: "Ring tillbaka är bokat",
-  interested: "Varm! Mejl med mötestider skickat",
-  meeting_booked: "Möte bokat och bekräftelse skickad",
-  not_interested: "Loggat – bolaget pausas",
-  wrong_person: "Ny kontakt sparad – Mejl 1 väntar i Gatekeeper",
-  do_not_call: "Bolaget kontaktas inte igen",
+  booked: "Behovssamtal bokat – bekräftelse köad",
+  no_answer: "Loggat – nästa försök är schemalagt",
+  call_later: "Ring senare är inlagt",
+  wrong_person: "Rätt person sparad – ligger överst i kön",
+  send_info: "Mejlet skickat, LinkedIn-påminnelse och samtal om 7 dagar inlagda",
+  not_now: "Vilande – samtalet ligger färdigt till datumet",
+  no_need: "Status Nej – allt stoppat",
+  do_not_call: "Kontakta ej – i alla kanaler",
 };
 
 export async function logCallOutcome(
@@ -74,40 +59,35 @@ export async function logCallOutcome(
   const payload: Record<string, Json> = {};
 
   switch (input.outcome) {
-    case "callback": {
-      const due = parseDate(p.due_at);
-      if (!due) return { ok: false, error: "Välj när du ska ringa tillbaka." };
-      payload.due_at = due.toISOString();
-      break;
-    }
-    case "interested": {
-      const times = (Array.isArray(p.times) ? p.times : []).map(parseDate).filter((d): d is Date => d !== null);
-      if (times.length < 2) return { ok: false, error: "Välj två mötestider." };
-      times.sort((a, b) => a.getTime() - b.getTime());
-      payload.times_text = times.map((d) => `• ${formatSlot(d)}`).join("\n");
-      break;
-    }
-    case "meeting_booked": {
+    case "booked": {
       const start = parseDate(p.starts_at);
-      if (!start) return { ok: false, error: "Välj tid för mötet." };
-      const minutes = Number(p.minutes) > 0 ? Number(p.minutes) : 45;
+      if (!start) return { ok: false, error: "Välj tid för behovssamtalet." };
+      const minutes = Number(p.minutes) > 0 ? Number(p.minutes) : 20;
       payload.starts_at = start.toISOString();
       payload.ends_at = new Date(start.getTime() + minutes * 60_000).toISOString();
       payload.when_text = formatSlot(start);
       payload.location = typeof p.location === "string" ? p.location : "";
       break;
     }
-    case "not_interested": {
-      const months = Number(p.months);
-      payload.months = months === 3 || months === 6 ? months : 0;
+    case "call_later":
+    case "not_now": {
+      const due = parseDate(p.due_at);
+      if (!due) return { ok: false, error: "Välj en tidpunkt." };
+      payload.due_at = due.toISOString();
+      break;
+    }
+    case "send_info": {
+      const body = typeof p.body === "string" ? p.body.trim() : "";
+      if (!body) return { ok: false, error: "Mejlet är tomt." };
+      payload.subject = typeof p.subject === "string" ? p.subject.trim() : "";
+      payload.body = body;
       break;
     }
     case "wrong_person": {
       const first = typeof p.first_name === "string" ? p.first_name.trim() : "";
-      if (!first) return { ok: false, error: "Fyll i förnamn på rätt person." };
-      const email = typeof p.email === "string" ? p.email.trim() : "";
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "Ogiltig e-postadress." };
-      for (const k of ["first_name", "last_name", "role", "phone", "email"] as const) {
+      const phone = typeof p.phone === "string" ? p.phone.trim() : "";
+      if (!first || !phone) return { ok: false, error: "Fyll i namn och nummer till rätt person." };
+      for (const k of ["first_name", "last_name", "role", "phone"] as const) {
         if (typeof p[k] === "string") payload[k] = p[k];
       }
       break;
@@ -127,7 +107,6 @@ export async function logCallOutcome(
     const msg = error.message ?? "";
     if (msg.includes("redan hanterad")) return { ok: false, error: "Uppgiften är redan hanterad." };
     if (msg.includes("do_not_contact")) return { ok: false, error: "Kontakten har avregistrerat sig – inget mejl skickades." };
-    if (msg.includes("23505") || msg.includes("duplicate")) return { ok: false, error: "Kontakten finns redan (samma e-post)." };
     return { ok: false, error: msg.length < 140 ? msg : "Kunde inte spara utfallet. Försök igen." };
   }
 
@@ -152,3 +131,61 @@ export async function logCallOutcome(
   revalidatePath("/", "layout");
   return { ok: true, data: { message: MESSAGES[input.outcome], emailsQueued, emailsFailed } };
 }
+
+// ---------------------------------------------------------------------------
+// "Att göra" i Ringpasset: SMS, kalender och LinkedIn tills fas F/G automatiserar dem
+// ---------------------------------------------------------------------------
+
+export async function markSmsSent(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("sms_messages")
+    .update({ status: "sent", sent_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("status", "pending");
+  if (error) return { ok: false, error: "Kunde inte markera SMS:et." };
+  revalidatePath("/ringpass");
+  return { ok: true, data: undefined };
+}
+
+export async function cancelSms(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("sms_messages").update({ status: "cancelled" }).eq("id", id).eq("status", "pending");
+  if (error) return { ok: false, error: "Kunde inte stryka SMS:et." };
+  revalidatePath("/ringpass");
+  return { ok: true, data: undefined };
+}
+
+export async function markCalendarAdded(meetingId: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("meetings")
+    .update({ calendar_added_at: new Date().toISOString() })
+    .eq("id", meetingId);
+  if (error) return { ok: false, error: "Kunde inte markera kalenderhändelsen." };
+  revalidatePath("/ringpass");
+  return { ok: true, data: undefined };
+}
+
+export async function completeTask(taskId: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tasks")
+    .update({ status: "done", completed_at: new Date().toISOString() })
+    .eq("id", taskId)
+    .eq("status", "open");
+  if (error) return { ok: false, error: "Kunde inte bocka av uppgiften." };
+  revalidatePath("/", "layout");
+  return { ok: true, data: undefined };
+}
+
+/** "Hämta fler": släpper in fler nya bolag i ringkön utöver dagens kvot. */
+export async function releaseMoreCalls(count: number): Promise<ActionResult<{ released: number }>> {
+  const n = Math.min(Math.max(Math.round(count), 1), 25);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("release_new_calls", { p_count: n });
+  if (error) return { ok: false, error: "Kunde inte hämta fler bolag." };
+  revalidatePath("/", "layout");
+  return { ok: true, data: { released: typeof data === "number" ? data : 0 } };
+}
+

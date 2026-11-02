@@ -11,15 +11,16 @@ export default function OutreachPage() {
   return (
     <PlannedView
       title="Outreach"
-      subtitle="AI Gatekeeper och kampanjer."
+      subtitle="Kall e-post via Smartlead och AI Gatekeeper."
       icon={Send}
       emptyTitle="AI Gatekeeper kommer här"
-      emptyText="AI skriver en unik öppningsrad per bolag. Här godkänner, redigerar eller avvisar du dem innan de skickas via vald utskicksleverantör."
-      step={3}
+      emptyText="AI läser hemsidan och skriver en personlig första mening. Du godkänner den i Gatekeeper i början; sedan går mejl 1 dag 1, ringkön dag 2 och mejl 2 dag 3 automatiskt."
+      phase="D (kall e-post)"
       features={[
-        "Granska mejl med status 'Väntar på granskning' – j/k, a = godkänn, x = avvisa",
-        "Kampanjer med dagsgräns och status",
-        "Utskick via utbytbar leverantör (manuell, Smartlead, n8n-SMTP)",
+        "Dubblettkontroll mot alla kanaler, partner och kunder",
+        "AI-första mening från hemsidan – godkänn med a, avvisa med x",
+        "Mejl 1 dag 1 → ringkön dag 2 → mejl 2 dag 3 via Smartlead",
+        "Svar stoppar alla kanaler och ger dig en notis",
       ]}
       actions={
         <Button asChild variant="outline">

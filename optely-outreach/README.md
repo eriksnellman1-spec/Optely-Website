@@ -88,36 +88,34 @@ npm run dev
 | `c`            | Ny kontakt                                  |
 | `[`            | Fäll ihop / ut sidomenyn                    |
 | `⌘S`           | Spara (Företagshjärnan)                     |
-| `1`–`7`        | Utfall i Ringpasset                         |
+| `1`–`8`        | Utfall i Ringpasset                         |
 
-## 5. Ringpasset och uppföljningssekvensen
+## 5. Säljsystemet – Ringpasset (fas A + B)
 
-Kalla bolag följer en sekvens på 8 steg. Ringdagar och mejldagar styrs av `settings.week_plan`:
+Hela specen finns i [`docs/saljsystem.md`](docs/saljsystem.md). Samtalskanalen (§4):
 
-| Steg | Kanal | Vad |
-|---|---|---|
-| 1 | mejl | Mejl 1 via AI Gatekeeper – sekvensen startar när det köas/skickas |
-| 2 | samtal | Samtal 1 |
-| 3 | samtal | Samtal 2 + röstmeddelande + "ringde nyss"-mejl |
-| 4 | mejl | Case-mejl |
-| 5 | samtal | Samtal 3 |
-| 6 | samtal | Samtal 4 + röstmeddelande |
-| 7 | mejl | Avslutsmejl |
-| 8 | samtal | Sista samtalet → vilande 90 dagar, sedan tillbaka som `new` |
+- **Ingång:** nya bolag (status Ny) släpps in i ringkön, högst `settings.ringpass.new_per_day` (15) per ringdag.
+  Tillverkning och tjänster först, bygg sist. Partnerägda bolag, kunder och Kontakta ej släpps aldrig in.
+  Knappen "Hämta 5 nya bolag" i Ringpasset släpper in fler.
+- **Ej svar:** försök 1 → SMS nästa morgon + försök 2, försök 2 → försök 3, försök 3 → sista mejlet
+  (om e-post finns) och Vilande 2 mån. Nytt försök läggs nästa ringdag enligt veckoplanen och växlar fm/em.
+- **Utfall (tangent):** 1 Bokat · 2 Ej svar · 3 Ring senare · 4 Fel person · 5 Skicka info · 6 Nej, inte nu ·
+  7 Nej, inget behov · 8 Ring ej. Logiken ligger i databasen (`apply_call_outcome`).
+- **Svar i en kanal stoppar alla andra** (`stop_all_channels`). Nej-svar och Ring ej ger Kontakta ej.
+- **Att göra för hand** (tills fas F): SMS att skicka, kalenderhändelser (Google Kalender-länk) och
+  LinkedIn-påminnelser visas överst i Ringpasset.
+- **Mallar** (SMS och mejl) redigeras i Företagshjärnan → Mejlmallar.
 
-Mejlmallarna (`kind = 'template'`) redigeras i Företagshjärnan. Logiken ligger i databasen
-(`apply_call_outcome`, `run_daily_sequence` i `0003_ringpass_sequence.sql`).
-
-**Dagligt jobb:** `vercel.json` kör `GET /api/cron/sequence` kl. 04:15 UTC. Vercel skickar
-`Authorization: Bearer $CRON_SECRET` – sätt `CRON_SECRET` i Vercel. Jobbet är idempotent och
-loggas i `webhook_events` (`source = 'cron'`). Kör manuellt:
+**Dagligt jobb:** `vercel.json` kör `GET /api/cron/sequence` kl. 04:15 UTC: vilande bolag vars tid gått ut
+tas tillbaka, och dagens kvot nya bolag släpps in på ringdagar. Vercel skickar
+`Authorization: Bearer $CRON_SECRET`. Jobbet är idempotent och loggas i `webhook_events` (`source = 'cron'`).
 
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" https://optely-outreach.vercel.app/api/cron/sequence
 ```
 
-**Ringpasset (`/ringpass`):** `j`/`k` byter samtal, `1`–`7` loggar utfall, `v` röstmeddelande,
-`n` anteckning, `m` visar/döljer manus.
+**Ringpasset (`/ringpass`):** `j`/`k` byter samtal, `1`–`8` utfall, `v` röstmeddelande, `n` anteckning,
+`m` visar/döljer manus.
 
 ## 6. Webhooks från n8n
 
