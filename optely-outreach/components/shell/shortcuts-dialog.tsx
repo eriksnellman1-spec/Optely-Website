@@ -13,6 +13,22 @@ const GENERAL: { keys: string[]; label: string }[] = [
   { keys: ["Esc"], label: "Stäng dialog" },
 ];
 
+const RINGPASS: { keys: string[]; label: string }[] = [
+  { keys: ["j"], label: "Nästa samtal" },
+  { keys: ["k"], label: "Föregående samtal" },
+  { keys: ["1"], label: "Bokat" },
+  { keys: ["2"], label: "Ej svar" },
+  { keys: ["3"], label: "Ring senare" },
+  { keys: ["4"], label: "Fel person" },
+  { keys: ["5"], label: "Skicka info" },
+  { keys: ["6"], label: "Nej, inte nu" },
+  { keys: ["7"], label: "Nej, inget behov" },
+  { keys: ["8"], label: "Ring ej" },
+  { keys: ["v"], label: "Röstmeddelande på/av" },
+  { keys: ["n"], label: "Skriv anteckning" },
+  { keys: ["m"], label: "Visa / dölj manus" },
+];
+
 const VIEW: { keys: string[]; label: string }[] = [
   { keys: ["⌘", "S"], label: "Spara (Företagshjärnan)" },
   { keys: ["/"], label: "Fokusera sökfältet (Kontakter)" },
@@ -34,6 +50,7 @@ export function ShortcutsDialog() {
             title="Navigera"
             rows={NAV_ITEMS.map((n) => ({ keys: ["g", n.key], label: n.label }))}
           />
+          <Section title="Ringpass" rows={RINGPASS} />
           <Section title="I vyerna" rows={VIEW} />
         </div>
       </DialogContent>

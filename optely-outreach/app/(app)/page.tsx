@@ -11,15 +11,16 @@ export default function HomePage() {
   return (
     <PlannedView
       title="Hem"
-      subtitle="War Room – veckans läge på en skärm."
+      subtitle="Idag-lista och veckans siffror mot mål."
       icon={Radar}
-      emptyTitle="War Room kommer här"
-      emptyText="Här ser du veckoplanen, dagens möten från kalendern och tratten från kall kontakt till bokat möte."
-      step={4}
+      emptyTitle="Idag-listan och dashboarden kommer här"
+      emptyText="Allt som ska göras i dag i alla kanaler, veckans siffror mot mål, pipeline per status och lördagsanalysen. Ringpasset fungerar redan."
+      phase="C (idag-lista) och J (dashboard)"
       features={[
-        "Veckoplan: vilken kanal som gäller per dag",
-        "Kalendersynk med dagens och veckans möten",
-        "Tratt: kontaktade → svar → varma → möten",
+        "Idag-lista: samtal, SMS, LinkedIn, partner och offertpåminnelser",
+        "Veckans siffror mot mål: försök, svar, bokade, genomförda, offerter, kunder",
+        "Per kanal och bokade per timme av din tid",
+        "Lördagsanalys med max 3 konkreta ändringar",
       ]}
       actions={
         <Button asChild>

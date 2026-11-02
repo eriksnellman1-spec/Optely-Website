@@ -109,17 +109,27 @@ export type Database = {
       companies: {
         Row: {
           business_id: string | null
+          call_attempt: number
           city: string | null
           created_at: string
           do_not_contact: boolean
+          domain: string | null
           employees: number | null
           enrichment: Json
           id: string
           industry: string | null
           last_activity_at: string | null
+          last_call_at: string | null
           name: string
           notes: string | null
+          nurture_until: string | null
+          partner_id: string | null
+          phone: string | null
+          released_at: string | null
           revenue_eur: number | null
+          sequence_contact_id: string | null
+          sequence_round: number
+          sequence_started_at: string | null
           source: string | null
           status: Database["public"]["Enums"]["company_status"]
           updated_at: string
@@ -127,17 +137,27 @@ export type Database = {
         }
         Insert: {
           business_id?: string | null
+          call_attempt?: number
           city?: string | null
           created_at?: string
           do_not_contact?: boolean
+          domain?: string | null
           employees?: number | null
           enrichment?: Json
           id?: string
           industry?: string | null
           last_activity_at?: string | null
+          last_call_at?: string | null
           name: string
           notes?: string | null
+          nurture_until?: string | null
+          partner_id?: string | null
+          phone?: string | null
+          released_at?: string | null
           revenue_eur?: number | null
+          sequence_contact_id?: string | null
+          sequence_round?: number
+          sequence_started_at?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["company_status"]
           updated_at?: string
@@ -145,23 +165,48 @@ export type Database = {
         }
         Update: {
           business_id?: string | null
+          call_attempt?: number
           city?: string | null
           created_at?: string
           do_not_contact?: boolean
+          domain?: string | null
           employees?: number | null
           enrichment?: Json
           id?: string
           industry?: string | null
           last_activity_at?: string | null
+          last_call_at?: string | null
           name?: string
           notes?: string | null
+          nurture_until?: string | null
+          partner_id?: string | null
+          phone?: string | null
+          released_at?: string | null
           revenue_eur?: number | null
+          sequence_contact_id?: string | null
+          sequence_round?: number
+          sequence_started_at?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["company_status"]
           updated_at?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "companies_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_sequence_contact_id_fkey"
+            columns: ["sequence_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contacts: {
         Row: {
@@ -270,9 +315,11 @@ export type Database = {
           queued_at: string | null
           reviewed_at: string | null
           sent_at: string | null
+          sequence_round: number
           sequence_step: number
           status: Database["public"]["Enums"]["email_status"]
           subject: string
+          template: string | null
           updated_at: string
         }
         Insert: {
@@ -289,9 +336,11 @@ export type Database = {
           queued_at?: string | null
           reviewed_at?: string | null
           sent_at?: string | null
+          sequence_round?: number
           sequence_step?: number
           status?: Database["public"]["Enums"]["email_status"]
           subject: string
+          template?: string | null
           updated_at?: string
         }
         Update: {
@@ -308,9 +357,11 @@ export type Database = {
           queued_at?: string | null
           reviewed_at?: string | null
           sent_at?: string | null
+          sequence_round?: number
           sequence_step?: number
           status?: Database["public"]["Enums"]["email_status"]
           subject?: string
+          template?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -339,6 +390,7 @@ export type Database = {
       }
       meetings: {
         Row: {
+          calendar_added_at: string | null
           calendar_event_id: string | null
           company_id: string
           contact_id: string | null
@@ -355,6 +407,7 @@ export type Database = {
           value_eur: number | null
         }
         Insert: {
+          calendar_added_at?: string | null
           calendar_event_id?: string | null
           company_id: string
           contact_id?: string | null
@@ -371,6 +424,7 @@ export type Database = {
           value_eur?: number | null
         }
         Update: {
+          calendar_added_at?: string | null
           calendar_event_id?: string | null
           company_id?: string
           contact_id?: string | null
@@ -568,8 +622,63 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_messages: {
+        Row: {
+          body: string
+          company_id: string
+          contact_id: string | null
+          created_at: string
+          due_at: string
+          id: string
+          sent_at: string | null
+          status: string
+          template: string | null
+          to_phone: string
+        }
+        Insert: {
+          body: string
+          company_id: string
+          contact_id?: string | null
+          created_at?: string
+          due_at?: string
+          id?: string
+          sent_at?: string | null
+          status?: string
+          template?: string | null
+          to_phone: string
+        }
+        Update: {
+          body?: string
+          company_id?: string
+          contact_id?: string | null
+          created_at?: string
+          due_at?: string
+          id?: string
+          sent_at?: string | null
+          status?: string
+          template?: string | null
+          to_phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sms_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
+          attempt: number | null
           company_id: string | null
           completed_at: string | null
           contact_id: string | null
@@ -586,6 +695,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attempt?: number | null
           company_id?: string | null
           completed_at?: string | null
           contact_id?: string | null
@@ -602,6 +712,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attempt?: number | null
           company_id?: string | null
           completed_at?: string | null
           contact_id?: string | null
@@ -621,7 +732,7 @@ export type Database = {
           {
             foreignKeyName: "tasks_company_id_fkey"
             columns: ["company_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -692,14 +803,112 @@ export type Database = {
           last_activity_at: string | null
           name: string | null
           open_task_count: number | null
+          partner_id: string | null
           status: Database["public"]["Enums"]["company_status"] | null
+          website: string | null
+        }
+        Relationships: []
+      }
+      ringpass_queue: {
+        Row: {
+          attempt: number | null
+          call_attempt: number | null
+          city: string | null
+          company_id: string | null
+          company_name: string | null
+          company_notes: string | null
+          company_status: Database["public"]["Enums"]["company_status"] | null
+          contact_id: string | null
+          description: string | null
+          due_at: string | null
+          email: string | null
+          employees: number | null
+          first_name: string | null
+          industry: string | null
+          last_name: string | null
+          partner_name: string | null
+          phone: string | null
+          previous_calls: number | null
+          priority: number | null
+          reply_id: string | null
+          role: string | null
+          task_id: string | null
+          task_type: Database["public"]["Enums"]["task_type"] | null
+          title: string | null
           website: string | null
         }
         Relationships: []
       }
     }
     Functions: {
-      [_ in never]: never
+      apply_call_outcome: {
+        Args: { p_task_id: string; p_outcome: string; p_notes?: string; p_voicemail?: boolean; p_payload?: Json }
+        Returns: Json
+      }
+      create_template_email: {
+        Args: { p_company_id: string; p_contact_id: string; p_template: string; p_step: number; p_round: number; p_vars?: Json; p_status?: Database["public"]["Enums"]["email_status"] }
+        Returns: string
+      }
+      fill_template: {
+        Args: { p_text: string; p_contact_id: string; p_company_id: string; p_vars?: Json }
+        Returns: string
+      }
+      find_company_duplicates: {
+        Args: { p_name: string; p_website?: string; p_email?: string; p_phone?: string }
+        Returns: { company_id: string | null; name: string | null; status: Database["public"]["Enums"]["company_status"] | null; matched_on: string | null }[]
+      }
+      helsinki_at: {
+        Args: { p_day: string; p_time: string }
+        Returns: string
+      }
+      helsinki_today: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      next_call_slot: {
+        Args: { p_after?: string }
+        Returns: string
+      }
+      next_channel_date: {
+        Args: { p_channel: string; p_after?: string }
+        Returns: string
+      }
+      norm_company_name: {
+        Args: { p: string }
+        Returns: string
+      }
+      norm_domain: {
+        Args: { p: string }
+        Returns: string
+      }
+      norm_phone: {
+        Args: { p: string }
+        Returns: string
+      }
+      queue_template_sms: {
+        Args: { p_company_id: string; p_contact_id: string; p_template: string; p_due: string; p_vars?: Json }
+        Returns: string
+      }
+      release_new_calls: {
+        Args: { p_count?: number }
+        Returns: number
+      }
+      ringpass_setting: {
+        Args: { p_key: string }
+        Returns: string
+      }
+      run_daily_sequence: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      schedule_call: {
+        Args: { p_company_id: string; p_contact_id: string; p_due: string; p_title: string; p_attempt?: number; p_priority?: number; p_description?: string }
+        Returns: string
+      }
+      stop_all_channels: {
+        Args: { p_company_id: string; p_keep_task?: string }
+        Returns: undefined
+      }
     }
     Enums: {
       call_outcome:
@@ -710,6 +919,10 @@ export type Database = {
         | "not_interested"
         | "meeting_booked"
         | "wrong_person"
+        | "send_info"
+        | "not_now"
+        | "no_need"
+        | "do_not_call"
       campaign_status:
         | "draft"
         | "active"
@@ -717,13 +930,17 @@ export type Database = {
         | "completed"
       company_status:
         | "new"
-        | "researching"
-        | "contacted"
+        | "in_sequence"
         | "replied"
-        | "warm"
         | "meeting_booked"
+        | "meeting_done"
+        | "solution_shown"
+        | "quote_sent"
         | "customer"
-        | "lost"
+        | "nurture"
+        | "no"
+        | "do_not_contact"
+        | "with_partner"
       context_kind:
         | "profile"
         | "offer"
@@ -732,6 +949,7 @@ export type Database = {
         | "script"
         | "objection"
         | "tone"
+        | "template"
         | "other"
       email_status:
         | "draft"
@@ -769,6 +987,7 @@ export type Database = {
         | "call"
         | "follow_up"
         | "partner_checkin"
+        | "linkedin"
         | "other"
     }
     CompositeTypes: {
@@ -880,16 +1099,16 @@ export type Enums<
 export const Constants = {
   public: {
     Enums: {
-      call_outcome: ["no_answer", "voicemail", "callback", "interested", "not_interested", "meeting_booked", "wrong_person"],
+      call_outcome: ["no_answer", "voicemail", "callback", "interested", "not_interested", "meeting_booked", "wrong_person", "send_info", "not_now", "no_need", "do_not_call"],
       campaign_status: ["draft", "active", "paused", "completed"],
-      company_status: ["new", "researching", "contacted", "replied", "warm", "meeting_booked", "customer", "lost"],
-      context_kind: ["profile", "offer", "icp", "case", "script", "objection", "tone", "other"],
+      company_status: ["new", "in_sequence", "replied", "meeting_booked", "meeting_done", "solution_shown", "quote_sent", "customer", "nurture", "no", "do_not_contact", "with_partner"],
+      context_kind: ["profile", "offer", "icp", "case", "script", "objection", "tone", "template", "other"],
       email_status: ["draft", "pending_review", "approved", "rejected", "queued", "sent", "bounced", "replied", "failed"],
       meeting_status: ["scheduled", "held", "no_show", "cancelled"],
       partner_type: ["it", "accounting", "web", "marketing", "other"],
       reply_classification: ["positive", "neutral", "negative", "out_of_office", "unsubscribe", "unclassified"],
       task_status: ["open", "done", "skipped"],
-      task_type: ["call", "follow_up", "partner_checkin", "other"],
+      task_type: ["call", "follow_up", "partner_checkin", "linkedin", "other"],
     },
   },
 } as const

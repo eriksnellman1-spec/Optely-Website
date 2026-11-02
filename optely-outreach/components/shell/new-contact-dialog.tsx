@@ -16,7 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createContact } from "@/lib/actions/contacts";
+import { createContact, type Duplicate, type NewContactInput } from "@/lib/actions/contacts";
+import { COMPANY_STATUS } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import { useShell } from "./shell-context";
 import { useOptions } from "./use-options";
@@ -44,32 +45,39 @@ function NewContactForm({ onDone }: { onDone: () => void }) {
   const [mode, setMode] = useState<"existing" | "new">("existing");
   const [companyId, setCompanyId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [duplicates, setDuplicates] = useState<{ input: NewContactInput; matches: Duplicate[] } | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const get = (k: string) => String(f.get(k) ?? "");
+  function send(input: NewContactInput) {
     setError(null);
-
+    setDuplicates(null);
     startTransition(async () => {
-      const result = await createContact({
-        companyId: mode === "existing" ? companyId || null : null,
-        companyName: mode === "new" ? get("companyName") : undefined,
-        companyCity: mode === "new" ? get("companyCity") : undefined,
-        firstName: get("firstName"),
-        lastName: get("lastName"),
-        role: get("role"),
-        email: get("email"),
-        phone: get("phone"),
-      });
+      const result = await createContact(input);
       if (!result.ok) {
-        setError(result.error);
+        if ("duplicates" in result) setDuplicates({ input, matches: result.duplicates });
+        else setError(result.error);
         return;
       }
       toast.success("Kontakten är sparad");
       onDone();
       router.refresh();
+    });
+  }
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const get = (k: string) => String(f.get(k) ?? "");
+    send({
+      companyId: mode === "existing" ? companyId || null : null,
+      companyName: mode === "new" ? get("companyName") : undefined,
+      companyCity: mode === "new" ? get("companyCity") : undefined,
+      companyWebsite: mode === "new" ? get("companyWebsite") : undefined,
+      firstName: get("firstName"),
+      lastName: get("lastName"),
+      role: get("role"),
+      email: get("email"),
+      phone: get("phone"),
     });
   }
 
@@ -112,6 +120,7 @@ function NewContactForm({ onDone }: { onDone: () => void }) {
           <div className="grid grid-cols-[1fr_8rem] gap-2">
             <Input name="companyName" placeholder="Bolagets namn" required />
             <Input name="companyCity" placeholder="Ort" />
+            <Input name="companyWebsite" placeholder="Webbplats (för dubblettkontroll)" className="col-span-2" />
           </div>
         )}
       </div>
@@ -128,6 +137,35 @@ function NewContactForm({ onDone }: { onDone: () => void }) {
         <p role="alert" className="text-xs text-status-red">
           {error}
         </p>
+      )}
+
+      {duplicates && (
+        <div role="alert" className="space-y-2 rounded-md border border-status-yellow/30 bg-status-yellow/10 p-3 text-sm">
+          <p className="font-medium text-status-yellow">Bolaget verkar redan finnas – det lades inte till.</p>
+          <ul className="space-y-1">
+            {duplicates.matches.map((d, i) => (
+              <li key={`${d.companyId ?? d.name}-${i}`} className="flex flex-wrap items-center gap-x-2 text-xs">
+                <span className="font-medium text-foreground">{d.name}</span>
+                <span className="text-muted-foreground">
+                  matchar på {d.matchedOn}
+                  {d.matchedOn === "partner"
+                    ? " (är en partner)"
+                    : d.status && d.status in COMPANY_STATUS
+                      ? ` · ${COMPANY_STATUS[d.status as keyof typeof COMPANY_STATUS].label}`
+                      : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex gap-2 pt-1">
+            <Button type="button" size="sm" variant="outline" onClick={() => send({ ...duplicates.input, force: true })}>
+              Lägg till ändå
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => setDuplicates(null)}>
+              Avbryt
+            </Button>
+          </div>
+        </div>
       )}
 
       <DialogFooter>

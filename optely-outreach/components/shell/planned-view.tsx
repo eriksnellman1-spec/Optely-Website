@@ -12,7 +12,7 @@ export function PlannedView({
   emptyTitle,
   emptyText,
   features,
-  step,
+  phase,
   actions,
   headerActions,
 }: {
@@ -22,7 +22,7 @@ export function PlannedView({
   emptyTitle: string;
   emptyText: React.ReactNode;
   features: string[];
-  step: number;
+  phase: string;
   actions?: React.ReactNode;
   headerActions?: React.ReactNode;
 }) {
@@ -31,7 +31,7 @@ export function PlannedView({
       <PageHeader title={title} description={subtitle} actions={headerActions} />
       <EmptyState icon={icon} title={emptyTitle} description={emptyText} action={actions}>
         <div className="mt-5 flex flex-col items-center gap-3">
-          <Badge variant="outline">Byggs i steg {step}</Badge>
+          <Badge variant="outline">Byggs i fas {phase}</Badge>
           <ul className="space-y-1 text-left text-xs text-muted-foreground">
             {features.map((f) => (
               <li key={f} className="flex gap-2">

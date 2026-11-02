@@ -10,11 +10,8 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
 
   const [{ data: claims }, openCalls, weekPlan] = await Promise.all([
     supabase.auth.getClaims(),
-    supabase
-      .from("tasks")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "open")
-      .eq("type", "call"),
+    // Samma urval som Ringpassets kö: öppna samtal/uppföljningar som förfaller i dag.
+    supabase.from("ringpass_queue").select("task_id", { count: "exact", head: true }),
     getSetting(supabase, "week_plan"),
   ]);
 

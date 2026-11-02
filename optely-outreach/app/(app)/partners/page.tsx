@@ -14,7 +14,7 @@ export default function PartnersPage() {
       icon={Handshake}
       emptyTitle="Partnernätverket kommer här"
       emptyText="Översikt över partners, när ni senast hördes och vem som behöver en check-in. Redan nu kan du logga en check-in från kommandopaletten."
-      step={5}
+      phase="H (partner)"
       features={[
         "Partners som inte hörts av på länge lyfts fram",
         "Historik över check-ins och tips",

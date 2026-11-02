@@ -5,7 +5,8 @@ import { getPublicSupabaseEnv } from "@/lib/env";
 import type { Database } from "./types";
 
 const PUBLIC_PATHS = ["/login"];
-const PUBLIC_PREFIXES = ["/api/webhooks/"];
+// Webhooks och cron autentiseras med egna hemligheter i routen, inte med cookies.
+const PUBLIC_PREFIXES = ["/api/webhooks/", "/api/cron/"];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
@@ -15,8 +16,7 @@ function isPublic(pathname: string) {
 export async function updateSession(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  // Webhooks autentiseras med x-optely-secret i routen, inte med cookies.
-  if (pathname.startsWith("/api/webhooks/")) {
+  if (PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
     return NextResponse.next({ request });
   }
 

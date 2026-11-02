@@ -1,16 +1,17 @@
 -- =============================================================================
--- Testdata för Optely O.R. – PÅHITTADE bolag och personer.
+-- Testdata för Optely O.R. enligt docs/saljsystem.md – PÅHITTADE bolag och personer.
 -- Ingen riktig persondata. Domänerna använder den reserverade toppdomänen .test.
+-- (Hagnäs Tyre Center nämns bara som Optelys kundcase i Företagshjärnan.)
 --
--- Körs automatiskt av `supabase db reset` (lokalt) eller manuellt:
---   psql "$SUPABASE_DB_URL" -f supabase/seed.sql
--- Skriptet tömmer affärstabellerna först så att det kan köras om.
+-- Kräver migrationerna 0001–0005. Tömmer affärstabellerna först och kan köras om:
+--   Supabase SQL Editor: klistra in och kör, eller  npm run db:seed
 -- =============================================================================
 
 begin;
 
 truncate
   public.webhook_events,
+  public.sms_messages,
   public.partner_checkins,
   public.calls,
   public.meetings,
@@ -20,376 +21,297 @@ truncate
   public.campaigns,
   public.contacts,
   public.companies,
-  public.partners,
-  public.context_entries
+  public.partners
 restart identity cascade;
 
--- Små hjälpare för läsbara, stabila id:n (finns bara under den här sessionen).
+-- Mejl-/SMS-mallarna (kind 'template', från migrationerna) behålls.
+delete from public.context_entries where kind::text <> 'template';
+
 create function pg_temp.co(n int) returns uuid language sql immutable as
   $$ select ('00000000-0000-4000-a001-' || lpad(n::text, 12, '0'))::uuid $$;
 create function pg_temp.ct(n int) returns uuid language sql immutable as
   $$ select ('00000000-0000-4000-a002-' || lpad(n::text, 12, '0'))::uuid $$;
-create function pg_temp.em(n int) returns uuid language sql immutable as
-  $$ select ('00000000-0000-4000-a003-' || lpad(n::text, 12, '0'))::uuid $$;
 create function pg_temp.pa(n int) returns uuid language sql immutable as
   $$ select ('00000000-0000-4000-a004-' || lpad(n::text, 12, '0'))::uuid $$;
+-- Tidpunkt i dag/relativ dag kl. hh:mm, Helsingfors-tid.
+create function pg_temp.at(d int, t text) returns timestamptz language sql stable as
+  $$ select ((now() at time zone 'Europe/Helsinki')::date + d + t::time) at time zone 'Europe/Helsinki' $$;
 
 -- -----------------------------------------------------------------------------
--- 25 bolag i Jakobstad, Larsmo, Pedersöre, Nykarleby och Vasa
--- -----------------------------------------------------------------------------
-
-insert into public.companies (id, name, business_id, website, industry, city, employees, revenue_eur, status, source, notes) values
-  (pg_temp.co(1),  'Bråtö Båtvarv Ab',                '3100001-1', 'https://bratobatvarv.test',      'Båtbyggnad',           'Larsmo',    34, 4800000, 'contacted',      'import',  'Bygger arbetsbåtar i aluminium. Offerter görs i Excel.'),
-  (pg_temp.co(2),  'Skata Elinstallation Ab',         '3100002-2', 'https://skataelinstallation.test','Elinstallation',      'Jakobstad', 12, 1300000, 'contacted',      'import',  null),
-  (pg_temp.co(3),  'Lillby Trädgård & Plantskola',    '3100003-3', 'https://lillbytradgard.test',    'Trädgård',             'Pedersöre',  8,  650000, 'new',            'import',  null),
-  (pg_temp.co(4),  'Nykarleby Plåt & Ventilation Ab', '3100004-4', 'https://nkplatvent.test',        'Ventilation & plåt',   'Nykarleby', 19, 2100000, 'contacted',      'import',  null),
-  (pg_temp.co(5),  'Vasklot Revisionsbyrå Ab',        '3100005-5', 'https://vasklotrevision.test',   'Redovisning',          'Vasa',      15, 1400000, 'contacted',      'partner', 'Tips från Larsmo Bokföringsbyrå.'),
-  (pg_temp.co(6),  'Kyrkostrand Snickeri Ab',         '3100006-6', 'https://kyrkostrandsnickeri.test','Snickeri',            'Jakobstad', 22, 2600000, 'contacted',      'import',  'Specialinredning till butiker och kontor.'),
-  (pg_temp.co(7),  'Purmo Maskinservice Ab',          '3100007-7', 'https://purmomaskin.test',       'Maskinservice',        'Pedersöre', 11,  980000, 'contacted',      'import',  null),
-  (pg_temp.co(8),  'Fäboda Café & Catering',          '3100008-8', 'https://fabodacatering.test',    'Restaurang & catering','Jakobstad',  9,  540000, 'new',            'import',  null),
-  (pg_temp.co(9),  'Edsevö Transport Ab',             '3100009-9', 'https://edsevotransport.test',   'Transport & logistik', 'Pedersöre', 41, 6200000, 'researching',    'import',  'Manuell ruttplanering, många telefonsamtal.'),
-  (pg_temp.co(10), 'Juthbacka Fastighetsservice Ab',  '3100010-0', 'https://juthbackafast.test',     'Fastighetsservice',    'Nykarleby', 17, 1500000, 'contacted',      'import',  null),
-  (pg_temp.co(11), 'Brändö Bokföring Ab',             '3100011-1', 'https://brandobokforing.test',   'Redovisning',          'Vasa',       6,  420000, 'lost',           'import',  'Har redan byggt egna automationer.'),
-  (pg_temp.co(12), 'Gamla Hamn Tryckeri Ab',          '3100012-2', 'https://gamlahamntryck.test',    'Tryckeri',             'Jakobstad', 14, 1250000, 'contacted',      'import',  null),
-  (pg_temp.co(13), 'Holm Lantbruksteknik Ab',         '3100013-3', 'https://holmlantbruk.test',      'Lantbruksteknik',      'Larsmo',    25, 3900000, 'new',            'import',  null),
-  (pg_temp.co(14), 'Sundom Bilverkstad Ab',           '3100014-4', 'https://sundombil.test',         'Bilverkstad',          'Vasa',      10,  890000, 'contacted',      'import',  'Bokar service per telefon, ingen onlinebokning.'),
-  (pg_temp.co(15), 'Västerby Golv & Kakel Ab',        '3100015-5', 'https://vasterbygolv.test',      'Bygg',                 'Nykarleby', 13, 1100000, 'new',            'import',  null),
-  (pg_temp.co(16), 'Bennäs Logistikpartner Ab',       '3100016-6', 'https://bennaslogistik.test',    'Logistik',             'Pedersöre', 52, 7400000, 'researching',    'import',  null),
-  (pg_temp.co(17), 'Strandgatans Optik Ab',           '3100017-7', 'https://strandgatansoptik.test', 'Detaljhandel',         'Jakobstad',  7,  610000, 'new',            'import',  null),
-  (pg_temp.co(18), 'Öja Stugor & Uthyrning Ab',       '3100018-8', 'https://ojastugor.test',         'Turism',               'Larsmo',     5,  380000, 'contacted',      'import',  null),
-  (pg_temp.co(19), 'Gerby Energiteknik Ab',           '3100019-9', 'https://gerbyenergi.test',       'Energiteknik',         'Vasa',      28, 3300000, 'customer',       'partner', 'Kund sedan augusti – automatiserad offertkedja.'),
-  (pg_temp.co(20), 'Socklot Fiskförädling Ab',        '3100020-0', 'https://socklotfisk.test',       'Livsmedel',            'Nykarleby', 31, 4100000, 'new',            'import',  null),
-  (pg_temp.co(21), 'Kållby Plast Ab',                 '3100021-1', 'https://kallbyplast.test',       'Tillverkning',         'Pedersöre', 45, 5800000, 'contacted',      'import',  null),
-  (pg_temp.co(22), 'Jeppo Fysioterapi Ab',            '3100022-2', 'https://jeppofysio.test',        'Hälsa',                'Nykarleby',  8,  520000, 'new',            'import',  null),
-  (pg_temp.co(23), 'Alholmens Svets & Montage Ab',    '3100023-3', 'https://alholmensvets.test',     'Verkstad',             'Jakobstad', 36, 4500000, 'warm',           'import',  null),
-  (pg_temp.co(24), 'Vikarholmen Event Ab',            '3100024-4', 'https://vikarholmenevent.test',  'Event',                'Vasa',       6,  450000, 'contacted',      'import',  null),
-  (pg_temp.co(25), 'Risö Hantverk & Inredning Ab',    '3100025-5', 'https://risohantverk.test',      'Inredning',            'Larsmo',     4,  290000, 'new',            'import',  null);
-
--- Utgångsläge för "senaste aktivitet" på bolag som ännu inte har mejl/samtal i seeden.
-update public.companies set last_activity_at = now() - interval '3 days'  where id in (pg_temp.co(9), pg_temp.co(16));
-update public.companies set last_activity_at = now() - interval '45 days' where id = pg_temp.co(11);
-update public.companies set last_activity_at = now() - interval '60 days' where id = pg_temp.co(19);
-
--- -----------------------------------------------------------------------------
--- Kontakter (1–2 per bolag)
--- -----------------------------------------------------------------------------
-
-insert into public.contacts (id, company_id, first_name, last_name, role, email, phone, is_primary) values
-  (pg_temp.ct(1),  pg_temp.co(1),  'Mikael',   'Storbacka',  'VD',                    'mikael@bratobatvarv.test',        '+358 40 100 0101', true),
-  (pg_temp.ct(2),  pg_temp.co(1),  'Sanna',    'Holmqvist',  'Ekonomiansvarig',       'sanna@bratobatvarv.test',         '+358 40 100 0102', false),
-  (pg_temp.ct(3),  pg_temp.co(2),  'Jonas',    'Skata',      'Ägare',                 'jonas@skataelinstallation.test',  '+358 40 100 0201', true),
-  (pg_temp.ct(4),  pg_temp.co(3),  'Ulla',     'Lillbacka',  'Ägare',                 'ulla@lillbytradgard.test',        '+358 40 100 0301', true),
-  (pg_temp.ct(5),  pg_temp.co(4),  'Peter',    'Nyman',      'VD',                    'peter@nkplatvent.test',           '+358 40 100 0401', true),
-  (pg_temp.ct(6),  pg_temp.co(4),  'Camilla',  'Sandvik',    'Arbetsledare',          'camilla@nkplatvent.test',         '+358 40 100 0402', false),
-  (pg_temp.ct(7),  pg_temp.co(5),  'Annika',   'Vasklot',    'Delägare, CGR',         'annika@vasklotrevision.test',     '+358 40 100 0501', true),
-  (pg_temp.ct(8),  pg_temp.co(6),  'Henrik',   'Kyrklund',   'VD',                    'henrik@kyrkostrandsnickeri.test', '+358 40 100 0601', true),
-  (pg_temp.ct(9),  pg_temp.co(6),  'Lotta',    'Ström',      'Projektledare',         'lotta@kyrkostrandsnickeri.test',  '+358 40 100 0602', false),
-  (pg_temp.ct(10), pg_temp.co(7),  'Kurt',     'Purmonen',   'Ägare',                 'kurt@purmomaskin.test',           '+358 40 100 0701', true),
-  (pg_temp.ct(11), pg_temp.co(8),  'Emma',     'Fäboda',     'Ägare',                 'emma@fabodacatering.test',        '+358 40 100 0801', true),
-  (pg_temp.ct(12), pg_temp.co(9),  'Tomas',    'Edsevik',    'Trafikchef',            'tomas@edsevotransport.test',      '+358 40 100 0901', true),
-  (pg_temp.ct(13), pg_temp.co(9),  'Maria',    'Granlund',   'VD',                    'maria@edsevotransport.test',      '+358 40 100 0902', false),
-  (pg_temp.ct(14), pg_temp.co(10), 'Stefan',   'Juthman',    'VD',                    'stefan@juthbackafast.test',       '+358 40 100 1001', true),
-  (pg_temp.ct(15), pg_temp.co(11), 'Gunilla',  'Brandt',     'Ägare',                 'gunilla@brandobokforing.test',    '+358 40 100 1101', true),
-  (pg_temp.ct(16), pg_temp.co(12), 'Patrik',   'Hamnström',  'VD',                    'patrik@gamlahamntryck.test',      '+358 40 100 1201', true),
-  (pg_temp.ct(17), pg_temp.co(13), 'Anders',   'Holm',       'VD',                    'anders@holmlantbruk.test',        '+358 40 100 1301', true),
-  (pg_temp.ct(18), pg_temp.co(13), 'Jenny',    'Holm',       'Försäljning',           'jenny@holmlantbruk.test',         '+358 40 100 1302', false),
-  (pg_temp.ct(19), pg_temp.co(14), 'Mats',     'Sundqvist',  'Verkstadschef',         'mats@sundombil.test',             '+358 40 100 1401', true),
-  (pg_temp.ct(20), pg_temp.co(15), 'Johan',    'Västerlund', 'Ägare',                 'johan@vasterbygolv.test',         '+358 40 100 1501', true),
-  (pg_temp.ct(21), pg_temp.co(16), 'Carina',   'Bennäs',     'Logistikchef',          'carina@bennaslogistik.test',      '+358 40 100 1601', true),
-  (pg_temp.ct(22), pg_temp.co(16), 'Robert',   'Åkerlund',   'VD',                    'robert@bennaslogistik.test',      '+358 40 100 1602', false),
-  (pg_temp.ct(23), pg_temp.co(17), 'Linda',    'Strand',     'Ägare, optiker',        'linda@strandgatansoptik.test',    '+358 40 100 1701', true),
-  (pg_temp.ct(24), pg_temp.co(18), 'Nils',     'Öjman',      'Ägare',                 'nils@ojastugor.test',             '+358 40 100 1801', true),
-  (pg_temp.ct(25), pg_temp.co(19), 'Kristian', 'Gerbyholm',  'VD',                    'kristian@gerbyenergi.test',       '+358 40 100 1901', true),
-  (pg_temp.ct(26), pg_temp.co(19), 'Elin',     'Back',       'Offertansvarig',        'elin@gerbyenergi.test',           '+358 40 100 1902', false),
-  (pg_temp.ct(27), pg_temp.co(20), 'Bengt',    'Socklund',   'VD',                    'bengt@socklotfisk.test',          '+358 40 100 2001', true),
-  (pg_temp.ct(28), pg_temp.co(21), 'Sofia',    'Kållberg',   'Produktionschef',       'sofia@kallbyplast.test',          '+358 40 100 2101', true),
-  (pg_temp.ct(29), pg_temp.co(21), 'Erik',     'Lassfolk',   'VD',                    'erik.l@kallbyplast.test',         '+358 40 100 2102', false),
-  (pg_temp.ct(30), pg_temp.co(22), 'Hanna',    'Jeppsson',   'Fysioterapeut, ägare',  'hanna@jeppofysio.test',           '+358 40 100 2201', true),
-  (pg_temp.ct(31), pg_temp.co(23), 'Ville',    'Alholm',     'VD',                    'ville@alholmensvets.test',        '+358 40 100 2301', true),
-  (pg_temp.ct(32), pg_temp.co(23), 'Tina',     'Forsman',    'Inköp',                 'tina@alholmensvets.test',         '+358 40 100 2302', false),
-  (pg_temp.ct(33), pg_temp.co(24), 'Oskar',    'Vikström',   'Ägare',                 'oskar@vikarholmenevent.test',     '+358 40 100 2401', true),
-  (pg_temp.ct(34), pg_temp.co(25), 'Ida',      'Risberg',    'Ägare',                 'ida@risohantverk.test',           '+358 40 100 2501', true);
-
--- -----------------------------------------------------------------------------
--- Kampanj
--- -----------------------------------------------------------------------------
-
-insert into public.campaigns (id, name, description, status, provider, daily_limit, starts_on) values
-  ('00000000-0000-4000-a005-000000000001',
-   'Höst 2026 – Industri & service i Österbotten',
-   'Bolag med 5–60 anställda där offerter, bokningar eller rapporter görs manuellt.',
-   'active', 'manual', 30, (now() - interval '21 days')::date);
-
--- -----------------------------------------------------------------------------
--- Mejl i olika status
--- -----------------------------------------------------------------------------
-
-insert into public.emails (id, campaign_id, company_id, contact_id, subject, body, ai_opening_line, ai_model, status, reviewed_at, queued_at, sent_at, error) values
-  -- Skickade som sedan fått positivt svar
-  (pg_temp.em(1), '00000000-0000-4000-a005-000000000001', pg_temp.co(1), pg_temp.ct(1),
-   'Offerterna på Bråtö',
-   E'Hej Mikael,\n\nSåg att ni nyligen levererat två arbetsbåtar till Norge – grattis! Många varv vi pratar med lägger timmar på varje offert i Excel.\n\nVi på Optely bygger automationer som tar fram offertunderlag på minuter. Vore det värt 20 minuter att se hur det kunde se ut hos er?\n\nHälsningar,\nErik',
-   'Såg att ni nyligen levererat två arbetsbåtar till Norge – grattis!', 'claude', 'sent',
-   now() - interval '15 days', now() - interval '14 days', now() - interval '14 days', null),
-  (pg_temp.em(2), '00000000-0000-4000-a005-000000000001', pg_temp.co(6), pg_temp.ct(8),
-   'Butiksinredning och ritningar',
-   E'Hej Henrik,\n\nSnyggt projekt ni gjorde för kafét i Jakobstads centrum. Jag gissar att varje specialbeställning innebär en del manuellt pussel mellan ritning, materiallista och offert.\n\nVi hjälper snickerier att koppla ihop de stegen. Har du tid för ett kort samtal nästa vecka?\n\nHälsningar,\nErik',
-   'Snyggt projekt ni gjorde för kafét i Jakobstads centrum.', 'claude', 'sent',
-   now() - interval '12 days', now() - interval '11 days', now() - interval '11 days', null),
-  (pg_temp.em(3), '00000000-0000-4000-a005-000000000001', pg_temp.co(14), pg_temp.ct(19),
-   'Servicebokningar i Sundom',
-   E'Hej Mats,\n\nJag såg att man fortfarande ringer för att boka service hos er – det är personligt, men tar säkert mycket telefontid i högsäsong.\n\nVi har byggt bokningsflöden för verkstäder som sparar flera timmar i veckan. Vill du höra hur?\n\nHälsningar,\nErik',
-   'Jag såg att man fortfarande ringer för att boka service hos er.', 'claude', 'sent',
-   now() - interval '9 days', now() - interval '8 days', now() - interval '8 days', null),
-  -- Skickat, neutralt svar
-  (pg_temp.em(4), '00000000-0000-4000-a005-000000000001', pg_temp.co(7), pg_temp.ct(10),
-   'Serviceprotokoll på papper?',
-   E'Hej Kurt,\n\nMånga maskinverkstäder vi pratar med fyller fortfarande i serviceprotokoll för hand. Stämmer det för er också?\n\nHälsningar,\nErik',
-   'Många maskinverkstäder vi pratar med fyller fortfarande i serviceprotokoll för hand.', 'claude', 'sent',
-   now() - interval '10 days', now() - interval '9 days', now() - interval '9 days', null),
-  -- Skickat, sedan avregistrering
-  (pg_temp.em(5), '00000000-0000-4000-a005-000000000001', pg_temp.co(24), pg_temp.ct(33),
-   'Anmälningar till era event',
-   E'Hej Oskar,\n\nSåg att ni ordnar sommarevent på Vikarholmen. Hur hanterar ni anmälningar och påminnelser i dag?\n\nHälsningar,\nErik',
-   'Såg att ni ordnar sommarevent på Vikarholmen.', 'claude', 'sent',
-   now() - interval '7 days', now() - interval '6 days', now() - interval '6 days', null),
-  -- Skickade utan svar
-  (pg_temp.em(6), '00000000-0000-4000-a005-000000000001', pg_temp.co(2), pg_temp.ct(3),
-   'Arbetsorder och fakturering',
-   E'Hej Jonas,\n\nFör elfirmor i er storlek brukar tiden mellan avslutat jobb och skickad faktura vara den stora tidstjuven. Hur ser det ut hos er?\n\nHälsningar,\nErik',
-   'För elfirmor i er storlek brukar tiden mellan avslutat jobb och faktura vara den stora tidstjuven.', 'claude', 'sent',
-   now() - interval '6 days', now() - interval '5 days', now() - interval '5 days', null),
-  (pg_temp.em(7), '00000000-0000-4000-a005-000000000001', pg_temp.co(12), pg_temp.ct(16),
-   'Tryckorder från webben',
-   E'Hej Patrik,\n\nKul att se att Gamla Hamn fortfarande trycker lokalt. Hur kommer beställningarna in till er i dag?\n\nHälsningar,\nErik',
-   'Kul att se att Gamla Hamn fortfarande trycker lokalt.', 'claude', 'sent',
-   now() - interval '5 days', now() - interval '4 days', now() - interval '4 days', null),
-  -- Studsat
-  (pg_temp.em(8), '00000000-0000-4000-a005-000000000001', pg_temp.co(18), pg_temp.ct(24),
-   'Bokningar av stugor',
-   E'Hej Nils,\n\nHur sköter ni bokningar och nyckelöverlämning för stugorna i dag?\n\nHälsningar,\nErik',
-   'Hur sköter ni bokningar och nyckelöverlämning för stugorna i dag?', 'claude', 'bounced',
-   now() - interval '5 days', now() - interval '4 days', now() - interval '4 days', 'Mailbox does not exist'),
-  -- Köat hos leverantören
-  (pg_temp.em(9), '00000000-0000-4000-a005-000000000001', pg_temp.co(4), pg_temp.ct(5),
-   'Servicerapporter efter ventilationsjobb',
-   E'Hej Peter,\n\nSåg att ni utökat med OVK-besiktningar. Rapporterna efteråt brukar vara ett tidskrävande steg – hur gör ni dem?\n\nHälsningar,\nErik',
-   'Såg att ni utökat med OVK-besiktningar.', 'claude', 'queued',
-   now() - interval '1 day', now() - interval '2 hours', null, null),
-  -- Godkänt, väntar på att köas
-  (pg_temp.em(10), '00000000-0000-4000-a005-000000000001', pg_temp.co(10), pg_temp.ct(14),
-   'Felanmälningar från hyresgäster',
-   E'Hej Stefan,\n\nHur kommer felanmälningarna in till er i dag – telefon, mejl eller både och?\n\nHälsningar,\nErik',
-   'Hur kommer felanmälningarna in till er i dag?', 'claude', 'approved',
-   now() - interval '3 hours', null, null, null),
-  -- Väntar på granskning i AI Gatekeeper
-  (pg_temp.em(11), '00000000-0000-4000-a005-000000000001', pg_temp.co(13), pg_temp.ct(17),
-   'Reservdelsförfrågningar',
-   E'Hej Anders,\n\n{{opening_line}}\n\nVi hjälper teknikbolag att svara snabbare på reservdelsförfrågningar utan att anställa fler. Värt ett kort samtal?\n\nHälsningar,\nErik',
-   'Er nya webbshop för reservdelar ser riktigt genomarbetad ut – kommer förfrågningarna fortfarande också per telefon?', 'claude', 'pending_review',
-   null, null, null, null),
-  (pg_temp.em(12), '00000000-0000-4000-a005-000000000001', pg_temp.co(20), pg_temp.ct(27),
-   'Spårbarhet i produktionen',
-   E'Hej Bengt,\n\n{{opening_line}}\n\nVi bygger enkla flöden som samlar batchdata automatiskt, så att revisionen tar timmar i stället för dagar. Låter det intressant?\n\nHälsningar,\nErik',
-   'Ni lyfter fram spårbarheten från båt till butik på er sajt – hur mycket handpåläggning kräver dokumentationen bakom?', 'claude', 'pending_review',
-   null, null, null, null),
-  (pg_temp.em(13), '00000000-0000-4000-a005-000000000001', pg_temp.co(21), pg_temp.ct(28),
-   'Produktionsrapporter',
-   E'Hej Sofia,\n\n{{opening_line}}\n\nVi har hjälpt tillverkare att automatisera dagsrapporterna från linjerna. Vore det värt 20 minuter?\n\nHälsningar,\nErik',
-   'Grattis till den nya formsprutan i Kållby – det måste ha ökat volymerna rejält.', 'claude', 'pending_review',
-   null, null, null, null),
-  (pg_temp.em(14), '00000000-0000-4000-a005-000000000001', pg_temp.co(15), pg_temp.ct(20),
-   'Offerter för golvjobb',
-   E'Hej Johan,\n\n{{opening_line}}\n\nVi hjälper byggfirmor att ta fram offerter direkt från mått och bilder. Intresserad av en snabb demo?\n\nHälsningar,\nErik',
-   'Bilderna på badrumsrenoveringarna i er galleri är imponerande – hur lång tid tar en offert från första besöket?', 'claude', 'pending_review',
-   null, null, null, null),
-  -- Avvisat i Gatekeeper
-  (pg_temp.em(15), '00000000-0000-4000-a005-000000000001', pg_temp.co(8), pg_temp.ct(11),
-   'Cateringbeställningar',
-   E'Hej Emma,\n\n{{opening_line}}\n\nHälsningar,\nErik',
-   'Ert café har fantastiska recensioner på Google!', 'claude', 'rejected',
-   now() - interval '2 days', null, null, 'För generisk öppningsrad');
-
--- -----------------------------------------------------------------------------
--- Svar – 3 positiva skapar ringuppgifter via triggern public.handle_reply()
--- -----------------------------------------------------------------------------
-
-insert into public.replies (email_id, company_id, contact_id, from_address, subject, body, classification, ai_summary, received_at) values
-  (pg_temp.em(1), pg_temp.co(1), pg_temp.ct(1), 'mikael@bratobatvarv.test', 'Sv: Offerterna på Bråtö',
-   E'Hej Erik,\n\nIntressant – vi har faktiskt pratat om just det här. Ring mig gärna nästa vecka, helst förmiddag.\n\n/Mikael',
-   'positive', 'Vill bli uppringd nästa vecka, helst förmiddag. Har redan diskuterat offertproblemet internt.',
-   now() - interval '13 days'),
-  (pg_temp.em(2), pg_temp.co(6), pg_temp.ct(8), 'henrik@kyrkostrandsnickeri.test', 'Sv: Butiksinredning och ritningar',
-   E'Hej,\n\nJa, det låter som något för oss. Lotta som är projektledare borde också vara med. Hör av dig!\n\nHenrik',
-   'positive', 'Positiv. Vill att projektledaren Lotta Ström är med i samtalet.',
-   now() - interval '2 days'),
-  (pg_temp.em(3), pg_temp.co(14), pg_temp.ct(19), 'mats@sundombil.test', 'Sv: Servicebokningar i Sundom',
-   E'Tjena,\n\nDet stämmer att telefonen går varm. Ring mig på eftermiddagen så tar vi det.\n\nMats',
-   'positive', 'Telefonen går varm i högsäsong. Ring på eftermiddagen.',
-   now() - interval '5 hours'),
-  (pg_temp.em(4), pg_temp.co(7), pg_temp.ct(10), 'kurt@purmomaskin.test', 'Sv: Serviceprotokoll på papper?',
-   E'Hej. Ja vi kör papper ännu. Inte aktuellt just nu men hör av dig efter nyår.\n\nKurt',
-   'neutral', 'Inte aktuellt nu – återkom efter nyår.',
-   now() - interval '8 days'),
-  (pg_temp.em(5), pg_temp.co(24), pg_temp.ct(33), 'oskar@vikarholmenevent.test', 'Sv: Anmälningar till era event',
-   E'Ta bort mig från era utskick, tack.',
-   'unsubscribe', 'Vill inte bli kontaktad.',
-   now() - interval '5 days');
-
--- -----------------------------------------------------------------------------
--- Samtal
--- -----------------------------------------------------------------------------
-
-insert into public.calls (company_id, contact_id, outcome, notes, duration_seconds, called_at) values
-  (pg_temp.co(1),  pg_temp.ct(1),  'no_answer',      'Inget svar, försök igen på förmiddagen.',                       0,   now() - interval '1 day'),
-  (pg_temp.co(5),  pg_temp.ct(7),  'meeting_booked', 'Partnertips från Larsmo Bokföringsbyrå. Vill se automatiserad bokslutsrapportering.', 540, now() - interval '6 days'),
-  (pg_temp.co(23), pg_temp.ct(31), 'meeting_booked', 'Stort intresse för automatiserad orderhantering. Inköp (Tina) med på mötet.',           720, now() - interval '3 days'),
-  (pg_temp.co(7),  pg_temp.ct(10), 'callback',       'Ring tillbaka i januari.',                                       180, now() - interval '7 days'),
-  (pg_temp.co(2),  pg_temp.ct(3),  'voicemail',      'Lämnade röstmeddelande.',                                        35,  now() - interval '2 days'),
-  (pg_temp.co(11), pg_temp.ct(15), 'not_interested', 'Har egna lösningar redan.',                                      240, now() - interval '45 days');
-
--- -----------------------------------------------------------------------------
--- Möten (triggern flyttar bolagen till 'meeting_booked')
--- -----------------------------------------------------------------------------
-
-insert into public.meetings (company_id, contact_id, title, starts_at, ends_at, location, status, notes) values
-  (pg_temp.co(5),  pg_temp.ct(7),  'Discovery: Vasklot Revisionsbyrå',
-   date_trunc('day', now()) + interval '3 days 10 hours',  date_trunc('day', now()) + interval '3 days 10 hours 45 minutes',
-   'Teams', 'scheduled', 'Fokus: bokslutsrapportering och klientkommunikation.'),
-  (pg_temp.co(23), pg_temp.ct(31), 'Discovery: Alholmens Svets & Montage',
-   date_trunc('day', now()) + interval '6 days 13 hours',  date_trunc('day', now()) + interval '6 days 14 hours',
-   'Hos kunden, Alholmen', 'scheduled', 'Ta med exempel på orderflöde från verkstadsbranschen.');
-
--- -----------------------------------------------------------------------------
--- Övriga uppgifter (ringuppgifterna för positiva svar skapas av triggern)
--- -----------------------------------------------------------------------------
-
-insert into public.tasks (type, title, description, priority, company_id, contact_id, due_at) values
-  ('follow_up', 'Följ upp Purmo Maskinservice efter nyår', 'Kurt bad oss återkomma i januari.', 3,
-   pg_temp.co(7), pg_temp.ct(10), date_trunc('year', now()) + interval '1 year 7 days'),
-  ('call', 'Ring Jonas på Skata Elinstallation igen', 'Röstmeddelande lämnat i tisdags.', 2,
-   pg_temp.co(2), pg_temp.ct(3), now() + interval '1 day');
-
--- -----------------------------------------------------------------------------
--- Partners (IT, bokföring, webb) – Larsmo Bokföringsbyrå har gammal check-in
+-- Partner (§6): bokföring, IT, webb/reklam, affärssystem
 -- -----------------------------------------------------------------------------
 
 insert into public.partners (id, name, type, contact_name, email, phone, city, notes, checkin_interval_days, referrals_count) values
-  (pg_temp.pa(1), 'Österbottens IT-Service Ab', 'it',         'Fredrik Lund',   'fredrik@obit-service.test',  '+358 40 200 0101', 'Jakobstad', 'Sköter IT för ett 40-tal småbolag i regionen.', 30, 2),
-  (pg_temp.pa(2), 'Larsmo Bokföringsbyrå Ab',   'accounting', 'Marina Eklund',  'marina@larsmobokforing.test','+358 40 200 0201', 'Larsmo',    'Gav tipset om Vasklot. Har många kunder med manuella flöden.', 30, 1),
-  (pg_temp.pa(3), 'Kustwebb Ab',                'web',        'Daniel Byskata', 'daniel@kustwebb.test',       '+358 40 200 0301', 'Vasa',      'Bygger webbplatser – vi tar automationen bakom formulären.', 45, 0),
-  (pg_temp.pa(4), 'Pedersöre Datahjälp',        'it',         'Ronja Lassila',  'ronja@pedersoredata.test',   '+358 40 200 0401', 'Pedersöre', 'Enmansfirma, nära kundrelationer.', 30, 0);
+  (pg_temp.pa(1), 'Larsmo Bokföringsbyrå Ab', 'accounting', 'Marina Eklund',  'marina@larsmobokforing.test', '+358 40 200 0101', 'Larsmo',    'Har många kunder med manuella listor. Testfall pågår.', 30, 1),
+  (pg_temp.pa(2), 'Österbottens IT-Service Ab', 'it',       'Fredrik Lund',   'fredrik@obit-service.test',   '+358 40 200 0201', 'Jakobstad', 'Sköter IT för ett 40-tal småbolag.', 30, 0),
+  (pg_temp.pa(3), 'Kustreklam Ab',              'marketing','Daniel Byskata', 'daniel@kustreklam.test',      '+358 40 200 0301', 'Vasa',      'Webb och reklam. Vi tar automationen bakom formulären.', 45, 0),
+  (pg_temp.pa(4), 'Affärsdata Österbotten',     'other',    'Ronja Lassila',  'ronja@affarsdata.test',       '+358 40 200 0401', 'Seinäjoki', 'Återförsäljare av affärssystem.', 30, 0);
 
 insert into public.partner_checkins (partner_id, notes, checked_in_at) values
-  (pg_temp.pa(1), 'Kaffe på stan. Två möjliga kunder inom transport.', now() - interval '12 days'),
-  (pg_temp.pa(2), 'Lunch i Larsmo. Tipsade om Vasklot.',               now() - interval '74 days'),
-  (pg_temp.pa(3), 'Teamssamtal om gemensamt erbjudande.',              now() - interval '20 days'),
-  (pg_temp.pa(4), 'Ronja hörde av sig om en kund i Bennäs.',           now() - interval '5 days');
-
-insert into public.tasks (type, title, description, priority, partner_id, due_at) values
-  ('partner_checkin', 'Check-in med Larsmo Bokföringsbyrå', 'Över 70 dagar sedan senaste kontakt.', 2, pg_temp.pa(2), now());
+  (pg_temp.pa(1), 'Lunch i Larsmo. Tipsade om Kronoby Lack.',  now() - interval '9 days'),
+  (pg_temp.pa(2), 'Kaffe. Två möjliga kunder inom transport.', now() - interval '40 days'),
+  (pg_temp.pa(3), 'Teamssamtal om gemensamt erbjudande.',      now() - interval '20 days');
 
 -- -----------------------------------------------------------------------------
--- Företagshjärnan – kontexten som matar AI-texterna
+-- 26 bolag, 2–15 anställda, hela Österbotten. Tillverkning och tjänster först, bygg sist.
+-- -----------------------------------------------------------------------------
+
+insert into public.companies (id, name, business_id, website, phone, industry, city, employees, status, source, partner_id, notes) values
+  -- Ny (släpps in i ringkön, 15 per ringdag)
+  (pg_temp.co(1),  'Bråtö Båtvarv Ab',             '3100001-1', 'https://bratobatvarv.test',       '+358 6 700 0101', 'Tillverkning',     'Larsmo',       12, 'new', 'lista', null, 'Bygger arbetsbåtar. Offerter i Excel.'),
+  (pg_temp.co(2),  'Skata Elinstallation Ab',      '3100002-2', 'https://skataelinstallation.test', null,             'Elinstallation',   'Jakobstad',     8, 'new', 'lista', null, null),
+  (pg_temp.co(3),  'Purmo Maskinservice Ab',       '3100003-3', 'https://purmomaskin.test',        null,              'Maskinservice',    'Pedersöre',     6, 'new', 'lista', null, 'Serviceprotokoll på papper.'),
+  (pg_temp.co(4),  'Nykarleby Plåt & Ventilation', '3100004-4', 'https://nkplatvent.test',         null,              'Tillverkning',     'Nykarleby',    14, 'new', 'lista', null, null),
+  (pg_temp.co(5),  'Kronoby Lack & Finish Ab',     '3100005-5', 'https://kronobylack.test',        null,              'Tillverkning',     'Kronoby',       5, 'new', 'lista', null, null),
+  (pg_temp.co(6),  'Gamla Hamn Tryckeri Ab',       '3100006-6', 'https://gamlahamntryck.test',     null,              'Tryckeri',         'Jakobstad',     9, 'new', 'lista', null, null),
+  (pg_temp.co(7),  'Socklot Fiskförädling Ab',     '3100007-7', 'https://socklotfisk.test',        null,              'Livsmedel',        'Nykarleby',    15, 'new', 'lista', null, null),
+  (pg_temp.co(8),  'Malax Snickeri Ab',            '3100008-8', 'https://malaxsnickeri.test',      null,              'Tillverkning',     'Malax',         7, 'new', 'lista', null, null),
+  (pg_temp.co(9),  'Korsholms Redovisning Ab',     '3100009-9', 'https://korsholmredovisning.test', null,             'Tjänster',         'Korsholm',      4, 'new', 'lista', null, null),
+  (pg_temp.co(10), 'Närpes Växthusteknik Ab',      '3100010-0', 'https://narpesvaxthus.test',      null,              'Tjänster',         'Närpes',       11, 'new', 'lista', null, null),
+  (pg_temp.co(11), 'Västerby Golv & Kakel Ab',     '3100011-1', 'https://vasterbygolv.test',       null,              'Bygg',             'Nykarleby',     6, 'new', 'lista', null, 'Bygg – ring sist.'),
+  -- Hör till en partner: kontaktas inte kallt
+  (pg_temp.co(12), 'Larsmo Bilservice Ab',         '3100012-2', 'https://larsmobilservice.test',   null,              'Tjänster',         'Larsmo',        5, 'new', 'partner', pg_temp.pa(1), 'Kund hos Larsmo Bokföringsbyrå.'),
+  -- I sekvens, olika försök
+  (pg_temp.co(13), 'Kållby Plast Ab',              '3100013-3', 'https://kallbyplast.test',        null,              'Tillverkning',     'Pedersöre',    13, 'in_sequence', 'lista', null, null),
+  (pg_temp.co(14), 'Sundom Bilverkstad Ab',        '3100014-4', 'https://sundombil.test',          null,              'Tjänster',         'Vasa',          7, 'in_sequence', 'lista', null, null),
+  (pg_temp.co(15), 'Jeppo Fysioterapi Ab',         '3100015-5', 'https://jeppofysio.test',         null,              'Tjänster',         'Nykarleby',     3, 'in_sequence', 'lista', null, null),
+  (pg_temp.co(16), 'Kristinestads Mekaniska Ab',   '3100016-6', 'https://kristinestadmek.test',    null,              'Tillverkning',     'Kristinestad', 10, 'in_sequence', 'lista', null, null),
+  -- Hos partner: tips via formulär, ring i dag
+  (pg_temp.co(17), 'Oravais Trä & Hyvleri Ab',     '3100017-7', 'https://oravaistra.test',         null,              'Tillverkning',     'Vörå',          8, 'with_partner', 'partner', pg_temp.pa(1), 'Tips från Marina: tidrapporter för hand.'),
+  -- Svarat, behovssamtal, lösning, offert, kund
+  (pg_temp.co(18), 'Kyrkostrand Snickeri Ab',      '3100018-8', 'https://kyrkostrandsnickeri.test', null,             'Tillverkning',     'Jakobstad',    11, 'in_sequence', 'lista', null, null),
+  (pg_temp.co(19), 'Vasklot Revisionsbyrå Ab',     '3100019-9', 'https://vasklotrevision.test',    null,              'Tjänster',         'Vasa',          6, 'meeting_booked', 'lista', null, null),
+  (pg_temp.co(20), 'Edsevö Transport Ab',          '3100020-0', 'https://edsevotransport.test',    null,              'Transport',        'Pedersöre',    14, 'meeting_done', 'lista', null, 'Rutter planeras för hand. Lösningsmöte nästa.'),
+  (pg_temp.co(21), 'Alholmens Svets & Montage Ab', '3100021-1', 'https://alholmensvets.test',      null,              'Tillverkning',     'Jakobstad',    12, 'solution_shown', 'lista', null, null),
+  (pg_temp.co(22), 'Gerby Energiteknik Ab',        '3100022-2', 'https://gerbyenergi.test',        null,              'Tjänster',         'Vasa',          9, 'quote_sent', 'lista', null, 'Offert 2 900 € skickad.'),
+  (pg_temp.co(23), 'Holm Lantbruksteknik Ab',      '3100023-3', 'https://holmlantbruk.test',       null,              'Tjänster',         'Larsmo',       10, 'customer', 'lista', null, 'Kund – automatiska servicelistor.'),
+  -- Vilande, Nej, Kontakta ej
+  (pg_temp.co(24), 'Fäboda Café & Catering',       '3100024-4', 'https://fabodacatering.test',     null,              'Restaurang',       'Jakobstad',     6, 'nurture', 'lista', null, 'Inte nu – hör av dig i vår.'),
+  (pg_temp.co(25), 'Brändö Bokföring Ab',          '3100025-5', 'https://brandobokforing.test',    null,              'Tjänster',         'Vasa',          3, 'no', 'lista', null, 'Inget behov.'),
+  (pg_temp.co(26), 'Vikarholmen Event Ab',         '3100026-6', 'https://vikarholmenevent.test',   null,              'Event',            'Vasa',          4, 'do_not_contact', 'lista', null, 'Bad att inte bli kontaktad.');
+
+update public.companies set domain = public.norm_domain(website);
+update public.companies set nurture_until = (now() at time zone 'Europe/Helsinki')::date + 60 where id = pg_temp.co(24);
+update public.companies set last_activity_at = now() - interval '3 days' where status not in ('new');
+
+-- -----------------------------------------------------------------------------
+-- Kontakter (VD/ägare först). Några saknar e-post eller mobil – för att testa reglerna.
+-- -----------------------------------------------------------------------------
+
+insert into public.contacts (id, company_id, first_name, last_name, role, email, phone, is_primary) values
+  (pg_temp.ct(1),  pg_temp.co(1),  'Mikael',   'Storbacka',  'VD',               'mikael@bratobatvarv.test',        '+358 40 100 0101', true),
+  (pg_temp.ct(2),  pg_temp.co(2),  'Jonas',    'Skata',      'Ägare',            'jonas@skataelinstallation.test',  '+358 40 100 0201', true),
+  (pg_temp.ct(3),  pg_temp.co(3),  'Kurt',     'Purmonen',   'Ägare',            null,                              '+358 40 100 0301', true),
+  (pg_temp.ct(4),  pg_temp.co(4),  'Peter',    'Nyman',      'VD',               'peter@nkplatvent.test',           '+358 40 100 0401', true),
+  (pg_temp.ct(5),  pg_temp.co(5),  'Annika',   'Lackström',  'Ägare',            'annika@kronobylack.test',         '+358 40 100 0501', true),
+  (pg_temp.ct(6),  pg_temp.co(6),  'Patrik',   'Hamnström',  'VD',               'patrik@gamlahamntryck.test',      '+358 40 100 0601', true),
+  (pg_temp.ct(7),  pg_temp.co(7),  'Bengt',    'Socklund',   'VD',               'bengt@socklotfisk.test',          '+358 40 100 0701', true),
+  (pg_temp.ct(8),  pg_temp.co(8),  'Tom',      'Malmberg',   'Ägare',            'tom@malaxsnickeri.test',          '+358 40 100 0801', true),
+  (pg_temp.ct(9),  pg_temp.co(9),  'Sara',     'Korsström',  'Ägare',            'sara@korsholmredovisning.test',   '+358 40 100 0901', true),
+  (pg_temp.ct(10), pg_temp.co(10), 'Joakim',   'Närman',     'VD',               'joakim@narpesvaxthus.test',       '+358 40 100 1001', true),
+  (pg_temp.ct(11), pg_temp.co(11), 'Johan',    'Västerlund', 'Ägare',            'johan@vasterbygolv.test',         '+358 40 100 1101', true),
+  (pg_temp.ct(12), pg_temp.co(12), 'Leif',     'Larsmo',     'Ägare',            'leif@larsmobilservice.test',      '+358 40 100 1201', true),
+  (pg_temp.ct(13), pg_temp.co(13), 'Sofia',    'Kållberg',   'VD',               'sofia@kallbyplast.test',          '+358 40 100 1301', true),
+  (pg_temp.ct(14), pg_temp.co(14), 'Mats',     'Sundqvist',  'Ägare',            'mats@sundombil.test',             '+358 40 100 1401', true),
+  (pg_temp.ct(15), pg_temp.co(15), 'Hanna',    'Jeppsson',   'Ägare',            'hanna@jeppofysio.test',           null,               true),
+  (pg_temp.ct(16), pg_temp.co(16), 'Rolf',     'Kristman',   'VD',               'rolf@kristinestadmek.test',       '+358 40 100 1601', true),
+  (pg_temp.ct(17), pg_temp.co(17), 'Nina',     'Oravainen',  'Ägare',            'nina@oravaistra.test',            '+358 40 100 1701', true),
+  (pg_temp.ct(18), pg_temp.co(18), 'Henrik',   'Kyrklund',   'VD',               'henrik@kyrkostrandsnickeri.test', '+358 40 100 1801', true),
+  (pg_temp.ct(19), pg_temp.co(19), 'Annika',   'Vasklot',    'Delägare',         'annika@vasklotrevision.test',     '+358 40 100 1901', true),
+  (pg_temp.ct(20), pg_temp.co(20), 'Tomas',    'Edsevik',    'VD',               'tomas@edsevotransport.test',      '+358 40 100 2001', true),
+  (pg_temp.ct(21), pg_temp.co(21), 'Ville',    'Alholm',     'VD',               'ville@alholmensvets.test',        '+358 40 100 2101', true),
+  (pg_temp.ct(22), pg_temp.co(22), 'Kristian', 'Gerbyholm',  'VD',               'kristian@gerbyenergi.test',       '+358 40 100 2201', true),
+  (pg_temp.ct(23), pg_temp.co(23), 'Anders',   'Holm',       'VD',               'anders@holmlantbruk.test',        '+358 40 100 2301', true),
+  (pg_temp.ct(24), pg_temp.co(24), 'Emma',     'Fäboda',     'Ägare',            'emma@fabodacatering.test',        '+358 40 100 2401', true),
+  (pg_temp.ct(25), pg_temp.co(25), 'Gunilla',  'Brandt',     'Ägare',            'gunilla@brandobokforing.test',    '+358 40 100 2501', true),
+  (pg_temp.ct(26), pg_temp.co(26), 'Oskar',    'Vikström',   'Ägare',            'oskar@vikarholmenevent.test',     '+358 40 100 2601', true),
+  (pg_temp.ct(27), pg_temp.co(13), 'Erik',     'Lassfolk',   'Produktionschef',  'erik.l@kallbyplast.test',         '+358 40 100 1302', false);
+
+update public.companies c set sequence_contact_id = (select k.id from public.contacts k where k.company_id = c.id and k.is_primary limit 1);
+
+-- -----------------------------------------------------------------------------
+-- Samtalshistorik och ringuppgifter för bolag i sekvens
+-- -----------------------------------------------------------------------------
+
+-- Kållby Plast: försök 1 obesvarat i förrgår → försök 2 i dag em
+insert into public.calls (company_id, contact_id, outcome, notes, called_at) values
+  (pg_temp.co(13), pg_temp.ct(13), 'no_answer', null, pg_temp.at(-2, '09:20'));
+update public.companies set call_attempt = 1, released_at = now() - interval '2 days', last_call_at = pg_temp.at(-2, '09:20') where id = pg_temp.co(13);
+insert into public.tasks (type, title, priority, company_id, contact_id, attempt, due_at) values
+  ('call', 'Försök 2: Kållby Plast Ab', 2, pg_temp.co(13), pg_temp.ct(13), 2, pg_temp.at(0, '13:00'));
+insert into public.sms_messages (company_id, contact_id, to_phone, body, template, status, due_at, sent_at) values
+  (pg_temp.co(13), pg_temp.ct(13), '+358 40 100 1301',
+   'Hej Sofia! Erik från Optely här, jag försökte ringa dig i går. Vi hjälper småföretag med det som görs för hand vid sidan om jobbet. Jag ringer igen om ett par dagar – eller svara här när det passar. /Erik',
+   'sms-ej-svar', 'sent', pg_temp.at(-1, '08:30'), pg_temp.at(-1, '08:41'));
+
+-- Sundom Bilverkstad: två obesvarade → sista försöket i dag fm. SMS efter försök 1 väntar fortfarande.
+insert into public.calls (company_id, contact_id, outcome, notes, called_at) values
+  (pg_temp.co(14), pg_temp.ct(14), 'no_answer', null, pg_temp.at(-5, '13:10')),
+  (pg_temp.co(14), pg_temp.ct(14), 'voicemail', 'Lämnade röstmeddelande.', pg_temp.at(-3, '09:05'));
+update public.companies set call_attempt = 2, released_at = now() - interval '5 days', last_call_at = pg_temp.at(-3, '09:05') where id = pg_temp.co(14);
+insert into public.tasks (type, title, priority, company_id, contact_id, attempt, due_at) values
+  ('call', 'Försök 3: Sundom Bilverkstad Ab', 2, pg_temp.co(14), pg_temp.ct(14), 3, pg_temp.at(0, '09:00'));
+insert into public.sms_messages (company_id, contact_id, to_phone, body, template, due_at) values
+  (pg_temp.co(14), pg_temp.ct(14), '+358 40 100 1401',
+   'Hej Mats! Erik från Optely här, jag försökte ringa dig i går. Vi hjälper småföretag med det som görs för hand vid sidan om jobbet. Jag ringer igen om ett par dagar – eller svara här när det passar. /Erik',
+   'sms-ej-svar', pg_temp.at(0, '08:30'));
+
+-- Jeppo Fysioterapi (ingen mobil): bad om samtal senare i dag kl. 15
+insert into public.calls (company_id, contact_id, outcome, notes, called_at) values
+  (pg_temp.co(15), pg_temp.ct(15), 'callback', 'Har patient – ring 15.00.', pg_temp.at(0, '08:50'));
+update public.companies set released_at = now() - interval '1 day', last_call_at = pg_temp.at(0, '08:50'), phone = '+358 6 724 1500' where id = pg_temp.co(15);
+insert into public.tasks (type, title, description, priority, company_id, contact_id, attempt, due_at) values
+  ('call', 'Ring senare: Jeppo Fysioterapi Ab', 'Har patient – ring 15.00.', 1, pg_temp.co(15), pg_temp.ct(15), 1, pg_temp.at(0, '15:00'));
+
+-- Kristinestads Mekaniska: försök 2 i morgon (syns inte i dagens kö)
+insert into public.calls (company_id, contact_id, outcome, called_at) values
+  (pg_temp.co(16), pg_temp.ct(16), 'no_answer', pg_temp.at(-1, '13:30'));
+update public.companies set call_attempt = 1, released_at = now() - interval '1 day' where id = pg_temp.co(16);
+insert into public.tasks (type, title, priority, company_id, contact_id, attempt, due_at) values
+  ('call', 'Försök 2: Kristinestads Mekaniska Ab', 2, pg_temp.co(16), pg_temp.ct(16), 2, pg_temp.at(1, '09:00'));
+
+-- Oravais Trä (Hos partner): tips via formulär → ring i dag och nämn partnern
+insert into public.tasks (type, title, description, priority, company_id, contact_id, due_at) values
+  ('call', 'Partnertips: ring i dag – Oravais Trä & Hyvleri Ab', 'Tips från Marina Eklund (Larsmo Bokföringsbyrå): tidrapporter görs för hand. Nämn Marina.', 1, pg_temp.co(17), pg_temp.ct(17), now());
+
+-- Fäboda Café (Vilande): "inte nu" → återkomst om 60 dagar
+insert into public.calls (company_id, contact_id, outcome, notes, called_at) values
+  (pg_temp.co(24), pg_temp.ct(24), 'not_now', 'Högsäsong – hör av dig i vår.', now() - interval '4 days');
+insert into public.tasks (type, title, priority, company_id, contact_id, attempt, due_at) values
+  ('call', 'Återkomst: Fäboda Café & Catering', 2, pg_temp.co(24), pg_temp.ct(24), 1, pg_temp.at(60, '09:00'));
+
+-- Brändö (Nej) och Vikarholmen (Kontakta ej)
+insert into public.calls (company_id, contact_id, outcome, notes, called_at) values
+  (pg_temp.co(25), pg_temp.ct(25), 'no_need', 'Har egna lösningar.', now() - interval '20 days'),
+  (pg_temp.co(26), pg_temp.ct(26), 'do_not_call', 'Bad att inte bli kontaktad.', now() - interval '12 days');
+update public.contacts set do_not_contact = true where id = pg_temp.ct(26);
+
+-- -----------------------------------------------------------------------------
+-- Kyrkostrand: svarade positivt på mejl → triggern stoppar allt och lägger "Svar: boka behovssamtal"
+-- -----------------------------------------------------------------------------
+
+insert into public.emails (company_id, contact_id, subject, body, ai_opening_line, status, sent_at, queued_at, reviewed_at) values
+  (pg_temp.co(18), pg_temp.ct(18), 'Det som görs för hand',
+   E'Hej Henrik,\n\nSnyggt projekt ni gjorde för kafét i Jakobstads centrum. Vi hjälper snickerier med det som görs för hand vid sidan om jobbet – materiallistor, offerter, tidrapporter.\n\nVärt 20 minuter?\n\nHälsningar,\nErik',
+   'Snyggt projekt ni gjorde för kafét i Jakobstads centrum.', 'sent', now() - interval '3 days', now() - interval '3 days', now() - interval '4 days');
+insert into public.replies (email_id, company_id, contact_id, from_address, subject, body, classification, ai_summary, received_at)
+select id, pg_temp.co(18), pg_temp.ct(18), 'henrik@kyrkostrandsnickeri.test', 'Sv: Det som görs för hand',
+       E'Hej,\n\nJa, materiallistorna tar alldeles för mycket tid. Ring mig gärna.\n\nHenrik',
+       'positive', 'Materiallistorna tar för mycket tid. Vill bli uppringd.', now() - interval '2 hours'
+  from public.emails where company_id = pg_temp.co(18);
+
+-- -----------------------------------------------------------------------------
+-- Behovssamtal bokat (i morgon) – bekräftelse-SMS och kalenderhändelse väntar
+-- -----------------------------------------------------------------------------
+
+insert into public.calls (company_id, contact_id, outcome, notes, duration_seconds, called_at) values
+  (pg_temp.co(19), pg_temp.ct(19), 'meeting_booked', 'Bokslutslistor görs för hand.', 420, now() - interval '1 hour');
+insert into public.meetings (company_id, contact_id, title, starts_at, ends_at, location, status) values
+  (pg_temp.co(19), pg_temp.ct(19), 'Behovssamtal: Vasklot Revisionsbyrå Ab', pg_temp.at(1, '10:00'), pg_temp.at(1, '10:20'), 'telefon', 'scheduled');
+select public.queue_template_sms(pg_temp.co(19), pg_temp.ct(19), 'sms-bokat', now(),
+  jsonb_build_object('tid', 'i morgon kl. 10:00', 'plats', 'telefon'));
+
+-- Senare steg i pipelinen (§7)
+insert into public.meetings (company_id, contact_id, title, starts_at, ends_at, location, status, outcome, calendar_added_at) values
+  (pg_temp.co(20), pg_temp.ct(20), 'Behovssamtal: Edsevö Transport Ab', now() - interval '6 days', now() - interval '6 days' + interval '20 minutes', 'telefon', 'held', 'Större problem → lösningsmöte', now() - interval '8 days'),
+  (pg_temp.co(21), pg_temp.ct(21), 'Lösningsmöte: Alholmens Svets & Montage Ab', now() - interval '2 days', now() - interval '2 days' + interval '30 minutes', 'hos kunden', 'held', 'Visade lösning för orderlistor', now() - interval '5 days'),
+  (pg_temp.co(22), pg_temp.ct(22), 'Lösningsmöte: Gerby Energiteknik Ab', now() - interval '9 days', now() - interval '9 days' + interval '30 minutes', 'Teams', 'held', 'Offert samma dag', now() - interval '12 days');
+-- Mötestriggern sätter status – återställ till rätt pipelinesteg.
+update public.companies set status = 'meeting_done'   where id = pg_temp.co(20);
+update public.companies set status = 'solution_shown' where id = pg_temp.co(21);
+update public.companies set status = 'quote_sent'     where id = pg_temp.co(22);
+
+-- -----------------------------------------------------------------------------
+-- Företagshjärnan
 -- -----------------------------------------------------------------------------
 
 insert into public.context_entries (kind, slug, title, content, sort_order) values
   ('profile', 'optely-profil', 'Optelys profil',
 $md$# Optely
 
-Optely är en AI- och automationsbyrå i **Jakobstad**. Vi hjälper svenskspråkiga små och medelstora bolag i Österbotten att ta bort manuellt arbete – offerter, bokningar, rapporter och uppföljning.
+Optely i Jakobstad hjälper svenskspråkiga småföretag i Österbotten med **det som görs för hand vid sidan om jobbet** – listor, rapporter, offerter och uppföljning.
 
 - Grundare: Erik
-- Språk: svenska, finska, engelska
-- Arbetssätt: kort discovery → konkret förslag → leverans i veckor, inte månader
 - Ton: lokal, rak, jordnära. Vi säljer tid tillbaka, inte "AI".
 $md$, 10),
-
   ('offer', 'erbjudande', 'Erbjudande',
 $md$# Erbjudande
 
-## 1. Discovery (kostnadsfritt, 45 min)
-Vi kartlägger 2–3 flöden där tid läcker och räknar på besparingen.
+**Huvuderbjudande: inte valt.** Starkaste kandidat: **automatiska listor och rapporter**.
 
-## 2. Automationssprint – från 2 900 €
-En avgränsad automation i drift inom 3 veckor. Exempel: offertunderlag, bokningsflöde, rapport som skrivs själv.
-
-## 3. Löpande drift – från 290 € / månad
-Övervakning, justeringar och nya små flöden.
-
-**Garanti:** sparar automationen inte den tid vi räknat med under första kvartalet justerar vi utan kostnad.
+- Behovssamtal 20 min – kostnadsfritt
+- Lösningsmöte 30 min – lösning, pris, startdatum
+- Mål: återkommande intäkt (drift och små tillägg varje månad)
 $md$, 20),
+  ('icp', 'icp', 'Målgrupp',
+$md$# Målgrupp
 
-  ('icp', 'icp', 'Idealkund (ICP)',
-$md$# Idealkund
-
-- Svenskspråkigt B2B-bolag i Österbotten (Jakobstad, Larsmo, Pedersöre, Nykarleby, Vasa med omnejd)
-- 5–60 anställda, omsättning 0,5–8 M€
-- Branscher: verkstad, bygg, transport, tillverkning, service, redovisning
-- Signaler: offerter i Excel, bokningar per telefon, rapporter som skrivs för hand, ägaren gör administrationen på kvällarna
-- Beslutsfattare: VD/ägare, ibland ekonomi- eller produktionschef
-
-**Inte för oss:** bolag med egen IT-avdelning, rena konsumentbolag, offentlig sektor.
+- Svenskspråkiga småföretag med **2–15 anställda** i hela Österbotten
+- **Ägaren sköter själv administrationen**
+- Tillverkning och tjänsteföretag först, **bygg sist**
+- Signaler: listor och rapporter görs för hand, offerter i Excel, ägaren gör pappersjobbet på kvällarna
 $md$, 30),
+  ('case', 'case-hagnas-tyre-center', 'Case: Hagnäs Tyre Center',
+$md$# Hagnäs Tyre Center
 
-  ('case', 'case-gerby-energiteknik', 'Case: Gerby Energiteknik (exempel)',
-$md$# Case: Automatiserad offertkedja
+Däcklistan skapas nu **automatiskt** i stället för för hand.
 
-> Exempelcase i testdatan – ersätt med ett riktigt kundcase.
-
-**Utgångsläge:** Offertansvarig lade ca 6 timmar i veckan på att sammanställa offerter från mejl, Excel och prislistor.
-
-**Lösning:** Förfrågningar läses in automatiskt, AI föreslår offertrader utifrån prislistan, offertansvarig granskar och skickar med ett klick.
-
-**Resultat:**
-- Offerttid från 45 min till 8 min per offert
-- Svarstid till kund från 3 dagar till samma dag
-- Ca 5 timmar sparade per vecka
+Använd som exempel: "vi hjälper med det som görs för hand vid sidan om jobbet".
 $md$, 40),
+  ('script', 'manus-kallt-samtal', 'Manus: kallt samtal',
+$md$# Kallt samtal
 
-  ('script', 'grundmanus', 'Grundmanus – varmt samtal',
-$md$# Grundmanus (varmt samtal efter positivt svar)
-
-1. **Öppning:** "Hej {förnamn}, Erik från Optely här – du svarade på mitt mejl om {ämne}. Passar det med två minuter?"
-2. **Bekräfta problemet:** "Du nämnde {det de skrev}. Hur ser det ut i praktiken i dag?"
-3. **Kvantifiera:** "Ungefär hur många timmar i veckan går åt till det?"
-4. **Bro:** "Vi gjorde något liknande för ett {bransch}bolag – de sparade ca 5 timmar i veckan."
-5. **Boka:** "Ska vi ta 45 minuter där jag visar hur det kunde se ut hos er? Jag har {dag} förmiddag eller {dag} eftermiddag."
-
-Se invändningarna nedan.
+1. **Öppning:** "Hej {förnamn}, Erik från Optely i Jakobstad. Har du två minuter?"
+2. **Budskap:** "Vi hjälper småföretag med det som görs för hand vid sidan om jobbet – som hos Hagnäs Tyre Center, där däcklistan nu skapas automatiskt."
+3. **Fråga:** "Finns det något hos er som görs för hand, som listor, rapporter eller offerter?"
+4. **Boka:** "Ska vi ta 20 minuter och titta på det? Jag har {dag} förmiddag eller eftermiddag."
 $md$, 50),
+  ('script', 'manus-behovssamtal', 'Manus: behovssamtal (20 min)',
+$md$# Behovssamtal
 
+- Vad görs för hand i dag?
+- Hur hanteras offerter?
+- Vad kostar det – i tid och pengar?
+- Vad har ni försökt?
+
+**Enkelt problem** → lösning och ungefärligt pris direkt → offert.
+**Större problem** → boka lösningsmöte (30 min).
+**Inget problem** → be om ett namn → status Nej.
+$md$, 55),
   ('objection', 'invandning-har-inte-tid', 'Invändning: "Har inte tid"',
 $md$**"Har inte tid."**
 
-"Det är precis därför jag ringer – det handlar om att frigöra tid. Om vi tar 20 minuter nästa vecka och det inte är värt det säger du bara stopp. Passar tisdag eller torsdag bättre?"
+"Det är precis därför jag ringer – det handlar om att få tid tillbaka. 20 minuter nästa vecka, och säger du stopp så är det stopp. Passar tisdag eller torsdag?"
 $md$, 60),
-
   ('objection', 'invandning-skicka-info', 'Invändning: "Skicka info på mejl"',
 $md$**"Skicka info på mejl."**
 
-"Absolut. För att jag ska skicka något relevant – är det {flödet de nämnde} som är mest intressant, eller något annat? … Bra. Jag skickar ett kort exempel i dag, och så bokar vi 20 minuter på fredag så går vi igenom det tillsammans?"
+"Absolut. Vad är det som görs mest för hand hos er? … Bra, då skickar jag ett kort exempel i dag och ringer dig om en vecka." → välj utfallet **Skicka info**.
 $md$, 70),
-
   ('objection', 'invandning-har-redan-nagon', 'Invändning: "Vi har redan någon"',
-$md$**"Vi har redan någon som sköter IT/det där."**
+$md$**"Vi har redan någon som sköter det."**
 
-"Bra – då har ni redan en bra grund. Vi ersätter sällan någon, vi bygger ofta automationerna tillsammans med er IT-partner. Vad gör de för er i dag?"
+"Bra – vi jobbar ofta tillsammans med er IT- eller bokföringspartner. Vad gör de för er i dag?"
 $md$, 80),
-
   ('objection', 'invandning-vad-kostar-det', 'Invändning: "Vad kostar det?"',
 $md$**"Vad kostar det?"**
 
-"En avgränsad automation börjar från 2 900 €. Men först vill jag förstå om det alls lönar sig för er – sparar vi inte minst det dubbla på ett år ska ni inte göra det. Det är det vi räknar på under mötet."
+"Det beror på vad som görs för hand. Ofta handlar det om en fast startkostnad och en liten månadsavgift. Under behovssamtalet räknar vi på om det alls lönar sig för er."
 $md$, 90),
-
-  ('tone', 'skrivregler', 'Skrivregler för AI-texter',
-$md$# Skrivregler
+  ('tone', 'skrivregler', 'Min stil',
+$md$# Min stil
 
 - Finlandssvenska, du-tilltal, korta meningar.
-- Öppningsraden ska vara **specifik** för bolaget – något från deras webbplats, nyheter eller referenser. Aldrig generiskt beröm.
+- Specifikt för bolaget – aldrig generiskt beröm.
 - Inga ord som "revolutionerande", "AI-driven", "synergier".
-- Max 80 ord per mejl. En fråga i slutet.
+- Max 80 ord per mejl. En fråga i slutet. Signatur: Erik, Optely.
 $md$, 100);
+
+-- -----------------------------------------------------------------------------
+-- Dagens kvot: släpp in 8 nya bolag i ringkön så att Ringpasset har något att visa.
+-- (Partnerägda bolag och bygg-bolaget ligger sist / kontaktas inte kallt.)
+-- -----------------------------------------------------------------------------
+
+select public.release_new_calls(8);
 
 commit;

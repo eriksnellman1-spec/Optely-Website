@@ -15,7 +15,7 @@ export default function SettingsPage() {
       icon={Settings}
       emptyTitle="Inställningarna kommer här"
       emptyText="Värdena finns redan i tabellen settings (week_plan, outbound, external_caller_unlock) och kan ändras i Supabase tills vidare."
-      step={4}
+      phase="C"
       features={[
         "Veckoplan: kanal per veckodag",
         "Utskicksleverantör: manuell, Smartlead eller n8n-SMTP",
