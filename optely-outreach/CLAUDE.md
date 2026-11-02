@@ -1,17 +1,30 @@
 # Optely Outreach Runtime (O.R.)
 
 Ett personligt sälj- och outreach-system för Optely (AI- och automationsbyrå i Jakobstad).
-En användare: Erik. Målet: kalla kontakter → varma samtal → bokade discovery-möten.
+En användare: Erik. Målet: återkommande intäkt – kalla kontakter → behovssamtal → kunder.
 
 Den här filen är projektets bestående kontext. Läs den före varje uppgift.
 
-## Säljmodellen (Warm Outbound)
+**Specen för hela säljsystemet ligger i [`docs/saljsystem.md`](docs/saljsystem.md) och är sanningen för vad
+som ska byggas** (kanaler, utfall, statusar, regler, beslut och byggordning). Läs den före varje fas.
 
-1. Leads (svenskspråkiga B2B-bolag i Finland) importeras och berikas.
-2. AI skriver en unik öppningsrad per bolag utifrån hemsidan. Erik godkänner i **AI Gatekeeper**.
-3. Godkända mejl skickas från en separat outreach-domän via en **utbytbar utskicksleverantör**.
-4. Positiva svar blir automatiskt ringuppgifter (databastrigger) → syns överst i **Ringpasset**.
-5. Erik ringer varmt, bokar möte, loggar utfallet.
+## Arbetsregel
+
+- **Fråga alltid med flerval innan du bygger** när något i specen är oklart eller kan tolkas på flera sätt.
+  Gissa aldrig. Lägg till besluten i tabellen "Beslut under bygget" i `docs/saljsystem.md`.
+- Förklara alltid vad ett steg är till för när Erik ska göra något själv. Ett steg i taget.
+
+## Säljmodellen
+
+Flerkanal: kall e-post, kalla samtal, LinkedIn och partner – se `docs/saljsystem.md`. Kärnregler:
+
+1. Ett företag = en rad. Dubbletter (e-postdomän, telefon, namn) stoppas och visas.
+2. Svar i en kanal stoppar alla andra kanaler. Nej / Kontakta ej stoppar allt, permanent.
+3. Partnerägda företag kontaktas inte kallt. Kunder ligger utanför sekvenserna.
+4. Allt som inte kräver Eriks röst eller omdöme körs automatiskt, i hans namn och stil.
+
+**Statusar:** Ny → I sekvens → Svarat → Behovssamtal bokat → Behovssamtal klart → Lösning visad →
+Offert skickad → Kund, samt Vilande, Nej, Kontakta ej, Hos partner.
 
 ## Stack
 
@@ -81,18 +94,10 @@ Känsla: Linear / Attio / Superhuman. Snabbt, tyst, tangentbordsstyrt. Varje vy 
 - Datum: `31.10.2026`, tid: `14:05`, tidszon `Europe/Helsinki`.
 - Valuta: **euro**, format `1 250 €`.
 
-## Moduler & ordning
+## Byggordning
 
-1. **Grund** – projekt, schema, auth, appskal, designsystem, seed *(steg 1)*
-2. **Ringpasset + kontaktvy med tidslinje**
-3. **AI Gatekeeper + outbound-adapter + webhooks (svar → ringlista)**
-4. **Hem / War Room** – veckoplan, kalendersynk, tratt
-5. **Partnernätverk**
-6. **Strategy Room** – KPI:er, kalkylator, veckorapport
-7. **Post-meeting-flöde**
-8. **Låst modul 2027** (extern säljare, låses upp enligt `settings.external_caller_unlock`)
-
-Bygg en modul i taget. Varje modul ska vara körbar och användbar innan nästa påbörjas.
+Faserna A–J står i `docs/saljsystem.md`. Bygg en fas i taget; varje fas ska vara körbar och användbar
+innan nästa påbörjas.
 
 ## Definition of done (varje uppgift)
 
