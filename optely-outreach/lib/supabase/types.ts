@@ -809,6 +809,43 @@ export type Database = {
         }
         Relationships: []
       }
+      notices: {
+        Row: {
+          city: string | null
+          classification: string | null
+          company_id: string | null
+          company_name: string | null
+          contact_id: string | null
+          contact_name: string | null
+          created_at: string | null
+          description: string | null
+          due_at: string | null
+          kind: string | null
+          partner_name: string | null
+          phone: string | null
+          received_at: string | null
+          reply_body: string | null
+          task_id: string | null
+          task_type: Database["public"]["Enums"]["task_type"] | null
+          title: string | null
+        }
+        Relationships: []
+      }
+      partners_due: {
+        Row: {
+          checkin_interval_days: number | null
+          city: string | null
+          contact_name: string | null
+          days_since: number | null
+          email: string | null
+          id: string | null
+          last_checkin_at: string | null
+          name: string | null
+          phone: string | null
+          type: Database["public"]["Enums"]["partner_type"] | null
+        }
+        Relationships: []
+      }
       ringpass_queue: {
         Row: {
           attempt: number | null

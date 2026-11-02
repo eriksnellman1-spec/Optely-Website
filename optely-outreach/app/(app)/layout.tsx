@@ -8,10 +8,11 @@ import { createClient } from "@/lib/supabase/server";
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const supabase = await createClient();
 
-  const [{ data: claims }, openCalls, weekPlan] = await Promise.all([
+  const [{ data: claims }, openCalls, notices, weekPlan] = await Promise.all([
     supabase.auth.getClaims(),
     // Samma urval som Ringpassets kö: öppna samtal/uppföljningar som förfaller i dag.
     supabase.from("ringpass_queue").select("task_id", { count: "exact", head: true }),
+    supabase.from("notices").select("task_id", { count: "exact", head: true }),
     getSetting(supabase, "week_plan"),
   ]);
 
@@ -26,6 +27,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       data={{
         email,
         openCallTasks: openCalls.count ?? 0,
+        noticeCount: notices.count ?? 0,
         dateLabel: formatDate(now),
         weekdayLabel: formatWeekday(now),
         todayPlan: todaysPlan(weekPlan, now),

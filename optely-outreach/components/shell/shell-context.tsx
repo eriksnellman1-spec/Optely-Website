@@ -10,7 +10,9 @@ type Dialog = "palette" | "shortcuts" | "new-contact" | "partner-checkin" | null
 
 type ShellContextValue = {
   dialog: Dialog;
-  openDialog: (d: Exclude<Dialog, null>) => void;
+  /** Valfri data till dialogen, t.ex. { partnerId } för förvald partner. */
+  dialogPayload: Record<string, string> | null;
+  openDialog: (d: Exclude<Dialog, null>, payload?: Record<string, string>) => void;
   closeDialog: () => void;
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
@@ -35,11 +37,15 @@ function isTypingTarget(target: EventTarget | null) {
 export function ShellProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [dialog, setDialog] = useState<Dialog>(null);
+  const [dialogPayload, setDialogPayload] = useState<Record<string, string> | null>(null);
   const [goPending, setGoPending] = useState(false);
   const goTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorageBoolean("or:sidebar-collapsed", false);
 
-  const openDialog = useCallback((d: Exclude<Dialog, null>) => setDialog(d), []);
+  const openDialog = useCallback((d: Exclude<Dialog, null>, payload?: Record<string, string>) => {
+    setDialogPayload(payload ?? null);
+    setDialog(d);
+  }, []);
   const closeDialog = useCallback(() => setDialog(null), []);
   const toggleSidebar = useCallback(
     () => setSidebarCollapsed(!sidebarCollapsed),
@@ -100,8 +106,8 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
   }, [dialog, router, toggleSidebar]);
 
   const value = useMemo(
-    () => ({ dialog, openDialog, closeDialog, sidebarCollapsed, toggleSidebar, goPending }),
-    [dialog, openDialog, closeDialog, sidebarCollapsed, toggleSidebar, goPending],
+    () => ({ dialog, dialogPayload, openDialog, closeDialog, sidebarCollapsed, toggleSidebar, goPending }),
+    [dialog, dialogPayload, openDialog, closeDialog, sidebarCollapsed, toggleSidebar, goPending],
   );
 
   return <ShellContext value={value}>{children}</ShellContext>;

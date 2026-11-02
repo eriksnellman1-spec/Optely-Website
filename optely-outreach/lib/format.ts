@@ -77,3 +77,21 @@ export function formatRelative(d: DateInput | null | undefined, now: Date = new 
   if (days < 30) return `${days} d sedan`;
   return formatDate(date);
 }
+
+/** Början av morgondagen i Helsingfors som ISO-sträng – gränsen för "i dag" i frågor. */
+export function startOfTomorrowHelsinki(now: Date = new Date()): string {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: TIME_ZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      hour12: false,
+    })
+      .formatToParts(now)
+      .map((p) => [p.type, p.value]),
+  );
+  const offsetH = (Number(parts.hour) % 24 - now.getUTCHours() + 24) % 24; // 2 eller 3 h
+  return new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day) + 1, -offsetH)).toISOString();
+}

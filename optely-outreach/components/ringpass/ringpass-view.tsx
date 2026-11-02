@@ -97,18 +97,23 @@ export function RingpassView({
   scripts,
   sendInfoTemplate,
   todo,
+  initialTaskId = null,
 }: {
   queue: QueueItem[];
   timeline: Record<string, TimelineEvent[]>;
   scripts: ScriptEntry[];
   sendInfoTemplate: string;
   todo: TodoData;
+  /** Förvalt samtal, t.ex. från "Ring nu" i idag-listan. */
+  initialTaskId?: string | null;
 }) {
   // Optimistiskt borttagna uppgifter – servern bekräftar via revalidering.
   const [removed, setRemoved] = useState<Set<string>>(() => new Set());
   const visible = useMemo(() => queue.filter((q) => !removed.has(q.taskId)), [queue, removed]);
 
-  const [selectedId, setSelectedId] = useState<string | null>(queue[0]?.taskId ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    queue.find((q) => q.taskId === initialTaskId)?.taskId ?? queue[0]?.taskId ?? null,
+  );
   const selected = visible.find((q) => q.taskId === selectedId) ?? visible[0] ?? null;
 
   const [dialog, setDialog] = useState<Outcome | null>(null);

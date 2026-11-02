@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 import { RingpassView, type QueueItem, type TimelineEvent } from "@/components/ringpass/ringpass-view";
-import type { TodoData } from "@/components/ringpass/todo-panel";
 import { PageHeader } from "@/components/ui/page-header";
+import { startOfTomorrowHelsinki } from "@/lib/format";
+import { loadTodo } from "@/lib/queries/todo";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Ringpass" };
@@ -21,28 +22,8 @@ const CALL_OUTCOME: Record<string, string> = {
   do_not_call: "Ring ej",
 };
 
-/** Början av morgondagen i Helsingfors som ISO-sträng (gräns för "i dag"). */
-function startOfTomorrowHelsinki() {
-  const now = new Date();
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Europe/Helsinki",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      hour12: false,
-    })
-      .formatToParts(now)
-      .map((p) => [p.type, p.value]),
-  );
-  // Offset mellan UTC och Helsingfors just nu (2 eller 3 h).
-  const offsetH = (Number(parts.hour) - now.getUTCHours() + 24) % 24;
-  const tomorrow = new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day) + 1, -offsetH));
-  return tomorrow.toISOString();
-}
-
-export default async function RingpassPage() {
+export default async function RingpassPage({ searchParams }: PageProps<"/ringpass">) {
+  const { task } = await searchParams;
   const supabase = await createClient();
   const tomorrow = startOfTomorrowHelsinki();
 
@@ -55,7 +36,7 @@ export default async function RingpassPage() {
   const companyIds = [...new Set(queue.map((q) => q.company_id))];
   const none = Promise.resolve({ data: [], error: null });
 
-  const [upcomingRes, scriptsRes, infoRes, smsRes, meetingsRes, linkedinRes, callsRes, emailsRes, repliesRes] =
+  const [upcomingRes, scriptsRes, infoRes, todo, callsRes, emailsRes, repliesRes] =
     await Promise.all([
       supabase
         .from("tasks")
@@ -70,25 +51,7 @@ export default async function RingpassPage() {
         .eq("is_active", true)
         .order("sort_order"),
       supabase.from("context_entries").select("content").eq("slug", "mejl-skicka-info").maybeSingle(),
-      supabase
-        .from("sms_messages")
-        .select("id, to_phone, body, due_at, template, company:companies(name), contact:contacts(first_name, last_name)")
-        .eq("status", "pending")
-        .lt("due_at", tomorrow)
-        .order("due_at"),
-      supabase
-        .from("meetings")
-        .select("id, title, starts_at, ends_at, location, company:companies(name), contact:contacts(first_name, last_name, email, phone)")
-        .eq("status", "scheduled")
-        .is("calendar_added_at", null)
-        .order("starts_at"),
-      supabase
-        .from("tasks")
-        .select("id, title, description, company:companies(name), contact:contacts(first_name, last_name)")
-        .eq("status", "open")
-        .eq("type", "linkedin")
-        .lt("due_at", tomorrow)
-        .order("due_at"),
+      loadTodo(supabase, tomorrow),
       companyIds.length
         ? supabase
             .from("calls")
@@ -135,38 +98,6 @@ export default async function RingpassPage() {
   for (const id of Object.keys(timeline)) {
     timeline[id] = timeline[id].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 6);
   }
-
-  const name = (k: { first_name: string; last_name: string | null } | null) =>
-    k ? [k.first_name, k.last_name].filter(Boolean).join(" ") : null;
-
-  const todo: TodoData = {
-    sms: (smsRes.data ?? []).map((s) => ({
-      id: s.id,
-      toPhone: s.to_phone,
-      body: s.body,
-      dueAt: s.due_at,
-      kind: s.template === "sms-bokat" ? "Bekräftelse" : "Efter obesvarat samtal",
-      companyName: s.company?.name ?? "",
-      contactName: name(s.contact),
-    })),
-    meetings: (meetingsRes.data ?? []).map((m) => ({
-      id: m.id,
-      title: m.title,
-      startsAt: m.starts_at,
-      endsAt: m.ends_at,
-      location: m.location,
-      companyName: m.company?.name ?? "",
-      contactName: name(m.contact),
-      contactEmail: m.contact?.email ?? null,
-      contactPhone: m.contact?.phone ?? null,
-    })),
-    linkedin: (linkedinRes.data ?? []).map((t) => ({
-      id: t.id,
-      title: t.title,
-      companyName: t.company?.name ?? "",
-      contactName: name(t.contact),
-    })),
-  };
 
   const items: QueueItem[] = queue.map((q) => ({
     taskId: q.task_id,
@@ -217,6 +148,7 @@ export default async function RingpassPage() {
         scripts={scriptsRes.data ?? []}
         sendInfoTemplate={infoRes.data?.content ?? ""}
         todo={todo}
+        initialTaskId={typeof task === "string" ? task : null}
       />
     </div>
   );

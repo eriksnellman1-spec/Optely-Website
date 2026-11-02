@@ -21,7 +21,7 @@ export type NavItem = {
 };
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "Hem", icon: Home, key: "h", description: "War Room – dagens läge", mobile: true },
+  { href: "/", label: "Hem", icon: Home, key: "h", description: "Idag-lista – allt som ska göras i dag", mobile: true },
   { href: "/ringpass", label: "Ringpass", icon: Phone, key: "r", description: "Varma samtal att ringa", mobile: true },
   { href: "/outreach", label: "Outreach", icon: Send, key: "o", description: "AI Gatekeeper och kampanjer", mobile: true },
   { href: "/contacts", label: "Kontakter", icon: Building2, key: "k", description: "Bolag och kontakter", mobile: true },

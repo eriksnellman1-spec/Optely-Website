@@ -11,7 +11,7 @@ import { NAV_ITEMS, isActive } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { useShell } from "./shell-context";
 
-export function Sidebar({ openCallTasks }: { openCallTasks: number }) {
+export function Sidebar({ openCallTasks, noticeCount }: { openCallTasks: number; noticeCount: number }) {
   const pathname = usePathname();
   const { sidebarCollapsed: collapsed, toggleSidebar, openDialog } = useShell();
 
@@ -42,7 +42,12 @@ export function Sidebar({ openCallTasks }: { openCallTasks: number }) {
         {NAV_ITEMS.map((item) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
-          const badge = item.href === "/ringpass" && openCallTasks > 0 ? openCallTasks : null;
+          const badge =
+            item.href === "/ringpass" && openCallTasks > 0
+              ? openCallTasks
+              : item.href === "/" && noticeCount > 0
+                ? noticeCount
+                : null;
 
           const link = (
             <Link

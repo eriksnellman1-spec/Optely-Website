@@ -11,7 +11,7 @@ import { useShell } from "./shell-context";
 const MOBILE_ITEMS = NAV_ITEMS.filter((n) => n.mobile);
 
 /** Bottenrad på mobil: de fyra viktigaste vyerna + sök (resten nås via paletten). */
-export function MobileNav({ openCallTasks }: { openCallTasks: number }) {
+export function MobileNav({ openCallTasks, noticeCount }: { openCallTasks: number; noticeCount: number }) {
   const pathname = usePathname();
   const { openDialog } = useShell();
 
@@ -23,7 +23,12 @@ export function MobileNav({ openCallTasks }: { openCallTasks: number }) {
       {MOBILE_ITEMS.map((item) => {
         const active = isActive(pathname, item.href);
         const Icon = item.icon;
-        const badge = item.href === "/ringpass" && openCallTasks > 0 ? openCallTasks : null;
+        const badge =
+          item.href === "/ringpass" && openCallTasks > 0
+            ? openCallTasks
+            : item.href === "/" && noticeCount > 0
+              ? noticeCount
+              : null;
         return (
           <Link
             key={item.href}

@@ -149,6 +149,12 @@ Allt ska hänga ihop och fungera smidigt, också i dashboarden.
 | 2026-11-02 | "Nej, inte nu" | Status Vilande till valt datum; samtalet ligger färdigt då. |
 | 2026-11-02 | Bekräftelse vid "Bokat" | SMS om mobilnummer finns, annars mejl. |
 | 2026-11-02 | "Skicka info" | Mallen öppnas i dialogen och skrivs/justeras för hand varje gång. |
+| 2026-11-02 | Var ligger idag-listan? (fas C) | På Hem. Ringpasset finns kvar som läge för att ringa ("Starta ringpass"). |
+| 2026-11-02 | Vad visar idag-listan? | Svar och partnertips, dagens/morgondagens möten, ringpass (antal + nästa), Att göra för hand, partner som behöver höras. |
+| 2026-11-02 | Notiser vid svar och tips | Bara i appen: siffra vid Hem (obehandlade) + toast när något kommer in medan appen är öppen. |
+| 2026-11-02 | Ordning i idag-listan | Efter typ: svar/tips → möten → ringpass → att göra → partner. |
+| 2026-11-02 | Möten i idag-listan | Enkla knappar: Genomfört (→ Behovssamtal klart), Dök inte upp (→ nytt samtal först i kön). Resten i fas I. |
+| 2026-11-02 | När ska en partner höras? | När senaste check-in är äldre än partnerns intervall (standard 30 dagar) eller aldrig skett. |
 
 ## Byggordning (faser)
 
