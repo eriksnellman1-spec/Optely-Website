@@ -10,6 +10,7 @@ export const COMPANY_STATUS: Record<Enums<"company_status">, { label: string; to
   meeting_booked: { label: "Möte bokat", tone: "brand" },
   customer: { label: "Kund", tone: "brand" },
   lost: { label: "Förlorad", tone: "red" },
+  nurture: { label: "Vilande", tone: "yellow" },
 };
 
 export const COMPANY_STATUS_ORDER: Enums<"company_status">[] = [
@@ -20,6 +21,7 @@ export const COMPANY_STATUS_ORDER: Enums<"company_status">[] = [
   "warm",
   "meeting_booked",
   "customer",
+  "nurture",
   "lost",
 ];
 
@@ -31,6 +33,7 @@ export const CONTEXT_KIND: Record<Enums<"context_kind">, string> = {
   script: "Manus",
   objection: "Invändningar",
   tone: "Ton & skrivregler",
+  template: "Mejlmallar",
   other: "Övrigt",
 };
 
@@ -42,6 +45,7 @@ export const CONTEXT_KIND_ORDER: Enums<"context_kind">[] = [
   "script",
   "objection",
   "tone",
+  "template",
   "other",
 ];
 

@@ -30,7 +30,7 @@ Den här filen är projektets bestående kontext. Läs den före varje uppgift.
 - **Server först.** Läs data i Server Components; mutationer via Server Actions. Klientkomponenter bara där interaktivitet kräver det.
 - **Optimistiska uppdateringar** för allt Erik klickar på i Ringpasset och Gatekeeper – UI:t ska aldrig vänta.
 - **Utskick är en adapter.** All kod som skickar mejl går via `lib/outbound/provider.ts` (interface) med implementationer `smartlead`, `n8n-smtp`, `manual`. Vald leverantör läses från `settings.outbound.provider`. Ingen annan kod får känna till Smartlead.
-- **Webhooks från n8n**: varje route under `app/api/webhooks/*` ska (1) verifiera headern `x-optely-secret` mot `WEBHOOK_SECRET`, (2) logga rå payload i `webhook_events`, (3) bearbeta, (4) sätta `processed_at` eller `error`. Använd service role-klienten bara i dessa routes.
+- **Webhooks från n8n**: varje route under `app/api/webhooks/*` ska (1) verifiera headern `x-optely-secret` mot `WEBHOOK_SECRET`, (2) logga rå payload i `webhook_events`, (3) bearbeta, (4) sätta `processed_at` eller `error`. Använd service role-klienten bara i dessa routes och i `app/api/cron/*` (skyddas med `CRON_SECRET`).
 - **Säkerhet**: hela appen bakom inloggning (middleware). Publik signup är avstängd i Supabase. `SUPABASE_SERVICE_ROLE_KEY` får aldrig nå klienten.
 - **Avregistrering respekteras alltid**: kontakter/bolag med `do_not_contact = true` får aldrig hamna i en utskicksbatch.
 

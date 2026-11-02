@@ -88,8 +88,38 @@ npm run dev
 | `c`            | Ny kontakt                                  |
 | `[`            | Fäll ihop / ut sidomenyn                    |
 | `⌘S`           | Spara (Företagshjärnan)                     |
+| `1`–`7`        | Utfall i Ringpasset                         |
 
-## 5. Webhooks från n8n
+## 5. Ringpasset och uppföljningssekvensen
+
+Kalla bolag följer en sekvens på 8 steg. Ringdagar och mejldagar styrs av `settings.week_plan`:
+
+| Steg | Kanal | Vad |
+|---|---|---|
+| 1 | mejl | Mejl 1 via AI Gatekeeper – sekvensen startar när det köas/skickas |
+| 2 | samtal | Samtal 1 |
+| 3 | samtal | Samtal 2 + röstmeddelande + "ringde nyss"-mejl |
+| 4 | mejl | Case-mejl |
+| 5 | samtal | Samtal 3 |
+| 6 | samtal | Samtal 4 + röstmeddelande |
+| 7 | mejl | Avslutsmejl |
+| 8 | samtal | Sista samtalet → vilande 90 dagar, sedan tillbaka som `new` |
+
+Mejlmallarna (`kind = 'template'`) redigeras i Företagshjärnan. Logiken ligger i databasen
+(`apply_call_outcome`, `run_daily_sequence` i `0003_ringpass_sequence.sql`).
+
+**Dagligt jobb:** `vercel.json` kör `GET /api/cron/sequence` kl. 04:15 UTC. Vercel skickar
+`Authorization: Bearer $CRON_SECRET` – sätt `CRON_SECRET` i Vercel. Jobbet är idempotent och
+loggas i `webhook_events` (`source = 'cron'`). Kör manuellt:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" https://optely-outreach.vercel.app/api/cron/sequence
+```
+
+**Ringpasset (`/ringpass`):** `j`/`k` byter samtal, `1`–`7` loggar utfall, `v` röstmeddelande,
+`n` anteckning, `m` visar/döljer manus.
+
+## 6. Webhooks från n8n
 
 `POST /api/webhooks/n8n` med headern `x-optely-secret: <WEBHOOK_SECRET>` och JSON-kropp.
 Händelsen loggas i `webhook_events`. Bearbetning byggs i steg 3.
