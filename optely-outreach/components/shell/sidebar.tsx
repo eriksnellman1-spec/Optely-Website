@@ -9,11 +9,14 @@ import { Kbd } from "@/components/ui/kbd";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { NAV_ITEMS, isActive } from "@/lib/nav";
 import { cn } from "@/lib/utils";
+import { useOffer } from "@/components/offer/offer-context";
 import { useShell } from "./shell-context";
 
 export function Sidebar({ openCallTasks }: { openCallTasks: number }) {
   const pathname = usePathname();
   const { sidebarCollapsed: collapsed, toggleSidebar, openDialog } = useShell();
+  const { offer } = useOffer();
+  const items = NAV_ITEMS.filter((n) => !(n.optelyOnly && offer === "sba"));
 
   return (
     <aside
@@ -39,10 +42,11 @@ export function Sidebar({ openCallTasks }: { openCallTasks: number }) {
       </div>
 
       <nav className={cn("flex flex-1 flex-col gap-0.5 px-2", collapsed && "px-1.5")} aria-label="Huvudmeny">
-        {NAV_ITEMS.map((item) => {
+        {items.map((item, index) => {
           const active = isActive(pathname, item.href);
           const Icon = item.icon;
           const badge = item.href === "/ringpass" && openCallTasks > 0 ? openCallTasks : null;
+          const firstMore = item.more && !items[index - 1]?.more;
 
           const link = (
             <Link
@@ -67,8 +71,17 @@ export function Sidebar({ openCallTasks }: { openCallTasks: number }) {
             </Link>
           );
 
+          const header =
+            firstMore && !collapsed ? (
+              <div className="mt-3 mb-1 px-2 text-[11px] font-medium tracking-wide text-subtle uppercase">Mer</div>
+            ) : firstMore ? (
+              <div className="mx-2 my-2 h-px bg-border" />
+            ) : null;
+
           return collapsed ? (
-            <Tooltip key={item.href}>
+            <div key={item.href}>
+              {header}
+            <Tooltip>
               <TooltipTrigger asChild>{link}</TooltipTrigger>
               <TooltipContent side="right" className="flex items-center gap-2">
                 {item.label}
@@ -76,8 +89,12 @@ export function Sidebar({ openCallTasks }: { openCallTasks: number }) {
                 <Kbd keys={["g", item.key]} />
               </TooltipContent>
             </Tooltip>
+            </div>
           ) : (
-            <div key={item.href}>{link}</div>
+            <div key={item.href}>
+              {header}
+              {link}
+            </div>
           );
         })}
       </nav>

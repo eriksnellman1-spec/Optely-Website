@@ -2,8 +2,11 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
+import { OfferProvider } from "@/components/offer/offer-context";
 import { getPublicSupabaseEnv } from "@/lib/env";
+import type { OfferFilter } from "@/lib/offer";
 import { createClient } from "@/lib/supabase/browser";
 import { CommandPalette } from "./command-palette";
 import { MobileNav } from "./mobile-nav";
@@ -17,23 +20,53 @@ import { Topbar } from "./topbar";
 export type ShellData = {
   email: string | null;
   openCallTasks: number;
+  /** Obehandlade svar och partnertips (siffran vid Hem). */
+  noticeCount: number;
   dateLabel: string;
   weekdayLabel: string;
   todayPlan: { channel: string; label: string } | null;
+  /** Erbjudande från cookien (URL:en går före i klienten). */
+  offer: OfferFilter;
 };
 
-/** Håller badgen för Ringpass aktuell när triggern skapar nya ringuppgifter. */
+const CLASSIFICATION: Record<string, string> = {
+  positive: "Intresserad",
+  neutral: "Neutralt",
+  negative: "Nej tack",
+  unsubscribe: "Avregistrering",
+};
+
+/** Håller siffrorna aktuella och visar en toast när ett svar eller partnertips kommer in. */
 function useTasksRealtime() {
   const router = useRouter();
   useEffect(() => {
     if (!getPublicSupabaseEnv()) return;
     const supabase = createClient();
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const refresh = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => router.refresh(), 300);
+    };
     const channel = supabase
       .channel("shell-tasks")
-      .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => router.refresh(), 300);
+      .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, (payload) => {
+        const row = payload.new as { title?: unknown } | null;
+        if (payload.eventType === "INSERT" && typeof row?.title === "string" && row.title.startsWith("Partnertips")) {
+          toast.success("Nytt partnertips", { description: row.title.replace(/^Partnertips:\s*/, "") });
+        }
+        refresh();
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "replies" }, (payload) => {
+        const row = payload.new as { classification?: unknown; from_address?: unknown } | null;
+        const kind = typeof row?.classification === "string" ? row.classification : "";
+        if (kind !== "out_of_office" && kind !== "unclassified") {
+          toast("Nytt svar", {
+            description: [CLASSIFICATION[kind], typeof row?.from_address === "string" ? row.from_address : null]
+              .filter(Boolean)
+              .join(" · "),
+          });
+        }
+        refresh();
       })
       .subscribe();
     return () => {
@@ -47,6 +80,7 @@ export function AppShell({ data, children }: { data: ShellData; children: React.
   useTasksRealtime();
 
   return (
+    <OfferProvider initial={data.offer}>
     <ShellProvider>
       <div className="flex min-h-dvh">
         <Sidebar openCallTasks={data.openCallTasks} />
@@ -68,5 +102,6 @@ export function AppShell({ data, children }: { data: ShellData; children: React.
       <NewContactDialog />
       <PartnerCheckinDialog />
     </ShellProvider>
+    </OfferProvider>
   );
 }

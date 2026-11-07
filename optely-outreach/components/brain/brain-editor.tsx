@@ -35,7 +35,18 @@ const toDraft = (e: ContextEntry): Draft => ({
 const sameDraft = (a: Draft, b: Draft) =>
   a.title === b.title && a.content === b.content && a.kind === b.kind && a.isActive === b.isActive;
 
-export function BrainEditor({ entries: initial, initialId }: { entries: ContextEntry[]; initialId: string | null }) {
+export function BrainEditor({
+  entries: initial,
+  initialId,
+  offer = null,
+  defaultKind = "other",
+}: {
+  entries: ContextEntry[];
+  initialId: string | null;
+  /** Nya poster får det här erbjudandet (null = gäller båda). */
+  offer?: "optely" | "sba" | null;
+  defaultKind?: Kind;
+}) {
   const [entries, setEntries] = useState(initial);
   const [selectedId, setSelectedId] = useState<string | null>(
     initial.find((e) => e.id === initialId)?.id ?? initial[0]?.id ?? null,
@@ -135,7 +146,7 @@ export function BrainEditor({ entries: initial, initialId }: { entries: ContextE
 
   function create() {
     startCreating(async () => {
-      const result = await createContextEntry({ title: "Ny post", kind: draft?.kind ?? "other" });
+      const result = await createContextEntry({ title: "Ny post", kind: draft?.kind ?? defaultKind, offer });
       if (!result.ok) {
         toast.error(result.error);
         return;
@@ -180,8 +191,8 @@ export function BrainEditor({ entries: initial, initialId }: { entries: ContextE
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-[240px_1fr]">
-      <aside className="space-y-4 md:sticky md:top-20 md:self-start">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[240px_minmax(0,1fr)]">
+      <aside className="min-w-0 space-y-4 md:sticky md:top-20 md:self-start">
         <Button variant="outline" size="sm" className="w-full" onClick={create} disabled={creating}>
           <FilePlus2 />
           {creating ? "Skapar…" : "Ny post"}
