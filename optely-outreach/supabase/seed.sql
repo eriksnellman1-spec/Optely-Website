@@ -36,6 +36,55 @@ delete from public.context_entries where slug in (
   'invandning-har-inte-tid', 'invandning-skicka-info', 'invandning-har-redan-nagon', 'invandning-vad-kostar-det',
   'skrivregler');
 
+-- SMS- och mejlmallarna som Ringpasset och den här seeden använder (samma som i 0005).
+-- Läggs bara till om de saknas – redigerade mallar i Företagshjärnan skrivs inte över.
+insert into public.context_entries (kind, slug, title, content, sort_order, offer) values
+  ('template', 'sms-ej-svar', 'SMS: efter obesvarat samtal (försök 1)',
+$md$Hej {{förnamn}}! Erik från Optely här, jag försökte ringa dig i går. Vi hjälper småföretag med det som görs för hand vid sidan om jobbet. Jag ringer igen om ett par dagar – eller svara här när det passar. /Erik$md$, 300, 'optely'),
+  ('template', 'sms-bokat', 'SMS: bekräftelse behovssamtal',
+$md$Hej {{förnamn}}! Tack för samtalet. Då hörs vi {{tid}} ({{plats}}), ca 20 minuter. Hälsningar Erik, Optely$md$, 310, 'optely'),
+  ('template', 'mejl-bokat', 'Mejl: bekräftelse behovssamtal (om mobilnummer saknas)',
+$md$Ämne: Vi hörs {{tid}}
+Hej {{förnamn}},
+
+Tack för samtalet! Då hörs vi {{tid}} ({{plats}}), ca 20 minuter.
+
+Fundera gärna på vad som görs för hand hos {{bolag}} i dag – listor, offerter, rapporter – så tittar vi på det tillsammans.
+
+Hälsningar,
+Erik
+Optely
+$md$, 320, 'optely'),
+  ('template', 'mejl-sista', 'Mejl: sista mejlet efter 3 försök',
+$md$Ämne: Jag slutar ringa
+Hej {{förnamn}},
+
+Jag har försökt nå dig några gånger utan att lyckas, så jag slutar ringa nu.
+
+Kort om varför: vi hjälper småföretag med det som görs för hand vid sidan om jobbet. Hos Hagnäs Tyre Center skapas däcklistan nu automatiskt i stället för för hand.
+
+Om det låter intressant räcker det med ett kort svar, så hörs vi när det passar dig.
+
+Hälsningar,
+Erik
+Optely
+$md$, 330, 'optely'),
+  ('template', 'mejl-skicka-info', 'Mejl: "Skicka info" (förifyllt – justeras varje gång)',
+$md$Ämne: Som utlovat – kort om Optely
+Hej {{förnamn}},
+
+Tack för pratstunden! Som utlovat, kort om vad vi gör: vi hjälper småföretag med det som görs för hand vid sidan om jobbet – listor, rapporter, offerter.
+
+Ett exempel: hos Hagnäs Tyre Center skapas däcklistan nu automatiskt.
+
+Jag ringer dig igen om en vecka och hör vad du tycker.
+
+Hälsningar,
+Erik
+Optely
+$md$, 340, 'optely')
+on conflict (slug) do nothing;
+
 create function pg_temp.co(n int) returns uuid language sql immutable as
   $$ select ('00000000-0000-4000-a001-' || lpad(n::text, 12, '0'))::uuid $$;
 create function pg_temp.ct(n int) returns uuid language sql immutable as
