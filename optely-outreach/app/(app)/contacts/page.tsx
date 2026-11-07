@@ -7,10 +7,11 @@ import { OpenDialogButton } from "@/components/shell/open-dialog-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { COMPANY_STATUS, COMPANY_STATUS_ORDER } from "@/lib/labels";
+import { getOfferFilter } from "@/lib/offer-server";
 import { createClient } from "@/lib/supabase/server";
 import type { Enums } from "@/lib/supabase/types";
 
-export const metadata: Metadata = { title: "Kontakter" };
+export const metadata: Metadata = { title: "Företag" };
 
 type Status = Enums<"company_status">;
 const isStatus = (v: unknown): v is Status => typeof v === "string" && v in COMPANY_STATUS;
@@ -21,22 +22,26 @@ export default async function ContactsPage({ searchParams }: PageProps<"/contact
   const status = isStatus(first(params.status)) ? (first(params.status) as Status) : null;
   const city = first(params.city)?.trim() || null;
   const q = first(params.q)?.trim() || "";
+  const offer = await getOfferFilter(searchParams);
 
   const supabase = await createClient();
 
   let query = supabase
     .from("company_overview")
-    .select("id, name, city, industry, status, do_not_contact, contact_count, open_task_count, last_activity_at")
+    .select("id, name, city, industry, status, do_not_contact, contact_count, open_task_count, last_activity_at, offer")
     .order("last_activity_at", { ascending: false, nullsFirst: false })
     .order("name")
     .limit(500);
   if (status) query = query.eq("status", status);
+  if (offer !== "all") query = query.eq("offer", offer);
   if (city) query = query.eq("city", city);
   if (q) query = query.ilike("name", `%${q.replace(/[%,()*\\]/g, " ")}%`);
 
   const [companiesRes, facetsRes] = await Promise.all([
     query,
-    supabase.from("companies").select("status, city").limit(5000),
+    offer === "all"
+      ? supabase.from("companies").select("status, city").limit(5000)
+      : supabase.from("companies").select("status, city").eq("offer", offer).limit(5000),
   ]);
 
   if (companiesRes.error || facetsRes.error) {
@@ -62,7 +67,7 @@ export default async function ContactsPage({ searchParams }: PageProps<"/contact
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Kontakter"
+        title="Företag"
         description={
           <>
             <span className="font-mono tabular-nums">{total}</span> bolag i registret

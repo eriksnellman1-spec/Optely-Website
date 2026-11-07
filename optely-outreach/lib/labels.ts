@@ -39,6 +39,7 @@ export const CONTEXT_KIND: Record<Enums<"context_kind">, string> = {
   case: "Case",
   script: "Manus",
   objection: "Invändningar",
+  sequence: "E-postsekvens",
   tone: "Ton & skrivregler",
   template: "Mejlmallar",
   other: "Övrigt",
@@ -51,6 +52,7 @@ export const CONTEXT_KIND_ORDER: Enums<"context_kind">[] = [
   "case",
   "script",
   "objection",
+  "sequence",
   "tone",
   "template",
   "other",
@@ -66,9 +68,35 @@ export const PARTNER_TYPE: Record<Enums<"partner_type">, string> = {
 
 export const CHANNEL_LABEL: Record<string, string> = {
   email: "Mejl",
-  phone: "Ringpass",
-  partners: "Partners",
+  phone: "Samtal",
+  partners: "Partner",
   strategy: "Strategi",
   linkedin: "LinkedIn",
   off: "Ledigt",
 };
+
+export const CALL_OUTCOME_LABEL: Record<string, string> = {
+  no_answer: "Ej svar",
+  voicemail: "Röstmeddelande",
+  callback: "Ring senare",
+  interested: "Intresserad",
+  not_interested: "Inte intresserad",
+  meeting_booked: "Bokat",
+  wrong_person: "Fel person",
+  send_info: "Skicka info",
+  not_now: "Nej, inte nu",
+  no_need: "Nej, inget behov",
+  do_not_call: "Ring ej",
+};
+
+export const DEAL_STAGE_LABEL: Record<string, string> = {
+  kontaktad: "Kontaktad",
+  svar: "Svar",
+  mote_bokat: "Möte bokat",
+  mote_hallet: "Möte hållet",
+  offert: "Offert",
+  kund: "Kund",
+  forlorad: "Förlorad",
+};
+
+export const PIPELINE_STAGES = ["kontaktad", "svar", "mote_bokat", "mote_hallet", "offert", "kund"] as const;

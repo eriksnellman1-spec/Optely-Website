@@ -5,9 +5,10 @@ import { ChevronRight, PanelRightClose, PanelRightOpen, ScrollText } from "lucid
 
 import { useLocalStorageBoolean } from "@/components/shell/use-local-storage";
 import { Kbd } from "@/components/ui/kbd";
+import { OfferBadge } from "@/components/offer/offer-badge";
 import { cn } from "@/lib/utils";
 
-export type ScriptEntry = { id: string; kind: string; title: string; content: string };
+export type ScriptEntry = { id: string; kind: string; title: string; content: string; offer: "optely" | "sba" | null };
 
 /** Enkel markdown: rubriker (#), fetstil (**), listor och stycken. */
 function Markdown({ text }: { text: string }) {
@@ -43,11 +44,14 @@ export function ScriptPanel({
   entries,
   firstName,
   companyName,
+  offer,
   className,
 }: {
   entries: ScriptEntry[];
   firstName: string | null;
   companyName: string;
+  /** Bolagets erbjudande – visar rätt manus (Optely eller SBA). */
+  offer: "optely" | "sba" | null;
   className?: string;
 }) {
   const [collapsed, setCollapsed] = useLocalStorageBoolean("or:script-collapsed", false);
@@ -70,8 +74,9 @@ export function ScriptPanel({
   const fill = (s: string) =>
     s.replaceAll("{förnamn}", firstName ?? "…").replaceAll("{bolag}", companyName).replaceAll("{{förnamn}}", firstName ?? "…");
 
-  const scripts = entries.filter((e) => e.kind === "script");
-  const objections = entries.filter((e) => e.kind === "objection");
+  const forOffer = entries.filter((e) => e.offer === null || offer === null || e.offer === offer);
+  const scripts = forOffer.filter((e) => e.kind === "script");
+  const objections = forOffer.filter((e) => e.kind === "objection");
 
   if (collapsed) {
     return (
@@ -97,6 +102,7 @@ export function ScriptPanel({
           <span className="flex items-center gap-2 text-sm font-medium">
             <ScrollText className="size-4 text-muted-foreground" />
             Manus
+            <OfferBadge offer={offer} />
           </span>
           <button
             type="button"
@@ -111,7 +117,7 @@ export function ScriptPanel({
         <div className="max-h-[70vh] space-y-4 overflow-y-auto p-3">
           {entries.length === 0 && (
             <p className="text-sm text-subtle">
-              Inget manus ännu. Lägg till ett under Företagshjärnan (typ &quot;Manus&quot; eller &quot;Invändningar&quot;).
+              Inget manus för det här erbjudandet ännu. Lägg till ett under Manus och sekvenser.
             </p>
           )}
           {scripts.map((s) => (

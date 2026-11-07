@@ -1,300 +1,148 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import {
-  CalendarClock,
-  CheckCircle2,
-  Handshake,
-  MessageSquareReply,
-  Phone,
-  PhoneCall,
-} from "lucide-react";
+import { ArrowDownRight, ArrowRight, ArrowUpRight, BarChart3 } from "lucide-react";
 
-import { MeetingActions, TaskDoneButton } from "@/components/home/row-actions";
-import { TodoPanel } from "@/components/ringpass/todo-panel";
-import { OpenDialogButton } from "@/components/shell/open-dialog-button";
-import { Button } from "@/components/ui/button";
+import { OfferBadge } from "@/components/offer/offer-badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Kbd } from "@/components/ui/kbd";
 import { PageHeader } from "@/components/ui/page-header";
-import { StatusDot } from "@/components/ui/status-dot";
-import { formatDate, formatRelative, formatTime, formatWeekday, startOfTomorrowHelsinki } from "@/lib/format";
-import { PARTNER_TYPE } from "@/lib/labels";
-import { loadTodo } from "@/lib/queries/todo";
+import { formatDate, isoWeek } from "@/lib/format";
+import { OFFER_LABEL, offersFor } from "@/lib/offer";
+import { getOfferFilter } from "@/lib/offer-server";
+import { CHANNEL_NAME, loadWeeklyStats, per100 } from "@/lib/queries/stats";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Hem" };
+export const metadata: Metadata = { title: "Översikt" };
 
-const REPLY_LABEL: Record<string, string> = {
-  positive: "Intresserad",
-  neutral: "Neutralt svar",
-};
-
-function Section({
-  title,
-  icon: Icon,
-  count,
-  action,
-  children,
-  tone,
-}: {
-  title: string;
-  icon: typeof Phone;
-  count?: number;
-  action?: React.ReactNode;
-  children: React.ReactNode;
-  tone?: "green";
-}) {
+function Metric({ label, value, previous }: { label: string; value: number; previous: number }) {
+  const diff = value - previous;
+  const Icon = diff > 0 ? ArrowUpRight : diff < 0 ? ArrowDownRight : ArrowRight;
   return (
-    <section
-      className={cn(
-        "rounded-lg border border-border bg-surface",
-        tone === "green" && "border-status-green/30 bg-status-green/5",
-      )}
-    >
-      <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
-        <Icon className={cn("size-4 text-muted-foreground", tone === "green" && "text-status-green")} />
-        <h2 className="text-sm font-medium">{title}</h2>
-        {typeof count === "number" && <span className="font-mono text-xs text-subtle">{count}</span>}
-        {action && <div className="ml-auto">{action}</div>}
-      </header>
-      {children}
-    </section>
+    <div className="rounded-md border border-border bg-background/40 p-3">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 font-mono text-2xl tabular-nums">{value}</div>
+      <div
+        className={cn(
+          "mt-1 flex items-center gap-1 text-xs",
+          diff > 0 ? "text-status-green" : diff < 0 ? "text-status-red" : "text-subtle",
+        )}
+      >
+        <Icon className="size-3.5" />
+        <span className="font-mono tabular-nums">
+          {diff > 0 ? "+" : ""}
+          {diff}
+        </span>
+        <span className="text-subtle">mot förra veckan ({previous})</span>
+      </div>
+    </div>
   );
 }
 
-export default async function HomePage() {
+export default async function OverviewPage({ searchParams }: PageProps<"/">) {
+  const filter = await getOfferFilter(searchParams);
   const supabase = await createClient();
-  const now = new Date();
-  const tomorrow = startOfTomorrowHelsinki(now);
-  const dayAfter = startOfTomorrowHelsinki(new Date(new Date(tomorrow).getTime() + 3600_000));
-
-  const [noticesRes, meetingsRes, queueRes, todo, partnersRes] = await Promise.all([
-    supabase.from("notices").select("*").order("created_at", { ascending: false }),
-    supabase
-      .from("meetings")
-      .select("id, title, starts_at, location, company:companies(name), contact:contacts(first_name, last_name, phone)")
-      .eq("status", "scheduled")
-      .lt("starts_at", dayAfter)
-      .order("starts_at"),
-    supabase
-      .from("ringpass_queue")
-      .select("task_id, title, attempt, priority, company_name, first_name, last_name, partner_name, reply_id")
-      .order("priority")
-      .order("due_at"),
-    loadTodo(supabase, tomorrow),
-    supabase.from("partners_due").select("*").order("last_checkin_at", { ascending: true, nullsFirst: true }),
-  ]);
-
-  if (noticesRes.error || meetingsRes.error || queueRes.error || partnersRes.error) {
-    throw new Error("Kunde inte läsa idag-listan.");
-  }
-
-  const notices = noticesRes.data;
-  const meetings = meetingsRes.data;
-  const queue = queueRes.data;
-  const partners = partnersRes.data;
-  const todoCount = todo.sms.length + todo.meetings.length + todo.linkedin.length;
-
-  const attempts = queue.filter((q) => (q.title ?? "").startsWith("Försök")).length;
-  const callLater = queue.filter((q) => (q.title ?? "").startsWith("Ring senare")).length;
-  const nothing = notices.length + meetings.length + queue.length + todoCount + partners.length === 0;
+  const stats = await loadWeeklyStats(supabase, filter, 4);
+  const [thisWeek, lastWeek] = stats.weeks;
+  const offers = offersFor(filter);
+  const hasData = stats.rows.length > 0;
 
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Idag"
+        title="Översikt"
         description={
           <>
-            <span className="capitalize">{formatWeekday(now)}</span>{" "}
-            <span className="font-mono tabular-nums">{formatDate(now)}</span> – allt som ska göras i dag, viktigast först.
+            Vecka <span className="font-mono">{isoWeek(thisWeek)}</span> (från {formatDate(thisWeek)}) ·{" "}
+            {OFFER_LABEL[filter] === "Alla" ? "Optely och SBA" : OFFER_LABEL[filter]} · bara mätning, inga mål
           </>
-        }
-        actions={
-          queue.length > 0 ? (
-            <Button asChild>
-              <Link href="/ringpass">
-                <PhoneCall />
-                Starta ringpass
-                <Kbd className="ml-1 border-black/20 bg-black/10 text-current">g r</Kbd>
-              </Link>
-            </Button>
-          ) : null
         }
       />
 
-      {nothing && (
+      {!hasData ? (
         <EmptyState
-          icon={CheckCircle2}
-          title="Allt klart för i dag"
-          description="Inga svar, möten, samtal eller uppgifter väntar. Nya bolag släpps in i ringkön nästa ringdag – eller hämta fler direkt i Ringpasset."
-          action={
-            <Button asChild variant="outline">
-              <Link href="/ringpass">Till Ringpasset</Link>
-            </Button>
-          }
+          icon={BarChart3}
+          title="Inga siffror än"
+          description="Siffrorna räknas fram ur samtal, mejl, LinkedIn och möten. Ring eller logga en kontakt så syns veckan här."
         />
-      )}
-
-      {/* 1. Svar och tips */}
-      {notices.length > 0 && (
-        <Section title="Svar och partnertips" icon={MessageSquareReply} count={notices.length} tone="green">
-          <ul className="divide-y divide-border">
-            {notices.map((n) => (
-              <li key={n.task_id} className="flex flex-wrap items-start gap-3 px-4 py-3">
-                <StatusDot tone="green" pulse className="mt-1.5" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-baseline gap-x-2">
-                    <span className="font-medium">{n.company_name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {n.kind === "reply"
-                        ? `${REPLY_LABEL[n.classification ?? ""] ?? "Svar"} · ${n.contact_name ?? ""}`
-                        : `Tips från ${n.partner_name ?? "partner"} · ${n.contact_name ?? ""}`}
-                    </span>
-                    <span className="font-mono text-xs text-subtle">
-                      {formatRelative(n.received_at ?? n.created_at)}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
-                    {n.kind === "reply" ? (n.reply_body ?? n.description) : n.description}
-                  </p>
-                </div>
-                <div className="flex gap-1.5">
-                  {n.task_type === "call" ? (
-                    <Button size="sm" asChild>
-                      <Link href={`/ringpass?task=${n.task_id}`}>
-                        <Phone /> Ring nu
-                      </Link>
-                    </Button>
-                  ) : (
-                    n.task_id && <TaskDoneButton taskId={n.task_id} />
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
-
-      {/* 2. Behovssamtal och möten */}
-      {meetings.length > 0 && (
-        <Section title="Behovssamtal och möten – i dag och i morgon" icon={CalendarClock} count={meetings.length}>
-          <ul className="divide-y divide-border">
-            {meetings.map((m) => {
-              const contact = m.contact ? [m.contact.first_name, m.contact.last_name].filter(Boolean).join(" ") : null;
-              const isToday = m.starts_at < tomorrow;
+      ) : (
+        <>
+          <div className={cn("grid gap-4", offers.length > 1 && "lg:grid-cols-2")}>
+            {offers.map((o) => {
+              const now = stats.get(thisWeek, o, "alla");
+              const prev = stats.get(lastWeek, o, "alla");
               return (
-                <MeetingActions key={m.id} meetingId={m.id}>
-                  <div className="w-24 shrink-0">
-                    <div className="font-mono text-sm tabular-nums">{formatTime(m.starts_at)}</div>
-                    <div className={cn("text-xs", isToday ? "text-brand" : "text-subtle")}>
-                      {isToday ? "i dag" : "i morgon"}
-                    </div>
+                <section key={o} aria-label={OFFER_LABEL[o]} className="rounded-lg border border-border bg-surface p-4">
+                  <h2 className="mb-3 flex items-center gap-2 text-sm font-medium">
+                    <OfferBadge offer={o} /> Denna vecka
+                  </h2>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <Metric label="Kontaktade" value={now.contacted} previous={prev.contacted} />
+                    <Metric label="Svar" value={now.replies} previous={prev.replies} />
+                    <Metric label="Bokade möten" value={now.booked} previous={prev.booked} />
+                    <Metric label="Avtal" value={now.won} previous={prev.won} />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">{m.company?.name ?? m.title}</div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      {[contact, m.location].filter(Boolean).join(" · ")}
-                    </div>
-                  </div>
-                  {m.contact?.phone && (
-                    <a
-                      href={`tel:${m.contact.phone.replace(/\s+/g, "")}`}
-                      className="font-mono text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      {m.contact.phone}
-                    </a>
-                  )}
-                </MeetingActions>
+                </section>
               );
             })}
-          </ul>
-        </Section>
-      )}
-
-      {/* 3. Ringpass */}
-      {queue.length > 0 && (
-        <Section
-          title="Ringpass"
-          icon={PhoneCall}
-          count={queue.length}
-          action={
-            <Button size="sm" asChild>
-              <Link href="/ringpass">Starta ringpass</Link>
-            </Button>
-          }
-        >
-          <div className="grid grid-cols-3 divide-x divide-border border-b border-border text-center">
-            {[
-              { label: "samtal i dag", value: queue.length },
-              { label: "försök i sekvens", value: attempts },
-              { label: "ring senare", value: callLater },
-            ].map((s) => (
-              <div key={s.label} className="px-3 py-3">
-                <div className="font-mono text-xl tabular-nums">{s.value}</div>
-                <div className="text-xs text-muted-foreground">{s.label}</div>
-              </div>
-            ))}
           </div>
-          <ul className="divide-y divide-border">
-            {queue.slice(0, 5).map((q) => (
-              <li key={q.task_id}>
-                <Link
-                  href={`/ringpass?task=${q.task_id}`}
-                  className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-surface-2"
-                >
-                  <StatusDot tone={q.priority === 1 ? "blue" : "neutral"} />
-                  <span className="truncate">{q.company_name}</span>
-                  <span className="truncate text-xs text-subtle">
-                    {(q.title ?? "").startsWith("Försök") && q.attempt
-                      ? `Försök ${q.attempt} av 3`
-                      : (q.title ?? "").split(":")[0]}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          {queue.length > 5 && (
-            <p className="px-4 py-2 text-xs text-subtle">+ {queue.length - 5} till i Ringpasset</p>
-          )}
-        </Section>
-      )}
 
-      {/* 4. Att göra för hand */}
-      <TodoPanel data={todo} />
-
-      {/* 5. Partner */}
-      {partners.length > 0 && (
-        <Section title="Partner som behöver höras" icon={Handshake} count={partners.length}>
-          <ul className="divide-y divide-border">
-            {partners.map((p) => (
-              <li key={p.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{p.name}</div>
-                  <div className="truncate text-xs text-muted-foreground">
-                    {[p.type ? PARTNER_TYPE[p.type] : null, p.contact_name, p.city].filter(Boolean).join(" · ")}
-                  </div>
-                </div>
-                <span className="font-mono text-xs text-status-yellow">
-                  {p.days_since === null ? "aldrig hörts" : `${p.days_since} d sedan`}
-                </span>
-                {p.phone && (
-                  <a
-                    href={`tel:${p.phone.replace(/\s+/g, "")}`}
-                    className="font-mono text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    {p.phone}
-                  </a>
-                )}
-                {p.id && (
-                  <OpenDialogButton dialog="partner-checkin" payload={{ partnerId: p.id }} size="sm">
-                    <Handshake /> Logga check-in
-                  </OpenDialogButton>
-                )}
-              </li>
-            ))}
-          </ul>
-        </Section>
+          <section aria-label="Bokade per 100" className="rounded-lg border border-border bg-surface">
+            <header className="border-b border-border px-4 py-2.5">
+              <h2 className="text-sm font-medium">Bokade möten per 100 kontaktade</h2>
+              <p className="text-xs text-muted-foreground">Per erbjudande och kanal. Mötet räknas på kanalen som bokade det.</p>
+            </header>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[480px] text-sm">
+                <thead>
+                  <tr className="h-8 border-b border-border text-left text-[11px] tracking-wide text-subtle uppercase">
+                    <th className="px-4 font-medium">Kanal</th>
+                    <th className="px-3 text-right font-medium">Denna vecka</th>
+                    <th className="px-3 text-right font-medium">Förra veckan</th>
+                    <th className="px-4 text-right font-medium">4 veckor</th>
+                  </tr>
+                </thead>
+                {offers.map((o) => (
+                  <tbody key={o} className="border-b border-border last:border-0">
+                    <tr>
+                      <td colSpan={4} className="px-4 pt-3 pb-1">
+                        <OfferBadge offer={o} />
+                      </td>
+                    </tr>
+                    {stats.channelsFor(o).map((ch) => {
+                      const a = stats.get(thisWeek, o, ch);
+                      const b = stats.get(lastWeek, o, ch);
+                      const all = stats.weeks.map((w) => stats.get(w, o, ch));
+                      const sumC = all.reduce((s, r) => s + r.contacted, 0);
+                      const sumB = all.reduce((s, r) => s + r.booked, 0);
+                      return (
+                        <tr key={ch} className={cn("h-9", ch === "alla" && "font-medium")}>
+                          <td className="px-4">{CHANNEL_NAME[ch] ?? ch}</td>
+                          <td className="px-3 text-right font-mono tabular-nums">
+                            {per100(a.booked, a.contacted)}
+                            <span className="ml-2 text-xs text-subtle">
+                              {a.booked}/{a.contacted}
+                            </span>
+                          </td>
+                          <td className="px-3 text-right font-mono tabular-nums">
+                            {per100(b.booked, b.contacted)}
+                            <span className="ml-2 text-xs text-subtle">
+                              {b.booked}/{b.contacted}
+                            </span>
+                          </td>
+                          <td className="px-4 text-right font-mono tabular-nums">
+                            {per100(sumB, sumC)}
+                            <span className="ml-2 text-xs text-subtle">
+                              {sumB}/{sumC}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                ))}
+              </table>
+            </div>
+          </section>
+        </>
       )}
     </div>
   );

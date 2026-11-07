@@ -3,10 +3,13 @@ import type { Metadata } from "next";
 import { RingpassView, type QueueItem, type TimelineEvent } from "@/components/ringpass/ringpass-view";
 import { PageHeader } from "@/components/ui/page-header";
 import { startOfTomorrowHelsinki } from "@/lib/format";
+import { TodayFollowups } from "@/components/today/followups";
+import { getOfferFilter } from "@/lib/offer-server";
+import { loadFollowups } from "@/lib/queries/followups";
 import { loadTodo } from "@/lib/queries/todo";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Ringpass" };
+export const metadata: Metadata = { title: "Idag" };
 
 const CALL_OUTCOME: Record<string, string> = {
   no_answer: "Ej svar",
@@ -24,10 +27,13 @@ const CALL_OUTCOME: Record<string, string> = {
 
 export default async function RingpassPage({ searchParams }: PageProps<"/ringpass">) {
   const { task } = await searchParams;
+  const offer = await getOfferFilter(searchParams);
   const supabase = await createClient();
   const tomorrow = startOfTomorrowHelsinki();
 
-  const queueRes = await supabase.from("ringpass_queue").select("*").order("priority").order("due_at").limit(200);
+  let queueQuery = supabase.from("ringpass_queue").select("*").order("priority").order("due_at").limit(200);
+  if (offer !== "all") queueQuery = queueQuery.eq("offer", offer);
+  const queueRes = await queueQuery;
   if (queueRes.error) throw new Error("Kunde inte läsa Ringpassets kö.");
 
   const queue = queueRes.data.filter((q): q is typeof q & { task_id: string; company_id: string } =>
@@ -36,22 +42,24 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
   const companyIds = [...new Set(queue.map((q) => q.company_id))];
   const none = Promise.resolve({ data: [], error: null });
 
-  const [upcomingRes, scriptsRes, infoRes, todo, callsRes, emailsRes, repliesRes] =
+  const [upcomingRes, scriptsRes, infoRes, todo, followups, callsRes, emailsRes, repliesRes] =
     await Promise.all([
       supabase
         .from("tasks")
-        .select("id", { count: "exact", head: true })
+        .select("id, company:companies(offer)")
         .eq("status", "open")
         .in("type", ["call", "follow_up"])
-        .gte("due_at", tomorrow),
+        .gte("due_at", tomorrow)
+        .limit(1000),
       supabase
         .from("context_entries")
-        .select("id, kind, title, content")
+        .select("id, kind, title, content, offer")
         .in("kind", ["script", "objection"])
         .eq("is_active", true)
         .order("sort_order"),
       supabase.from("context_entries").select("content").eq("slug", "mejl-skicka-info").maybeSingle(),
-      loadTodo(supabase, tomorrow),
+      loadTodo(supabase, tomorrow, offer),
+      loadFollowups(supabase, tomorrow, offer),
       companyIds.length
         ? supabase
             .from("calls")
@@ -124,24 +132,27 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
     role: q.role,
     phone: q.phone,
     email: q.email,
+    offer: q.offer,
   }));
+  const upcoming = (upcomingRes.data ?? []).filter((t) => offer === "all" || t.company?.offer === offer).length;
 
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Ringpass"
+        title="Idag"
         description={
           <>
             <span className="font-mono tabular-nums">{items.length}</span> samtal i dag
-            {(upcomingRes.count ?? 0) > 0 && (
+            {upcoming > 0 && (
               <>
                 {" · "}
-                <span className="font-mono tabular-nums">{upcomingRes.count}</span> kommande
+                <span className="font-mono tabular-nums">{upcoming}</span> kommande
               </>
             )}
           </>
         }
       />
+      <TodayFollowups data={followups} />
       <RingpassView
         queue={items}
         timeline={timeline}

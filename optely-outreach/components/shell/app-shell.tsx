@@ -4,7 +4,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { OfferProvider } from "@/components/offer/offer-context";
 import { getPublicSupabaseEnv } from "@/lib/env";
+import type { OfferFilter } from "@/lib/offer";
 import { createClient } from "@/lib/supabase/browser";
 import { CommandPalette } from "./command-palette";
 import { MobileNav } from "./mobile-nav";
@@ -23,6 +25,8 @@ export type ShellData = {
   dateLabel: string;
   weekdayLabel: string;
   todayPlan: { channel: string; label: string } | null;
+  /** Erbjudande från cookien (URL:en går före i klienten). */
+  offer: OfferFilter;
 };
 
 const CLASSIFICATION: Record<string, string> = {
@@ -76,9 +80,10 @@ export function AppShell({ data, children }: { data: ShellData; children: React.
   useTasksRealtime();
 
   return (
+    <OfferProvider initial={data.offer}>
     <ShellProvider>
       <div className="flex min-h-dvh">
-        <Sidebar openCallTasks={data.openCallTasks} noticeCount={data.noticeCount} />
+        <Sidebar openCallTasks={data.openCallTasks} />
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar
             dateLabel={data.dateLabel}
@@ -91,11 +96,12 @@ export function AppShell({ data, children }: { data: ShellData; children: React.
           </main>
         </div>
       </div>
-      <MobileNav openCallTasks={data.openCallTasks} noticeCount={data.noticeCount} />
+      <MobileNav openCallTasks={data.openCallTasks} />
       <CommandPalette />
       <ShortcutsDialog />
       <NewContactDialog />
       <PartnerCheckinDialog />
     </ShellProvider>
+    </OfferProvider>
   );
 }

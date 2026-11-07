@@ -28,6 +28,7 @@ export async function saveContextEntry(input: {
 
   if (error || !data) return { ok: false, error: "Kunde inte spara. Försök igen." };
   revalidatePath("/brain");
+  revalidatePath("/scripts");
   return { ok: true, data: { updatedAt: data.updated_at } };
 }
 
@@ -46,6 +47,7 @@ function slugify(s: string) {
 export async function createContextEntry(input: {
   title: string;
   kind: Enums<"context_kind">;
+  offer?: Enums<"offer"> | null;
 }): Promise<ActionResult<ContextEntry>> {
   const title = input.title.trim() || "Ny post";
   const supabase = await createClient();
@@ -62,6 +64,7 @@ export async function createContextEntry(input: {
     .insert({
       title,
       kind: input.kind,
+      offer: input.offer ?? null,
       slug: `${slugify(title)}-${Date.now().toString(36)}`,
       content: "",
       sort_order: (last?.sort_order ?? 0) + 10,
@@ -71,6 +74,7 @@ export async function createContextEntry(input: {
 
   if (error || !data) return { ok: false, error: "Kunde inte skapa posten." };
   revalidatePath("/brain");
+  revalidatePath("/scripts");
   return { ok: true, data };
 }
 
@@ -79,5 +83,6 @@ export async function deleteContextEntry(id: string): Promise<ActionResult> {
   const { error } = await supabase.from("context_entries").delete().eq("id", id);
   if (error) return { ok: false, error: "Kunde inte ta bort posten." };
   revalidatePath("/brain");
+  revalidatePath("/scripts");
   return { ok: true, data: undefined };
 }
