@@ -90,32 +90,26 @@ npm run dev
 | `⌘S`           | Spara (Företagshjärnan)                     |
 | `1`–`8`        | Utfall i Ringpasset                         |
 
-## 5. Säljsystemet – Ringpasset (fas A + B)
+## 5. Sidor och erbjudanden
 
-Hela specen finns i [`docs/saljsystem.md`](docs/saljsystem.md). Samtalskanalen (§4):
+Två erbjudanden – **Optely** och **SBA** – i samma app (`docs/saljsystem.md`). Växeln **Alla / Optely / SBA**
+högst upp styr all data (sparas i `?offer=` och cookien `or_offer`).
 
-- **Ingång:** nya bolag (status Ny) släpps in i ringkön, högst `settings.ringpass.new_per_day` (15) per ringdag.
-  Tillverkning och tjänster först, bygg sist. Partnerägda bolag, kunder och Kontakta ej släpps aldrig in.
-  Knappen "Hämta 5 nya bolag" i Ringpasset släpper in fler.
-- **Ej svar:** försök 1 → SMS nästa morgon + försök 2, försök 2 → försök 3, försök 3 → sista mejlet
-  (om e-post finns) och Vilande 2 mån. Nytt försök läggs nästa ringdag enligt veckoplanen och växlar fm/em.
-- **Utfall (tangent):** 1 Bokat · 2 Ej svar · 3 Ring senare · 4 Fel person · 5 Skicka info · 6 Nej, inte nu ·
-  7 Nej, inget behov · 8 Ring ej. Logiken ligger i databasen (`apply_call_outcome`).
-- **Svar i en kanal stoppar alla andra** (`stop_all_channels`). Nej-svar och Ring ej ger Kontakta ej.
-- **Att göra för hand** (tills fas F): SMS att skicka, kalenderhändelser (Google Kalender-länk) och
-  LinkedIn-påminnelser visas överst i Ringpasset.
-- **Mallar** (SMS och mejl) redigeras i Företagshjärnan → Mejlmallar.
+| Sida | Väg | Grund |
+|---|---|---|
+| Översikt | `/` | Kontaktade, svar, bokade, avtal denna/förra veckan; bokade per 100 per kanal (`offer_stats_weekly`) |
+| Idag | `/ringpass` | Svar/tips, möten, partner att höra, Att göra + Ringpasset (oförändrad logik), rätt manus per erbjudande |
+| Företag | `/contacts`, `/contacts/[id]` | Registret med erbjudande; kontaktkort med historik (`activities`), Logga LinkedIn, byte av erbjudande med spärr |
+| Pipeline | `/pipeline` | Kontaktad → Kund med antal och värde; flytt via `move_deal_stage` |
+| Kunder | `/customers` | Optely: projekt, faktura, driftsavtal. SBA: bokningar mot garantin (3/mån) |
+| Manus och sekvenser | `/scripts` | Samtalsmanus, invändningar, e-postsekvens per erbjudande |
+| Partner | `/partners` | Bara Optely; behöver höras först, check-in, hänvisade bolag |
+| Lördagsanalys | `/strategy` | 4 veckor per erbjudande och kanal + "Vad ska ändras" (`weekly_reviews`) |
+| Inställningar | `/settings` | Veckoplan, nya bolag per ringdag, senaste `webhook_events` |
+| Outreach (Mer) | `/outreach` | Mejl per status |
 
-**Dagligt jobb:** `vercel.json` kör `GET /api/cron/sequence` kl. 04:15 UTC: vilande bolag vars tid gått ut
-tas tillbaka, och dagens kvot nya bolag släpps in på ringdagar. Vercel skickar
-`Authorization: Bearer $CRON_SECRET`. Jobbet är idempotent och loggas i `webhook_events` (`source = 'cron'`).
-
-```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://optely-outreach.vercel.app/api/cron/sequence
-```
-
-**Ringpasset (`/ringpass`):** `j`/`k` byter samtal, `1`–`8` utfall, `v` röstmeddelande, `n` anteckning,
-`m` visar/döljer manus.
+**Ringpasset** (`/ringpass`): `j`/`k` byter samtal, `1`–`8` utfall, `v` röstmeddelande, `n` anteckning,
+`m` manus. Daglig cron: `GET /api/cron/sequence` med `Authorization: Bearer $CRON_SECRET`.
 
 ## 6. Webhooks från n8n
 

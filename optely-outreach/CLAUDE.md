@@ -16,15 +16,15 @@ som ska byggas** (kanaler, utfall, statusar, regler, beslut och byggordning). L�
 
 ## Säljmodellen
 
-Flerkanal: kall e-post, kalla samtal, LinkedIn och partner – se `docs/saljsystem.md`. Kärnregler:
+Två erbjudanden i samma app: **Optely** (AI-automation av administration) och **SBA** (fler bokade kunder åt
+hantverkare). Ett företag har ett aktivt erbjudande (`companies.offer`): bygg/VVS/el/måleri/tak = SBA, övriga =
+Optely. Växeln Alla / Optely / SBA högst upp styr all data. Kanaler: kall e-post, samtal, LinkedIn, partner
+(bara Optely) – se `docs/saljsystem.md`. Kärnregler:
 
 1. Ett företag = en rad. Dubbletter (e-postdomän, telefon, namn) stoppas och visas.
 2. Svar i en kanal stoppar alla andra kanaler. Nej / Kontakta ej stoppar allt, permanent.
 3. Partnerägda företag kontaktas inte kallt. Kunder ligger utanför sekvenserna.
-4. Allt som inte kräver Eriks röst eller omdöme körs automatiskt, i hans namn och stil.
-
-**Statusar:** Ny → I sekvens → Svarat → Behovssamtal bokat → Behovssamtal klart → Lösning visad →
-Offert skickad → Kund, samt Vilande, Nej, Kontakta ej, Hos partner.
+4. Inga fasta mål, milstolpar eller stoppregler i UI:t – bara mätning.
 
 ## Stack
 
@@ -53,12 +53,15 @@ Offert skickad → Kund, samt Vilande, Nej, Kontakta ej, Hos partner.
 app/
   (auth)/login/           inloggning
   (app)/layout.tsx        appskal: sidomeny, topbar, ⌘K
-  (app)/page.tsx          Hem / War Room
-  (app)/ringpass/
-  (app)/outreach/         AI Gatekeeper + kampanjer
-  (app)/contacts/         bolag & kontakter + tidslinje
+  (app)/page.tsx          Översikt
+  (app)/ringpass/         Idag (samtalslistan)
+  (app)/contacts/         Företag + kontaktkort med historik
+  (app)/pipeline/
+  (app)/customers/
+  (app)/scripts/          Manus och sekvenser
   (app)/partners/
-  (app)/strategy/         KPI:er, kalkylator, veckorapport
+  (app)/strategy/         Lördagsanalys
+  (app)/outreach/         mejl per status
   (app)/brain/            Företagshjärnan (context_entries)
   (app)/settings/
   api/webhooks/           n8n → appen
@@ -96,8 +99,9 @@ Känsla: Linear / Attio / Superhuman. Snabbt, tyst, tangentbordsstyrt. Varje vy 
 
 ## Byggordning
 
-Faserna A–J står i `docs/saljsystem.md`. Bygg en fas i taget; varje fas ska vara körbar och användbar
-innan nästa påbörjas.
+Grunden finns på alla sidor (riktig data, viktigaste knappar, mobil 390 px). Bygg sedan en sida eller kanal
+i taget på djupet enligt `docs/saljsystem.md` ("bygg det som behövs för att ringa och mejla först").
+Inga platshållarsidor.
 
 ## Definition of done (varje uppgift)
 
