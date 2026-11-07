@@ -14,6 +14,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { OfferBadge } from "@/components/offer/offer-badge";
 import { Kbd } from "@/components/ui/kbd";
 import { StatusDot } from "@/components/ui/status-dot";
 import { signOut } from "@/lib/actions/auth";
@@ -24,7 +25,7 @@ import { createClient } from "@/lib/supabase/browser";
 import type { Enums } from "@/lib/supabase/types";
 import { useShell } from "./shell-context";
 
-type CompanyHit = { id: string; name: string; city: string | null; status: Enums<"company_status"> };
+type CompanyHit = { id: string; name: string; city: string | null; status: Enums<"company_status">; offer: Enums<"offer"> };
 type ContactHit = {
   id: string;
   first_name: string;
@@ -67,7 +68,7 @@ function useLiveSearch(query: string, enabled: boolean) {
             .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,email.ilike.%${q}%`);
 
       const [companies, contacts] = await Promise.all([
-        supabase.from("companies").select("id, name, city, status").ilike("name", `%${q}%`).order("name").limit(6),
+        supabase.from("companies").select("id, name, city, status, offer").ilike("name", `%${q}%`).order("name").limit(6),
         contactFilter.limit(6),
       ]);
       if (cancelled) return;
@@ -134,10 +135,11 @@ export function CommandPalette() {
               <CommandItem
                 key={c.id}
                 value={`bolag ${c.name} ${c.city ?? ""} ${c.id}`}
-                onSelect={() => run(() => router.push(`/contacts?q=${encodeURIComponent(c.name)}`))}
+                onSelect={() => run(() => router.push(`/contacts/${c.id}`))}
               >
                 <Building2 />
                 <span className="truncate">{c.name}</span>
+                <OfferBadge offer={c.offer} />
                 <span className="truncate text-xs text-subtle">{c.city}</span>
                 <CommandShortcut>
                   <StatusDot tone={COMPANY_STATUS[c.status].tone} />
@@ -157,7 +159,7 @@ export function CommandPalette() {
                   key={k.id}
                   value={`kontakt ${name} ${k.email ?? ""} ${k.company?.name ?? ""} ${k.id}`}
                   onSelect={() =>
-                    run(() => router.push(`/contacts?q=${encodeURIComponent(k.company?.name ?? name)}`))
+                    run(() => router.push(k.company ? `/contacts/${k.company.id}` : `/contacts?q=${encodeURIComponent(name)}`))
                   }
                 >
                   <User />

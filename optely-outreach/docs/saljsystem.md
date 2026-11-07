@@ -1,138 +1,126 @@
-# Optelys säljsystem
+# Optelys säljsystem (Optely + SBA)
 
-Ett automatiserat flerkanals-säljsystem (outbound sales engine) med eget CRM, sekvensmotor och dashboard.
+> **Källa:** CONTEXT från Erik (2026-11-07). Den här filen är projektets sanning för *vad* som ska byggas.
+> `CLAUDE.md` beskriver *hur*. Vid krock gäller CONTEXT. Beslut under bygget står längst ner.
 
-> Det här är projektets sanning för *vad* systemet ska göra. `CLAUDE.md` beskriver *hur* det byggs.
-> Beslut som tagits under bygget står under "Beslut" längst ner.
+## Syfte
 
-## 1. Mål och målgrupp
+En egen app för all kall outreach för två erbjudanden, **Optely** och **SBA**, med en gemensam databas,
+ringlista och dashboard. Erik jobbar ensam och ringer själv. Allt ska vara kopplat och så automatiserat som
+möjligt. Språk i appen: svenska.
 
-- **Mål:** återkommande intäkt och ett valt huvuderbjudande.
-- **Målgrupp:** svenskspråkiga småföretag med 2–15 anställda i hela Österbotten, där ägaren själv sköter
-  administrationen. Tillverkning och tjänsteföretag först, bygg sist.
-- **Budskap:** "vi hjälper med det som görs för hand vid sidan om jobbet", med Hagnäs Tyre Center som exempel
-  (däcklistan skapas nu automatiskt).
-- **Huvuderbjudande:** inte valt. Starkaste kandidat är automatiska listor och rapporter.
+## Erbjudanden
 
-## 2. Globala regler
+1. **Optely** – AI-automation av administration (listor/rapporter, offerter + uppföljning, kundkort).
+   Målgrupp: svenskspråkiga företag i Österbotten, alla branscher utom bygg, tillverkning först.
+2. **SBA** – färdigt system för fler bokade kunder åt hantverkare och installatörer (bygg, VVS, el, måleri, tak).
+   Löfte: minst 3 extra bokade möten/offerttider/besök per månad, räknas när bokat. Färre än 3 = ingen avgift den
+   månaden. Pris 490 €/mån fast, kunden betalar själv annonsbudgeten. Leveransen sker i GoHighLevel, inte i appen.
 
-- Ett företag = en rad i databasen. Dubbletter känns igen på e-postdomän, telefonnummer eller företagsnamn.
-- Svar i en kanal stoppar alla andra kanaler för det företaget.
-- Nej eller Kontakta ej stoppar allt, permanent.
-- Företag som hör till en partner kontaktas inte kallt.
-- Befintliga kunder ligger utanför sekvenserna.
-- Alla uppföljningar som inte kräver min röst eller mitt omdöme körs automatiskt, i mitt namn och min stil.
-- Allt ska kunna kontrolleras och ses i appen.
+**Regel:** ett företag kan bara ha ett aktivt erbjudande. Bygg = SBA, övriga = Optely.
+(I appen: `companies.offer`. Byte spärras när bolaget är i sekvens eller längre fram, utom vid Ny, Nej, Vilande
+och Kontakta ej.)
 
-## 3. Kanal 1: Kall e-post
+## Stack
 
-Verktyg: Smartlead, flera separata domäner. Automatiskt utom svar.
+- Frontend: webbapp (fungerar även i mobilens webbläsare)
+- Databas: Supabase
+- Automatik: n8n
+- Kall e-post: Smartlead (5 inkorgar: 3 på optely-team.com, 2 på getoptely.com, Hostinger). Hälften av volymen
+  till respektive erbjudande.
+- LinkedIn: DM görs manuellt, loggas i appen
+- Samtal: nu `tel:`-länkar (ringer från Android-telefonen med appen öppen i mobilen). Senare Twilio Voice JS SDK
+  i webbläsaren med Eriks verifierade mobilnummer som avsändare.
 
-| Steg | Dag | Handling | Typ |
-|---|---|---|---|
-| 1 | 0 | Företaget läggs in. Dubblettkontroll mot alla kanaler, partner och kunder | Automatiskt |
-| 2 | 0 | AI läser hemsidan och skriver en personlig första mening | Automatiskt |
-| 3 | 1 | Mejl 1 skickas. Status: I sekvens | Automatiskt |
-| 4 | 2 | Företaget läggs i ringkön. Samtalet hänvisar till mejlet | Automatiskt |
-| 5 | 3 | Mejl 2 skickas om inget svar | Automatiskt |
-| 6 | – | Svar med intresse: status Svarat, alla sekvenser stoppas, notis till mig, jag bokar behovssamtal | Notis + manuellt |
-| 7 | – | Nej eller avregistrering: status Kontakta ej i alla kanaler | Automatiskt |
-| 8 | – | Inget svar efter mejl 2: fortsätter i samtalsprocessen | Automatiskt |
+## Datamodell (Supabase)
 
-## 4. Kanal 2: Kalla samtal
-
-Verktyg: ringapp kopplad till databasen. Samtalen manuella, resten automatiskt.
-Ingångar: direkt från listan (företag utan e-post) eller från kall e-post dag 2.
-
-| Steg | Handling | Typ |
+| Tabell | Innehåll | I appen |
 |---|---|---|
-| 1 | Företaget visas i idag-listan med VD, bransch, storlek och tidigare kontakter | Automatiskt |
-| 2 | Jag ringer under ringpass och väljer utfall i appen | Manuellt |
+| companies | namn, kommun, postort, bransch, anställda, omsättning, telefon, VD, webb, erbjudande, status, källa, anteckning | `companies` (+ `offer`) |
+| contacts | företag, namn, roll, telefon, e-post, linkedin | `contacts` |
+| activities | företag, kontakt, kanal (samtal/e-post/linkedin/partner), typ, utfall, tidpunkt, varaktighet, erbjudande | vyn `activities` (samlar calls, emails, replies, sms_messages, linkedin_messages, partner_checkins, meetings) |
+| deals | företag, erbjudande, steg, värde, nästa åtgärd, datum för nästa åtgärd | `deals` (steg synkas från status) |
+| partners | typ (bokföring/IT/reklam-webb), namn, kontakt, status, svar, nästa åtgärd | `partners` |
+| sba_clients | företag, bokningar denna månad (från GoHighLevel), garantin uppnådd, fakturera | `sba_clients` (bokningar manuellt tills GoHighLevel kopplas) |
 
-| Utfall | Nästa steg | Typ |
-|---|---|---|
-| Bokat | Bekräftelse-SMS + kalenderhändelse. Status Behovssamtal bokat | Automatiskt |
-| Ej svar, försök 1 | SMS nästa morgon. Nytt samtal schemaläggs annan dag och tid | Automatiskt |
-| Ej svar, försök 2 | Nytt samtal schemaläggs annan dag och tid | Automatiskt |
-| Ej svar, försök 3 | Sista mejl om e-post finns. Status Vilande 2 mån | Automatiskt |
-| Ring senare | Samtal schemaläggs exakt vid angiven tid | Automatiskt |
-| Fel person | Jag fyller i nytt namn och nummer. Nytt samtal schemaläggs | Manuellt + automatiskt |
-| "Skicka info" | Kort mejl skickas. Påminnelse om LinkedIn-kontakt. Nytt samtal om 7 dagar | Automatiskt |
-| Nej, inte nu | Samtal schemaläggs vid angiven tidpunkt | Automatiskt |
-| Nej, inget behov | Status Nej | Manuellt |
-| Ring ej | Status Kontakta ej i alla kanaler | Automatiskt |
+Dessutom: `customers_optely` (projekt, fakturerad, driftsavtal), `linkedin_messages` (manuell loggning),
+`weekly_reviews` (Lördagsanalysens "vad ska ändras"), vyn `offer_stats_weekly` (veckosiffror per erbjudande och kanal).
 
-## 5. Kanal 3: LinkedIn
+Underlag: CSV med 1 176 aktiva bolag (PRH + Profinder), ringlista med 189 bolag (2–15 anställda),
+partnerlista med 109 byråer.
 
-Verktyg: LinkedIn + loggknapp i appen. DM manuella, uppföljning automatisk.
-Ingångar: någon kommenterar ett inlägg, eller jag hittar en intressant kontakt i målgruppen.
+## Sidor
 
-| Steg | Dag | Handling | Typ |
-|---|---|---|---|
-| 1 | 0 | Dubblettkontroll mot alla kanaler | Automatiskt |
-| 2 | 0 | Jag skickar DM med en fråga om deras situation och loggar det | Manuellt |
-| 3 | – | Svar: status Svarat, jag föreslår 20 minuter, behovssamtal | Manuellt |
-| 4 | 5 | Inget svar: påminnelse i idag-listan att skicka en uppföljning | Automatiskt |
-| 5 | 10 | Fortfarande inget svar: företaget läggs i ringkön om telefon finns | Automatiskt |
+Växel högst upp: **Alla / Optely / SBA** – styr all data på alla sidor (sparas i URL `?offer=` och cookie).
 
-## 6. Kanal 4: Partner
+1. **Översikt** (`/`) – kontaktade, svar, bokade möten, avtal per erbjudande sida vid sida. Bokade möten per 100
+   kontaktade per erbjudande och kanal.
+2. **Idag** (`/ringpass`) – dagens samtalslista: varma först (svarat/öppnat mejl flera gånger), sedan kalla.
+   Etikett för erbjudande + rätt manus per rad. Dagens uppföljningar.
+3. **Företag** (`/contacts`) – hela registret med filter, kontaktkort med all historik över kanaler, spärr för
+   dubbla erbjudanden.
+4. **Pipeline** (`/pipeline`) – Kontaktad → Svar → Möte bokat → Möte hållet → Offert → Kund. Filter per erbjudande.
+5. **Kunder** (`/customers`) – Optely: projekt, faktura, eventuellt driftsavtal. SBA: bokningar mot garantin
+   (3/mån), fakturera ja/nej.
+6. **Manus och sekvenser** (`/scripts`) – flikarna Optely och SBA: samtalsmanus, invändningar, e-postsekvenser.
+7. **Partner** (`/partners`) – endast Optely.
+8. **Lördagsanalys** (`/strategy`) – veckans siffror per erbjudande och kanal + vad som ska ändras.
 
-Verktyg: partnertabell i databasen + tipsformulär.
-Partnertyper: bokföringsbyråer, IT-byråer, webb- och reklambyråer, återförsäljare av affärssystem.
+Under "Mer": Outreach (`/outreach`, mejl per status), Företagshjärnan (`/brain`), Inställningar (`/settings`).
 
-| Steg | Dag | Handling | Typ |
-|---|---|---|---|
-| 1 | 1 | Mejl till partnern: vem jag är, Tyre Center, varför deras kunder, fråga om 20 min | Mall + manuellt |
-| 2 | 3–4 | Samtal om inget svar visas i idag-listan | Automatiskt + manuellt |
-| 3 | – | Partnermöte: vad frågar deras kunder om, tre signaler för när de ska tipsa, föreslå ett testfall | Manuellt |
-| 4 | – | Testfall blir affär: villkor bekräftas per mejl (10–15 % provision eller underleverantör) | Manuellt |
-| 5 | Varje månad | Uppdatering till partnern | Automatiskt |
-| 6 | – | Tips via formulär: nytt företag med partnern som källa, status Hos partner, notis "ring idag" | Automatiskt |
-| 7 | 0 | Jag ringer kunden samma dag och nämner partnern → behovssamtal | Manuellt |
-| 8 | – | Partnern får besked om hur det gick | Automatiskt |
+## Ring-knappen
 
-## 7. Från behovssamtal till kund (alla kanaler)
+Ett klick: (1) startar samtalet via `tel:`-länk (senare Twilio), (2) loggar försöket med tid i activities,
+(3) öppnar en ruta för utfall: inget svar / svar – nej / ring senare (datum) / möte bokat (tid) / fel person.
+Utfallet uppdaterar status, deal och nästa åtgärd automatiskt.
 
-| Steg | Handling | Typ |
-|---|---|---|
-| 1 | Behovssamtal (20 min): frågor om vad som görs för hand, hur offerter hanteras, vad det kostar, vad de försökt | Manuellt |
-| 2a | Enkelt problem → lösning och ungefärligt pris direkt → offert | Manuellt |
-| 2b | Större problem → boka lösningsmöte | Manuellt |
-| 2c | Inget problem → be om ett namn → status Nej | Manuellt |
-| 3 | Lösningsmöte (30 min): lösning, pris, be om startdatum | Manuellt |
-| 4 | Offert skickas samma dag. Status Offert skickad | Manuellt |
-| 5 | Påminnelse dag 5 och dag 10 | Automatiskt |
-| 6 | Inget svar → status Vilande 2 mån | Automatiskt |
-| 7 | Ja → status Kund → leverans: bygg, testa, lämna över | Manuellt |
-| 8 | Efter leverans: feedbackformulär, mät resultat, fråga "vem mer?" → nya företag in med kunden som källa | Automatiskt + manuellt |
-| 9 | Vilande företag återaktiveras efter 2 mån och går in i sekvensen igen | Automatiskt |
+> **Nuvarande läge:** Ringpasset har 8 utfall (se "Kvar från tidigare spec") och loggar försöket när utfallet
+> väljs. Omläggning till CONTEXT:s ring-knapp görs i en egen omgång.
 
-## 8. Status per företag
+## Automatik (n8n)
 
-Ny → I sekvens → Svarat → Behovssamtal bokat → Behovssamtal klart → Lösning visad → Offert skickad → Kund
+- Smartlead → Supabase: skickat, öppnat, svar och avregistrering loggas i activities
+- Positivt svar eller flera öppningar → företaget läggs automatiskt i dagens samtalslista
+- Flerkanalsuppföljning, upp till 5–7 kontakter per företag (e-post → samtal → LinkedIn → e-post …), nästa steg
+  skapas automatiskt efter varje utfall
+- Avregistrerade och "nej tack" spärras i alla kanaler
+- GoHighLevel → sba_clients: antal bokningar per kund och månad
+- Lördag: sammanställning av veckans statistik till sidan Lördagsanalys
 
-Samt: Vilande, Nej, Kontakta ej, Hos partner
+## Regler
 
-## 9. Teknik
-
-| Del | Verktyg |
-|---|---|
-| Databas (CRM) | Supabase: företag, kontakter, affärer, partner |
-| Automatik | n8n (självhostat) |
-| Kall e-post | Smartlead |
-| App och dashboard | Next.js |
-| Kalender | Google Kalender |
-
-## 10. Dashboard och analys
-
-- **Dashboard:** veckans siffror mot mål (försök, svar, bokade, genomförda, offerter, kunder), siffror per kanal
-  (försök → svar → bokade → kunder, bokade per timme av min tid), pipeline per status, idag-lista.
-- **Varje lördag:** statistik från alla kanaler analyseras → siffror mot målen + max 3 konkreta ändringar, högst
-  en per kanal.
-
-Allt ska hänga ihop och fungera smidigt, också i dashboarden.
+- Inga fasta datum, milstolpar eller stoppregler i appen. Bara mätning.
+- Inga dokument, inga Meta-annonser.
+- Håll det enkelt: bygg det som behövs för att ringa och mejla först, resten efter.
 
 ---
+
+## Kvar från tidigare spec (gäller tills det byggs om)
+
+Det här finns i appen sedan fas A–C och ändras inte förrän en egen omgång:
+
+- **Statusar:** Ny → I sekvens → Svarat → Behovssamtal bokat → Behovssamtal klart → Lösning visad →
+  Offert skickad → Kund, samt Vilande, Nej, Kontakta ej, Hos partner. Deal-stegen härleds från dessa.
+- **Globala regler:** ett företag = en rad; dubbletter (e-postdomän, telefon, namn) stoppas och visas; svar i en
+  kanal stoppar alla andra; Nej/Kontakta ej stoppar allt permanent; partnerägda bolag kontaktas inte kallt;
+  kunder ligger utanför sekvenserna.
+- **Samtalskanalen (Ringpasset):** 15 nya bolag per ringdag; 3 försök på ringdagar med växlande fm/em;
+  SMS efter försök 1; sista mejl + Vilande 2 mån efter försök 3; utfallen Bokat, Ej svar, Ring senare,
+  Fel person, Skicka info, Nej inte nu, Nej inget behov, Ring ej.
+
+## Krockar mellan CONTEXT och tidigare spec
+
+| # | Tidigare spec | CONTEXT (gäller) | Hur det hanteras nu |
+|---|---|---|---|
+| 1 | Ett erbjudande, målgrupp 2–15 anställda, bygg sist | Två erbjudanden: bygg/VVS/el/måleri/tak = SBA, övriga = Optely | `companies.offer`. Ringpassets "bygg sist" i kön finns kvar tills ringlogiken görs om. |
+| 2 | 8 utfall, försöket loggas när utfallet väljs | Ring-knapp med 5 utfall, försöket loggas vid klick | Oförändrat i denna omgång (ringlogiken rörs inte). |
+| 3 | Samtal: 3 försök, sedan Vilande 2 mån | Flerkanal 5–7 kontakter via n8n | Oförändrat tills n8n kopplas. |
+| 4 | Dashboard "mot veckomål", lördag max 3 ändringar | Inga mål, bara mätning; lördag "vad ska ändras" | Översikt och Lördagsanalys visar bara siffror; fritext för ändringar. |
+| 5 | Idag-lista på Hem (fas C) | Översikt på `/`, Idag = samtalslistan | Fas C:s delar ligger överst på Idag (`/ringpass`). |
+| 6 | Partnertyper inkl. affärssystem | Bokföring, IT, reklam-webb | Befintlig typ "övrigt/affärssystem" finns kvar i databasen. |
+| 7 | Google Kalender, SMS-tjänst (fas F) | Inte nämnt; Twilio för samtal senare; GoHighLevel för SBA | Inga integrationer nu; tabeller och fält finns för senare. |
+| 8 | Offert/behovssamtal-flöde §7 med påminnelser | "Inga dokument" | Inga dokument skapas; deals har bara steg, värde och nästa åtgärd. |
+| 9 | Idag: positiva svar först | Varma först (svarat/öppnat mejl flera gånger) | Öppningar kommer först med Smartlead/n8n; svar ligger redan först. |
 
 ## Beslut under bygget
 
@@ -149,18 +137,19 @@ Allt ska hänga ihop och fungera smidigt, också i dashboarden.
 | 2026-11-02 | "Nej, inte nu" | Status Vilande till valt datum; samtalet ligger färdigt då. |
 | 2026-11-02 | Bekräftelse vid "Bokat" | SMS om mobilnummer finns, annars mejl. |
 | 2026-11-02 | "Skicka info" | Mallen öppnas i dialogen och skrivs/justeras för hand varje gång. |
+| 2026-11-02 | Var ligger idag-listan? (fas C) | På Hem. Ringpasset finns kvar som läge för att ringa ("Starta ringpass"). |
+| 2026-11-02 | Vad visar idag-listan? | Svar och partnertips, dagens/morgondagens möten, ringpass (antal + nästa), Att göra för hand, partner som behöver höras. |
+| 2026-11-02 | Notiser vid svar och tips | Bara i appen: siffra vid Hem (obehandlade) + toast när något kommer in medan appen är öppen. |
+| 2026-11-02 | Ordning i idag-listan | Efter typ: svar/tips → möten → ringpass → att göra → partner. |
+| 2026-11-02 | Möten i idag-listan | Enkla knappar: Genomfört (→ Behovssamtal klart), Dök inte upp (→ nytt samtal först i kön). Resten i fas I. |
+| 2026-11-02 | När ska en partner höras? | När senaste check-in är äldre än partnerns intervall (standard 30 dagar) eller aldrig skett. |
+| 2026-11-07 | Fas C (PR #31, ej mergad) | Följer med i grund-PR:en. Idag-listans delar ligger överst på Idag (/ringpass); / blir Översikt. |
+| 2026-11-07 | "Svar" i samtalskanalen | Någon svarade i telefon: alla utfall utom Ej svar och Röstmeddelande (även nej). E-post: inkomna svar. LinkedIn: inkommande meddelanden. |
+| 2026-11-07 | Vilken kanal får ett bokat möte? | Kanalen som bokade det: bokat i samtal → samtal, annars kanalen för senaste utgående kontakt före bokningen. |
+| 2026-11-07 | Vad är ett "avtal"? | Bolag vars affär nådde steget Kund den veckan (Optely och SBA). |
 
-## Byggordning (faser)
+## Implementationsnoter
 
-| Fas | Innehåll |
-|---|---|
-| A | Datamodell 2.0: statusar enligt §8, dubblettkontroll, partnerägda bolag, kunder utanför sekvenser, "svar stoppar alla kanaler" |
-| B | Ringpass 2.0: utfallen i §4, 3 försök med växlande tider, SMS-/kalenderkö, Skicka info + LinkedIn-påminnelse |
-| C | Idag-lista: allt som ska göras i dag, alla kanaler |
-| D | Kall e-post: Smartlead-adapter, AI-första mening, mejl 1 dag 1 → ringkö dag 2 → mejl 2 dag 3 |
-| E | Svar via n8n: klassning, stopp av alla kanaler, notis |
-| F | SMS-tjänst + Google Kalender |
-| G | LinkedIn-kanalen |
-| H | Partnerkanalen + tipsformulär |
-| I | Behovssamtal → kund: affärer, offert, påminnelser dag 5/10, feedback, "vem mer?" |
-| J | Dashboard mot veckomål + lördagsanalys |
+- `weekly_reviews` har en rad per vecka **och** erbjudande (null = alla), så att Optely och SBA kan få egna
+  anteckningar. Unikt på (vecka, erbjudande).
+- Värde på SBA-affärer sätts till 490 € (månadsavgift) som standard; Optely-affärer har inget standardvärde.

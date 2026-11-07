@@ -21,7 +21,7 @@ import { useShell } from "./shell-context";
 import { useOptions } from "./use-options";
 
 export function PartnerCheckinDialog() {
-  const { dialog, closeDialog } = useShell();
+  const { dialog, dialogPayload, closeDialog } = useShell();
   const open = dialog === "partner-checkin";
   return (
     <Dialog open={open} onOpenChange={(o) => !o && closeDialog()}>
@@ -30,16 +30,16 @@ export function PartnerCheckinDialog() {
           <DialogTitle>Logga partner-check-in</DialogTitle>
           <DialogDescription>Håll nätverket varmt – notera vad ni pratade om.</DialogDescription>
         </DialogHeader>
-        {open && <CheckinForm onDone={closeDialog} />}
+        {open && <CheckinForm onDone={closeDialog} initialPartnerId={dialogPayload?.partnerId ?? ""} />}
       </DialogContent>
     </Dialog>
   );
 }
 
-function CheckinForm({ onDone }: { onDone: () => void }) {
+function CheckinForm({ onDone, initialPartnerId }: { onDone: () => void; initialPartnerId: string }) {
   const router = useRouter();
   const partners = useOptions("partners", true);
-  const [partnerId, setPartnerId] = useState("");
+  const [partnerId, setPartnerId] = useState(initialPartnerId);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();

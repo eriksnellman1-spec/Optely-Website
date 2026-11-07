@@ -123,6 +123,7 @@ export type Database = {
           name: string
           notes: string | null
           nurture_until: string | null
+          offer: Database["public"]["Enums"]["offer"]
           partner_id: string | null
           phone: string | null
           released_at: string | null
@@ -151,6 +152,7 @@ export type Database = {
           name: string
           notes?: string | null
           nurture_until?: string | null
+          offer?: Database["public"]["Enums"]["offer"]
           partner_id?: string | null
           phone?: string | null
           released_at?: string | null
@@ -179,6 +181,7 @@ export type Database = {
           name?: string
           notes?: string | null
           nurture_until?: string | null
+          offer?: Database["public"]["Enums"]["offer"]
           partner_id?: string | null
           phone?: string | null
           released_at?: string | null
@@ -271,6 +274,7 @@ export type Database = {
           id: string
           is_active: boolean
           kind: Database["public"]["Enums"]["context_kind"]
+          offer: Database["public"]["Enums"]["offer"] | null
           slug: string
           sort_order: number
           title: string
@@ -282,6 +286,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           kind?: Database["public"]["Enums"]["context_kind"]
+          offer?: Database["public"]["Enums"]["offer"] | null
           slug: string
           sort_order?: number
           title: string
@@ -293,12 +298,107 @@ export type Database = {
           id?: string
           is_active?: boolean
           kind?: Database["public"]["Enums"]["context_kind"]
+          offer?: Database["public"]["Enums"]["offer"] | null
           slug?: string
           sort_order?: number
           title?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      customers_optely: {
+        Row: {
+          company_id: string
+          created_at: string
+          invoice_note: string | null
+          invoiced: boolean
+          maintenance_agreement: boolean
+          project: string | null
+          started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          invoice_note?: string | null
+          invoiced?: boolean
+          maintenance_agreement?: boolean
+          project?: string | null
+          started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          invoice_note?: string | null
+          invoiced?: boolean
+          maintenance_agreement?: boolean
+          project?: string | null
+          started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_optely_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          closed_at: string | null
+          company_id: string
+          created_at: string
+          id: string
+          next_action: string | null
+          next_action_at: string | null
+          offer: Database["public"]["Enums"]["offer"]
+          stage: Database["public"]["Enums"]["deal_stage"]
+          stage_changed_at: string
+          updated_at: string
+          value_eur: number | null
+          won_at: string | null
+        }
+        Insert: {
+          closed_at?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          next_action?: string | null
+          next_action_at?: string | null
+          offer: Database["public"]["Enums"]["offer"]
+          stage?: Database["public"]["Enums"]["deal_stage"]
+          stage_changed_at?: string
+          updated_at?: string
+          value_eur?: number | null
+          won_at?: string | null
+        }
+        Update: {
+          closed_at?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          next_action?: string | null
+          next_action_at?: string | null
+          offer?: Database["public"]["Enums"]["offer"]
+          stage?: Database["public"]["Enums"]["deal_stage"]
+          stage_changed_at?: string
+          updated_at?: string
+          value_eur?: number | null
+          won_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       emails: {
         Row: {
@@ -381,6 +481,51 @@ export type Database = {
           },
           {
             foreignKeyName: "emails_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      linkedin_messages: {
+        Row: {
+          company_id: string
+          contact_id: string | null
+          created_at: string
+          direction: Database["public"]["Enums"]["message_direction"]
+          id: string
+          note: string | null
+          sent_at: string
+        }
+        Insert: {
+          company_id: string
+          contact_id?: string | null
+          created_at?: string
+          direction?: Database["public"]["Enums"]["message_direction"]
+          id?: string
+          note?: string | null
+          sent_at?: string
+        }
+        Update: {
+          company_id?: string
+          contact_id?: string | null
+          created_at?: string
+          direction?: Database["public"]["Enums"]["message_direction"]
+          id?: string
+          note?: string | null
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "linkedin_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "linkedin_messages_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
@@ -601,6 +746,47 @@ export type Database = {
           },
         ]
       }
+      sba_clients: {
+        Row: {
+          bookings: number
+          company_id: string
+          created_at: string
+          guarantee_met: boolean | null
+          id: string
+          invoice: boolean | null
+          month: string
+          updated_at: string
+        }
+        Insert: {
+          bookings?: number
+          company_id: string
+          created_at?: string
+          guarantee_met?: boolean | null
+          id?: string
+          invoice?: boolean | null
+          month: string
+          updated_at?: string
+        }
+        Update: {
+          bookings?: number
+          company_id?: string
+          created_at?: string
+          guarantee_met?: boolean | null
+          id?: string
+          invoice?: boolean | null
+          month?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sba_clients_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       settings: {
         Row: {
           description: string | null
@@ -789,8 +975,52 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string
+          offer: Database["public"]["Enums"]["offer"] | null
+          updated_at: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string
+          offer?: Database["public"]["Enums"]["offer"] | null
+          updated_at?: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string
+          offer?: Database["public"]["Enums"]["offer"] | null
+          updated_at?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
+      activities: {
+        Row: {
+          channel: string | null
+          company_id: string | null
+          contact_id: string | null
+          duration_seconds: number | null
+          note: string | null
+          occurred_at: string | null
+          offer: Database["public"]["Enums"]["offer"] | null
+          outcome: string | null
+          partner_id: string | null
+          source: string | null
+          source_id: string | null
+          type: string | null
+        }
+        Relationships: []
+      }
       company_overview: {
         Row: {
           city: string | null
@@ -802,10 +1032,98 @@ export type Database = {
           industry: string | null
           last_activity_at: string | null
           name: string | null
+          offer: Database["public"]["Enums"]["offer"] | null
           open_task_count: number | null
           partner_id: string | null
           status: Database["public"]["Enums"]["company_status"] | null
           website: string | null
+        }
+        Relationships: []
+      }
+      email_overview: {
+        Row: {
+          ai_opening_line: string | null
+          company_id: string | null
+          company_name: string | null
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string | null
+          id: string | null
+          offer: Database["public"]["Enums"]["offer"] | null
+          queued_at: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["email_status"] | null
+          subject: string | null
+          template: string | null
+        }
+        Relationships: []
+      }
+      notices: {
+        Row: {
+          city: string | null
+          classification: string | null
+          company_id: string | null
+          company_name: string | null
+          contact_id: string | null
+          contact_name: string | null
+          created_at: string | null
+          description: string | null
+          due_at: string | null
+          kind: string | null
+          offer: Database["public"]["Enums"]["offer"] | null
+          partner_name: string | null
+          phone: string | null
+          received_at: string | null
+          reply_body: string | null
+          task_id: string | null
+          task_type: Database["public"]["Enums"]["task_type"] | null
+          title: string | null
+        }
+        Relationships: []
+      }
+      offer_stats_weekly: {
+        Row: {
+          booked_per_100: number | null
+          channel: string | null
+          contacted: number | null
+          deals_won: number | null
+          meetings_booked: number | null
+          offer: Database["public"]["Enums"]["offer"] | null
+          replies: number | null
+          week_start: string | null
+        }
+        Relationships: []
+      }
+      partners_due: {
+        Row: {
+          checkin_interval_days: number | null
+          city: string | null
+          contact_name: string | null
+          days_since: number | null
+          email: string | null
+          id: string | null
+          last_checkin_at: string | null
+          name: string | null
+          phone: string | null
+          type: Database["public"]["Enums"]["partner_type"] | null
+        }
+        Relationships: []
+      }
+      pipeline_cards: {
+        Row: {
+          city: string | null
+          company_id: string | null
+          company_name: string | null
+          company_status: Database["public"]["Enums"]["company_status"] | null
+          deal_id: string | null
+          industry: string | null
+          next_action: string | null
+          next_action_at: string | null
+          offer: Database["public"]["Enums"]["offer"] | null
+          stage: Database["public"]["Enums"]["deal_stage"] | null
+          stage_changed_at: string | null
+          value_eur: number | null
+          won_at: string | null
         }
         Relationships: []
       }
@@ -826,6 +1144,7 @@ export type Database = {
           first_name: string | null
           industry: string | null
           last_name: string | null
+          offer: Database["public"]["Enums"]["offer"] | null
           partner_name: string | null
           phone: string | null
           previous_calls: number | null
@@ -844,6 +1163,10 @@ export type Database = {
       apply_call_outcome: {
         Args: { p_task_id: string; p_outcome: string; p_notes?: string; p_voicemail?: boolean; p_payload?: Json }
         Returns: Json
+      }
+      attributed_channel: {
+        Args: { p_company_id: string; p_at: string }
+        Returns: string
       }
       create_template_email: {
         Args: { p_company_id: string; p_contact_id: string; p_template: string; p_step: number; p_round: number; p_vars?: Json; p_status?: Database["public"]["Enums"]["email_status"] }
@@ -864,6 +1187,10 @@ export type Database = {
       helsinki_today: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      move_deal_stage: {
+        Args: { p_company_id: string; p_stage: Database["public"]["Enums"]["deal_stage"] }
+        Returns: undefined
       }
       next_call_slot: {
         Args: { p_after?: string }
@@ -904,6 +1231,10 @@ export type Database = {
       schedule_call: {
         Args: { p_company_id: string; p_contact_id: string; p_due: string; p_title: string; p_attempt?: number; p_priority?: number; p_description?: string }
         Returns: string
+      }
+      stage_for_status: {
+        Args: { p_status: Database["public"]["Enums"]["company_status"] }
+        Returns: Database["public"]["Enums"]["deal_stage"]
       }
       stop_all_channels: {
         Args: { p_company_id: string; p_keep_task?: string }
@@ -948,9 +1279,18 @@ export type Database = {
         | "case"
         | "script"
         | "objection"
+        | "sequence"
         | "tone"
         | "template"
         | "other"
+      deal_stage:
+        | "kontaktad"
+        | "svar"
+        | "mote_bokat"
+        | "mote_hallet"
+        | "offert"
+        | "kund"
+        | "forlorad"
       email_status:
         | "draft"
         | "pending_review"
@@ -966,6 +1306,12 @@ export type Database = {
         | "held"
         | "no_show"
         | "cancelled"
+      message_direction:
+        | "out"
+        | "in"
+      offer:
+        | "optely"
+        | "sba"
       partner_type:
         | "it"
         | "accounting"
@@ -1102,9 +1448,12 @@ export const Constants = {
       call_outcome: ["no_answer", "voicemail", "callback", "interested", "not_interested", "meeting_booked", "wrong_person", "send_info", "not_now", "no_need", "do_not_call"],
       campaign_status: ["draft", "active", "paused", "completed"],
       company_status: ["new", "in_sequence", "replied", "meeting_booked", "meeting_done", "solution_shown", "quote_sent", "customer", "nurture", "no", "do_not_contact", "with_partner"],
-      context_kind: ["profile", "offer", "icp", "case", "script", "objection", "tone", "template", "other"],
+      context_kind: ["profile", "offer", "icp", "case", "script", "objection", "sequence", "tone", "template", "other"],
+      deal_stage: ["kontaktad", "svar", "mote_bokat", "mote_hallet", "offert", "kund", "forlorad"],
       email_status: ["draft", "pending_review", "approved", "rejected", "queued", "sent", "bounced", "replied", "failed"],
       meeting_status: ["scheduled", "held", "no_show", "cancelled"],
+      message_direction: ["out", "in"],
+      offer: ["optely", "sba"],
       partner_type: ["it", "accounting", "web", "marketing", "other"],
       reply_classification: ["positive", "neutral", "negative", "out_of_office", "unsubscribe", "unclassified"],
       task_status: ["open", "done", "skipped"],

@@ -34,6 +34,8 @@ import { COMPANY_STATUS } from "@/lib/labels";
 import { MAX_ATTEMPTS, noAnswerHint, type Outcome } from "@/lib/sequence";
 import type { Enums } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
+import { OfferBadge } from "@/components/offer/offer-badge";
+import type { Offer } from "@/lib/offer";
 import { OutcomeDialog } from "./outcome-dialog";
 import { ScriptPanel, type ScriptEntry } from "./script-panel";
 import { TodoPanel, type TodoData } from "./todo-panel";
@@ -63,6 +65,7 @@ export type QueueItem = {
   role: string | null;
   phone: string | null;
   email: string | null;
+  offer: Offer | null;
 };
 
 export type TimelineEvent = {
@@ -97,18 +100,23 @@ export function RingpassView({
   scripts,
   sendInfoTemplate,
   todo,
+  initialTaskId = null,
 }: {
   queue: QueueItem[];
   timeline: Record<string, TimelineEvent[]>;
   scripts: ScriptEntry[];
   sendInfoTemplate: string;
   todo: TodoData;
+  /** Förvalt samtal, t.ex. från "Ring nu" i idag-listan. */
+  initialTaskId?: string | null;
 }) {
   // Optimistiskt borttagna uppgifter – servern bekräftar via revalidering.
   const [removed, setRemoved] = useState<Set<string>>(() => new Set());
   const visible = useMemo(() => queue.filter((q) => !removed.has(q.taskId)), [queue, removed]);
 
-  const [selectedId, setSelectedId] = useState<string | null>(queue[0]?.taskId ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    queue.find((q) => q.taskId === initialTaskId)?.taskId ?? queue[0]?.taskId ?? null,
+  );
   const selected = visible.find((q) => q.taskId === selectedId) ?? visible[0] ?? null;
 
   const [dialog, setDialog] = useState<Outcome | null>(null);
@@ -305,6 +313,7 @@ export function RingpassView({
                         <StatusDot tone="neutral" />
                       )}
                       <span className="truncate text-sm font-medium">{q.companyName}</span>
+                      <OfferBadge offer={q.offer} className="ml-auto" />
                     </span>
                     <span className="w-full truncate pl-4 text-xs text-subtle">
                       {q.isReply
@@ -335,7 +344,10 @@ export function RingpassView({
             <div className="space-y-4 p-4 sm:p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="truncate text-lg font-semibold tracking-tight">{selected.companyName}</h2>
+                  <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+                    <span className="truncate">{selected.companyName}</span>
+                    <OfferBadge offer={selected.offer} />
+                  </h2>
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
                     {facts.join(" · ")}
                     {selected.website && (
@@ -528,6 +540,7 @@ export function RingpassView({
           entries={scripts}
           firstName={selected.firstName}
           companyName={selected.companyName}
+          offer={selected.offer}
           className="order-3 lg:col-span-2 xl:col-span-1"
         />
       </div>

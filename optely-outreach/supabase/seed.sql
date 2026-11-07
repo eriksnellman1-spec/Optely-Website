@@ -3,13 +3,18 @@
 -- Ingen riktig persondata. Domänerna använder den reserverade toppdomänen .test.
 -- (Hagnäs Tyre Center nämns bara som Optelys kundcase i Företagshjärnan.)
 --
--- Kräver migrationerna 0001–0005. Tömmer affärstabellerna först och kan köras om:
+-- Kräver migrationerna 0001–0008. Tömmer affärstabellerna först och kan köras om:
 --   Supabase SQL Editor: klistra in och kör, eller  npm run db:seed
 -- =============================================================================
 
 begin;
 
 truncate
+  public.weekly_reviews,
+  public.sba_clients,
+  public.customers_optely,
+  public.deals,
+  public.linkedin_messages,
   public.webhook_events,
   public.sms_messages,
   public.partner_checkins,
@@ -24,8 +29,12 @@ truncate
   public.partners
 restart identity cascade;
 
--- Mejl-/SMS-mallarna (kind 'template', från migrationerna) behålls.
-delete from public.context_entries where kind::text <> 'template';
+-- Bara seedens egna poster i Företagshjärnan ersätts. Mallar, SBA-manus och sekvenser från
+-- migrationerna (och allt du skrivit själv) lämnas orört.
+delete from public.context_entries where slug in (
+  'optely-profil', 'erbjudande', 'icp', 'case-hagnas-tyre-center', 'manus-kallt-samtal', 'manus-behovssamtal',
+  'invandning-har-inte-tid', 'invandning-skicka-info', 'invandning-har-redan-nagon', 'invandning-vad-kostar-det',
+  'skrivregler');
 
 create function pg_temp.co(n int) returns uuid language sql immutable as
   $$ select ('00000000-0000-4000-a001-' || lpad(n::text, 12, '0'))::uuid $$;
@@ -90,6 +99,19 @@ insert into public.companies (id, name, business_id, website, phone, industry, c
   (pg_temp.co(25), 'Brändö Bokföring Ab',          '3100025-5', 'https://brandobokforing.test',    null,              'Tjänster',         'Vasa',          3, 'no', 'lista', null, 'Inget behov.'),
   (pg_temp.co(26), 'Vikarholmen Event Ab',         '3100026-6', 'https://vikarholmenevent.test',   null,              'Event',            'Vasa',          4, 'do_not_contact', 'lista', null, 'Bad att inte bli kontaktad.');
 
+-- Erbjudande (§ Erbjudanden): bygg/VVS/el/måleri/tak = SBA. Byte går bara vid Ny/Nej/Vilande/Kontakta ej.
+update public.companies set offer = 'sba' where id in (pg_temp.co(2), pg_temp.co(11));
+
+-- SBA: hantverkare och installatörer
+insert into public.companies (id, name, business_id, website, phone, industry, city, employees, status, source, offer, notes) values
+  (pg_temp.co(27), 'Kronoby Bygg & Renovering Ab', '3100027-7', 'https://kronobybygg.test',     null, 'Bygg',         'Kronoby',   9, 'in_sequence',    'lista', 'sba', 'Får jobb mest via rekommendationer.'),
+  (pg_temp.co(28), 'Larsmo VVS-Service Ab',        '3100028-8', 'https://larsmovvs.test',       null, 'VVS',          'Larsmo',    6, 'in_sequence',    'lista', 'sba', null),
+  (pg_temp.co(29), 'Vasa Måleri & Fasad Ab',       '3100029-9', 'https://vasamaleri.test',      null, 'Måleri',       'Vasa',      7, 'meeting_booked', 'lista', 'sba', 'Vill ha fler fasadjobb.'),
+  (pg_temp.co(30), 'Jakobstads Takservice Ab',     '3100030-0', 'https://jakobstadtak.test',    null, 'Tak',          'Jakobstad', 5, 'quote_sent',     'lista', 'sba', 'Erbjudande 490 €/mån skickat.'),
+  (pg_temp.co(31), 'Pedersöre Rörtjänst Ab',       '3100031-1', 'https://pedersoreror.test',    null, 'VVS',          'Pedersöre', 8, 'customer',       'lista', 'sba', 'SBA-kund sedan förra månaden.'),
+  (pg_temp.co(32), 'Nykarleby El & Automation Ab', '3100032-2', 'https://nykarlebyel.test',     null, 'El',           'Nykarleby', 4, 'new',            'lista', 'sba', null),
+  (pg_temp.co(33), 'Vörå Golv & Bygg Ab',          '3100033-3', 'https://vorabygg.test',        null, 'Bygg',         'Vörå',      3, 'nurture',        'lista', 'sba', 'Hör av dig efter jul.');
+
 update public.companies set domain = public.norm_domain(website);
 update public.companies set nurture_until = (now() at time zone 'Europe/Helsinki')::date + 60 where id = pg_temp.co(24);
 update public.companies set last_activity_at = now() - interval '3 days' where status not in ('new');
@@ -125,7 +147,14 @@ insert into public.contacts (id, company_id, first_name, last_name, role, email,
   (pg_temp.ct(24), pg_temp.co(24), 'Emma',     'Fäboda',     'Ägare',            'emma@fabodacatering.test',        '+358 40 100 2401', true),
   (pg_temp.ct(25), pg_temp.co(25), 'Gunilla',  'Brandt',     'Ägare',            'gunilla@brandobokforing.test',    '+358 40 100 2501', true),
   (pg_temp.ct(26), pg_temp.co(26), 'Oskar',    'Vikström',   'Ägare',            'oskar@vikarholmenevent.test',     '+358 40 100 2601', true),
-  (pg_temp.ct(27), pg_temp.co(13), 'Erik',     'Lassfolk',   'Produktionschef',  'erik.l@kallbyplast.test',         '+358 40 100 1302', false);
+  (pg_temp.ct(27), pg_temp.co(13), 'Erik',     'Lassfolk',   'Produktionschef',  'erik.l@kallbyplast.test',         '+358 40 100 1302', false),
+  (pg_temp.ct(28), pg_temp.co(27), 'Mattias',  'Kronqvist',  'Ägare',            'mattias@kronobybygg.test',        '+358 40 100 2701', true),
+  (pg_temp.ct(29), pg_temp.co(28), 'Jari',     'Larsén',     'Ägare',            'jari@larsmovvs.test',             '+358 40 100 2801', true),
+  (pg_temp.ct(30), pg_temp.co(29), 'Lena',     'Vasström',   'VD',               'lena@vasamaleri.test',            '+358 40 100 2901', true),
+  (pg_temp.ct(31), pg_temp.co(30), 'Kim',      'Takala',     'Ägare',            'kim@jakobstadtak.test',           '+358 40 100 3001', true),
+  (pg_temp.ct(32), pg_temp.co(31), 'Per',      'Rörholm',    'VD',               'per@pedersoreror.test',           '+358 40 100 3101', true),
+  (pg_temp.ct(33), pg_temp.co(32), 'Simon',    'Elmgren',    'Ägare',            'simon@nykarlebyel.test',          '+358 40 100 3201', true),
+  (pg_temp.ct(34), pg_temp.co(33), 'Anton',    'Vöråkoski',  'Ägare',            'anton@vorabygg.test',             '+358 40 100 3301', true);
 
 update public.companies c set sequence_contact_id = (select k.id from public.contacts k where k.company_id = c.id and k.is_primary limit 1);
 
@@ -306,6 +335,118 @@ $md$# Min stil
 - Inga ord som "revolutionerande", "AI-driven", "synergier".
 - Max 80 ord per mejl. En fråga i slutet. Signatur: Erik, Optely.
 $md$, 100);
+
+update public.context_entries set offer = 'optely'
+ where slug in ('optely-profil', 'erbjudande', 'icp', 'case-hagnas-tyre-center', 'manus-kallt-samtal',
+                'manus-behovssamtal', 'invandning-har-inte-tid', 'invandning-skicka-info',
+                'invandning-har-redan-nagon', 'invandning-vad-kostar-det');
+
+-- -----------------------------------------------------------------------------
+-- SBA i sekvens, svar, möte, offert och kund
+-- -----------------------------------------------------------------------------
+
+update public.companies c set sequence_contact_id = k.id
+  from public.contacts k where k.company_id = c.id and k.is_primary and c.id in
+  (pg_temp.co(27), pg_temp.co(28), pg_temp.co(29), pg_temp.co(30), pg_temp.co(31), pg_temp.co(32), pg_temp.co(33));
+update public.companies set nurture_until = (now() at time zone 'Europe/Helsinki')::date + 45 where id = pg_temp.co(33);
+
+-- Kronoby Bygg: försök 1 i dag
+update public.companies set released_at = now() - interval '1 hour' where id = pg_temp.co(27);
+insert into public.tasks (type, title, priority, company_id, contact_id, attempt, due_at) values
+  ('call', 'Försök 1: Kronoby Bygg & Renovering Ab', 2, pg_temp.co(27), pg_temp.ct(28), 1, pg_temp.at(0, '10:00'));
+
+-- Larsmo VVS: LinkedIn-DM i förra veckan, svar i dag → triggern ger Svarat och stoppar övriga kanaler
+insert into public.linkedin_messages (company_id, contact_id, direction, note, sent_at) values
+  (pg_temp.co(28), pg_temp.ct(29), 'out', 'Frågade hur de får nya kunder i dag.', now() - interval '6 days'),
+  (pg_temp.co(28), pg_temp.ct(29), 'in',  'Mest rekommendationer, men det är ojämnt. Ring gärna.', now() - interval '3 hours');
+insert into public.tasks (type, title, description, priority, company_id, contact_id, due_at) values
+  ('call', 'LinkedIn-svar: ring Jari på Larsmo VVS-Service Ab', 'Svarade på LinkedIn – vill bli uppringd.', 1, pg_temp.co(28), pg_temp.ct(29), now());
+
+-- Fler LinkedIn-loggar (Optely)
+insert into public.linkedin_messages (company_id, contact_id, direction, note, sent_at) values
+  (pg_temp.co(10), pg_temp.ct(10), 'out', 'DM: hur sköter ni rapporterna till kunderna?', now() - interval '2 days'),
+  (pg_temp.co(20), pg_temp.ct(20), 'out', 'Tackade för behovssamtalet.', now() - interval '5 days');
+
+-- Vasa Måleri: behovssamtal bokat i övermorgon
+insert into public.calls (company_id, contact_id, outcome, notes, duration_seconds, called_at) values
+  (pg_temp.co(29), pg_temp.ct(30), 'meeting_booked', 'Vill ha fler fasadjobb i vår.', 360, now() - interval '1 day');
+insert into public.meetings (company_id, contact_id, title, starts_at, ends_at, location, status, created_at) values
+  (pg_temp.co(29), pg_temp.ct(30), 'Behovssamtal: Vasa Måleri & Fasad Ab', pg_temp.at(2, '13:00'), pg_temp.at(2, '13:20'), 'telefon', 'scheduled', now() - interval '1 day');
+
+-- Jakobstads Takservice: offert, Pedersöre Rörtjänst: kund (statusar återställs efter mötestriggern)
+insert into public.meetings (company_id, contact_id, title, starts_at, ends_at, location, status, outcome, calendar_added_at, created_at) values
+  (pg_temp.co(30), pg_temp.ct(31), 'Behovssamtal: Jakobstads Takservice Ab', now() - interval '8 days', now() - interval '8 days' + interval '20 minutes', 'telefon', 'held', 'Skickar erbjudande', now() - interval '10 days', now() - interval '10 days'),
+  (pg_temp.co(31), pg_temp.ct(32), 'Behovssamtal: Pedersöre Rörtjänst Ab', now() - interval '40 days', now() - interval '40 days' + interval '20 minutes', 'telefon', 'held', 'Ja – start direkt', now() - interval '42 days', now() - interval '42 days');
+update public.companies set status = 'meeting_booked' where id = pg_temp.co(29);
+update public.companies set status = 'quote_sent' where id = pg_temp.co(30);
+
+-- SBA-kund: bokningar mot garantin (3/mån). Förra månaden 2 (ingen avgift), denna månad 4.
+insert into public.sba_clients (company_id, month, bookings) values
+  (pg_temp.co(31), (date_trunc('month', now() at time zone 'Europe/Helsinki') - interval '1 month')::date, 2),
+  (pg_temp.co(31), date_trunc('month', now() at time zone 'Europe/Helsinki')::date, 4);
+
+-- Optely-kund: Holm Lantbruksteknik (raden skapas av triggern när bolaget blir Kund)
+insert into public.customers_optely (company_id, project, invoiced, invoice_note, maintenance_agreement, started_at)
+values (pg_temp.co(23), 'Automatiska servicelistor', true, 'Fakturerat 2 900 € i oktober', true,
+        (now() at time zone 'Europe/Helsinki')::date - 60)
+on conflict (company_id) do update set project = excluded.project, invoiced = excluded.invoiced,
+  invoice_note = excluded.invoice_note, maintenance_agreement = excluded.maintenance_agreement, started_at = excluded.started_at;
+
+-- Förlorad affär: Brändö var i sekvens och sa sedan nej
+update public.companies set status = 'in_sequence' where id = pg_temp.co(25);
+update public.companies set status = 'no' where id = pg_temp.co(25);
+
+-- Värden och nästa åtgärd på affärer
+update public.deals set value_eur = 2900, next_action = 'Ring om offerten', next_action_at = pg_temp.at(2, '09:00')
+ where company_id = pg_temp.co(22) and stage = 'offert';
+update public.deals set value_eur = 3500, next_action = 'Skicka offert efter lösningsmötet', next_action_at = pg_temp.at(1, '12:00')
+ where company_id = pg_temp.co(21);
+update public.deals set value_eur = 4200, next_action = 'Boka lösningsmöte', next_action_at = pg_temp.at(3, '10:00')
+ where company_id = pg_temp.co(20);
+update public.deals set next_action = 'Följ upp erbjudandet', next_action_at = pg_temp.at(1, '09:00')
+ where company_id = pg_temp.co(30);
+update public.deals set value_eur = 2900, won_at = now() - interval '58 days', closed_at = now() - interval '58 days'
+ where company_id = pg_temp.co(23) and stage = 'kund';
+update public.deals set won_at = now() - interval '38 days', closed_at = now() - interval '38 days'
+ where company_id = pg_temp.co(31) and stage = 'kund';
+
+-- -----------------------------------------------------------------------------
+-- Historik för Översikt och Lördagsanalys: fyra veckor samtal, mejl och möten per erbjudande
+-- -----------------------------------------------------------------------------
+
+insert into public.calls (company_id, contact_id, outcome, called_at, duration_seconds)
+select c.id, c.sequence_contact_id,
+       (array['no_answer', 'voicemail', 'no_answer', 'callback', 'no_need', 'send_info', 'meeting_booked'])
+         [1 + ((row_number() over (order by c.name) + w) % 7)]::public.call_outcome,
+       pg_temp.at((-(7 * w) - (row_number() over (order by c.name) % 4))::int, '10:15'),
+       60 + (row_number() over (order by c.name) % 5) * 45
+  from public.companies c, generate_series(1, 3) as w
+ where c.status not in ('do_not_contact')
+   and c.sequence_contact_id is not null
+   and ((abs(hashtext(c.name)) + w) % 3) <> 0;
+
+insert into public.emails (company_id, contact_id, subject, body, status, sent_at, queued_at, reviewed_at)
+select c.id, c.sequence_contact_id, 'Det som görs för hand', 'Hej! (testmejl)', 'sent',
+       pg_temp.at(-(7 * w) - 1, '08:00'), pg_temp.at(-(7 * w) - 1, '07:55'), pg_temp.at(-(7 * w) - 2, '16:00')
+  from public.companies c, generate_series(1, 3) as w
+ where c.sequence_contact_id is not null and c.status not in ('do_not_contact', 'customer')
+   and ((abs(hashtext(c.name)) + w) % 2) = 0;
+
+insert into public.meetings (company_id, contact_id, title, starts_at, ends_at, location, status, outcome, calendar_added_at, created_at)
+select c.id, c.sequence_contact_id, 'Behovssamtal: ' || c.name,
+       pg_temp.at(-(7 * w) + 2, '10:00'), pg_temp.at(-(7 * w) + 2, '10:20'), 'telefon',
+       case when w = 1 then 'no_show'::public.meeting_status else 'held'::public.meeting_status end,
+       'Testdata', pg_temp.at(-(7 * w), '11:00'), pg_temp.at(-(7 * w), '11:00')
+  from public.companies c, generate_series(1, 3) as w
+ where c.id in (pg_temp.co(6), pg_temp.co(9), pg_temp.co(27), pg_temp.co(32))
+   and ((abs(hashtext(c.name)) + w) % 2) = 1;
+
+-- (Historikmötena är hållna/uteblivna – mötestriggern reagerar bara på nybokade, så statusarna ändras inte.)
+
+-- En gammal lördagsanteckning
+insert into public.weekly_reviews (week_start, offer, notes) values
+  (date_trunc('week', now() at time zone 'Europe/Helsinki')::date - 7, null,
+   'Ring SBA-bolag på förmiddagen – hantverkare svarar sällan efter lunch. Testa kortare öppning i Optely-manuset.');
 
 -- -----------------------------------------------------------------------------
 -- Dagens kvot: släpp in 8 nya bolag i ringkön så att Ringpasset har något att visa.

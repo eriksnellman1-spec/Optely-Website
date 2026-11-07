@@ -1,3 +1,6 @@
+import Link from "next/link";
+
+import { OfferBadge } from "@/components/offer/offer-badge";
 import { StatusDot } from "@/components/ui/status-dot";
 import { formatDateTime, formatRelative } from "@/lib/format";
 import { COMPANY_STATUS } from "@/lib/labels";
@@ -15,6 +18,7 @@ type Row = Pick<
   | "contact_count"
   | "open_task_count"
   | "last_activity_at"
+  | "offer"
 >;
 
 export function CompanyTable({ companies }: { companies: Row[] }) {
@@ -44,7 +48,10 @@ export function CompanyTable({ companies }: { companies: Row[] }) {
               >
                 <td className="px-3">
                   <div className="flex min-w-0 items-center gap-2">
-                    <span className="truncate font-medium">{c.name}</span>
+                    <Link href={`/contacts/${c.id}`} className="truncate font-medium hover:underline">
+                      {c.name}
+                    </Link>
+                    <OfferBadge offer={c.offer} />
                     {c.do_not_contact && (
                       <span className="shrink-0 rounded bg-status-red/15 px-1 text-[10px] text-status-red">
                         Avregistrerad
