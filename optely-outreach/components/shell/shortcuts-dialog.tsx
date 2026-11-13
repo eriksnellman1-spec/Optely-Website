@@ -24,7 +24,7 @@ const RINGPASS: { keys: string[]; label: string }[] = [
   { keys: ["6"], label: "Skicka info (Mer)" },
   { keys: ["7"], label: "Nej, inte nu (Mer)" },
   { keys: ["8"], label: "Ring ej (Mer)" },
-  { keys: ["s"], label: "Hoppa över (sist i kön)" },
+  { keys: ["s"], label: "Hoppa över (sist bland samma prioritet)" },
   { keys: ["u"], label: "Skjut upp till nästa ringdag" },
   { keys: ["e"], label: "Redigera kontakt" },
   { keys: ["v"], label: "Röstmeddelande på/av" },
