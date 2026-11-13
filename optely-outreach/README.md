@@ -112,7 +112,10 @@ högst upp styr all data (sparas i `?offer=` och cookien `or_offer`).
 `u` skjut upp till nästa ringdag, `e` redigera kontakt, `v` röstmeddelande, `n` anteckning, `m` manus.
 
 **Ringlistan:** Företag → *Importera CSV* (`/contacts/import`). Välj kolumner, förhandsgranska dubbletter och
-erbjudande, importera. Samma sida har *Töm testdata* (tar bort bolag/partner med .test-adresser). Daglig cron: `GET /api/cron/sequence` med `Authorization: Bearer $CRON_SECRET`.
+erbjudande, importera. Samma sida har *Töm testdata* (tar bort bolag/partner med .test-adresser).
+
+**Partnerlistan:** Partner → *Importera CSV* (`/partners/import`). Typen (bokföring, IT, webb & reklam, övrigt)
+gissas ur en typkolumn eller byråns namn. Daglig cron: `GET /api/cron/sequence` med `Authorization: Bearer $CRON_SECRET`.
 
 ## 6. Webhooks från n8n
 

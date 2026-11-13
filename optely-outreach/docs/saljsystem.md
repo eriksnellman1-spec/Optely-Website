@@ -156,6 +156,9 @@ Det här finns i appen sedan fas A–C och ändras inte förrän en egen omgång
 | 2026-11-13 | Ringlistan | CSV-import i appen (Företag → Importera CSV) med kolumnval, gissning av PRH/Profinder-rubriker, dubblettkontroll och erbjudande utifrån bransch. Nya bolag får status Ny. |
 | 2026-11-13 | Extra i passet | Redigera kontakt i kortet (`e`), dagens siffror (ringda/svar/bokade/kvar), hoppa över (`s`) och skjut upp till nästa ringdag (`u`). |
 | 2026-11-13 | Testdata | Knappen "Töm testdata" tar bort bolag och partner med .test-adresser. Manus, mallar och inställningar behålls. |
+| 2026-11-13 | Smartlead efter trialen | Erik betalar billigaste planen så att uppvärmningen av de 5 inkorgarna fortsätter. Ingen integration med appen än. |
+| 2026-11-13 | Partnermejlen (109 byråer) | Skickas personligt från Eriks egen Gmail, ca 20 per dag. Svar och samtal loggas som check-in i appen. |
+| 2026-11-13 | Partnerlistan in i appen | CSV-import (Partner → Importera CSV) med kolumnval, typ gissad ur typkolumn eller namn, dubblettkontroll (namn, e-postdomän, telefon, samma fil). |
 
 ## Implementationsnoter
 

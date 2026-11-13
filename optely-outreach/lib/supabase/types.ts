@@ -1203,6 +1203,10 @@ export type Database = {
         Args: { p_rows: Json; p_skip_duplicates?: boolean }
         Returns: Json
       }
+      import_partners: {
+        Args: { p_rows: Json; p_skip_duplicates?: boolean }
+        Returns: Json
+      }
       move_deal_stage: {
         Args: { p_company_id: string; p_stage: Database["public"]["Enums"]["deal_stage"] }
         Returns: undefined
@@ -1231,7 +1235,19 @@ export type Database = {
         Args: { p_industry: string }
         Returns: Database["public"]["Enums"]["offer"]
       }
+      partner_type_for: {
+        Args: { p_text: string }
+        Returns: Database["public"]["Enums"]["partner_type"]
+      }
+      partner_type_from_row: {
+        Args: { r: Json }
+        Returns: Database["public"]["Enums"]["partner_type"]
+      }
       preview_import: {
+        Args: { p_rows: Json }
+        Returns: Json
+      }
+      preview_partner_import: {
         Args: { p_rows: Json }
         Returns: Json
       }

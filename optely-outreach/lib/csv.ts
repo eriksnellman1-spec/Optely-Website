@@ -83,17 +83,57 @@ const GUESSES: Record<ImportFieldKey, string[]> = {
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-zåäöüé0-9]+/g, " ").trim();
 
+type Field<K extends string> = { readonly key: K; readonly label: string; readonly required?: boolean };
+
 /** Gissar vilken kolumn som hör till vilket fält. Returnerar kolumnindex eller -1. */
-export function guessMapping(headers: string[]): Record<ImportFieldKey, number> {
+export function guessColumns<K extends string>(
+  headers: string[],
+  fields: readonly Field<K>[],
+  guesses: Record<K, string[]>,
+): Record<K, number> {
   const used = new Set<number>();
-  const out = {} as Record<ImportFieldKey, number>;
+  const out = {} as Record<K, number>;
   const h = headers.map(norm);
-  for (const f of IMPORT_FIELDS) {
-    const cands = GUESSES[f.key].map(norm);
+  for (const f of fields) {
+    const cands = guesses[f.key].map(norm);
     let idx = h.findIndex((x, i) => !used.has(i) && cands.includes(x));
     if (idx === -1) idx = h.findIndex((x, i) => !used.has(i) && cands.some((c) => c.length > 3 && x.includes(c)));
     if (idx !== -1) used.add(idx);
     out[f.key] = idx;
   }
   return out;
+}
+
+export function guessMapping(headers: string[]): Record<ImportFieldKey, number> {
+  return guessColumns(headers, IMPORT_FIELDS, GUESSES);
+}
+
+// --- Partnerlistan ---
+
+export const PARTNER_FIELDS = [
+  { key: "name", label: "Byrå", required: true },
+  { key: "type", label: "Typ" },
+  { key: "contact_name", label: "Kontaktperson" },
+  { key: "email", label: "E-post" },
+  { key: "phone", label: "Telefon" },
+  { key: "city", label: "Ort" },
+  { key: "website", label: "Webb" },
+  { key: "notes", label: "Anteckning" },
+] as const;
+
+export type PartnerFieldKey = (typeof PARTNER_FIELDS)[number]["key"];
+
+const PARTNER_GUESSES: Record<PartnerFieldKey, string[]> = {
+  name: ["byrå", "partner", "företag", "företagsnamn", "bolag", "namn", "firma", "nimi", "yritys", "toiminimi", "company", "name"],
+  type: ["typ", "partnertyp", "kategori", "bransch", "tjänst", "tyyppi", "toimiala", "type", "category", "industry"],
+  contact_name: ["kontaktperson", "kontakt", "person", "vd", "yhteyshenkilö", "toimitusjohtaja", "contact", "contact name"],
+  email: ["e-post", "epost", "email", "e-mail", "sähköposti", "mejl"],
+  phone: ["telefon", "tel", "telefonnummer", "puhelin", "phone"],
+  city: ["ort", "stad", "kommun", "postort", "kunta", "kaupunki", "paikkakunta", "city"],
+  website: ["webb", "webbplats", "hemsida", "www", "kotisivu", "website", "url"],
+  notes: ["anteckning", "kommentar", "notering", "huomio", "notes"],
+};
+
+export function guessPartnerMapping(headers: string[]): Record<PartnerFieldKey, number> {
+  return guessColumns(headers, PARTNER_FIELDS, PARTNER_GUESSES);
 }
