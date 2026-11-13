@@ -105,3 +105,37 @@ export async function createContact(input: NewContactInput): Promise<CreateConta
   revalidatePath("/contacts");
   return { ok: true, data: { companyId, contactId: contact.id } };
 }
+
+/** Redigera en kontakt direkt i Ringpassets kort. */
+export async function updateContact(input: {
+  contactId: string;
+  firstName: string;
+  lastName?: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+}): Promise<ActionResult> {
+  const firstName = clean(input.firstName);
+  const email = clean(input.email);
+  if (!firstName) return { ok: false, error: "Förnamn krävs." };
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "Ogiltig e-postadress." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("contacts")
+    .update({
+      first_name: firstName,
+      last_name: clean(input.lastName),
+      role: clean(input.role),
+      phone: clean(input.phone),
+      email: email ? email.toLowerCase() : null,
+    })
+    .eq("id", input.contactId);
+  if (error) {
+    if (error.code === "23505") return { ok: false, error: "En annan kontakt har redan den e-postadressen." };
+    return { ok: false, error: "Kunde inte spara kontakten." };
+  }
+  revalidatePath("/", "layout");
+  return { ok: true, data: undefined };
+}
+

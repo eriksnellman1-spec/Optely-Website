@@ -42,7 +42,16 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
   const companyIds = [...new Set(queue.map((q) => q.company_id))];
   const none = Promise.resolve({ data: [], error: null });
 
-  const [upcomingRes, scriptsRes, infoRes, todo, followups, callsRes, emailsRes, repliesRes] =
+  const startOfToday = new Date(new Date(tomorrow).getTime() - 86_400_000).toISOString();
+  let todayQuery = supabase
+    .from("activities")
+    .select("channel, type, outcome, offer")
+    .in("channel", ["samtal", "möte"])
+    .gte("occurred_at", startOfToday)
+    .lt("occurred_at", tomorrow);
+  if (offer !== "all") todayQuery = todayQuery.eq("offer", offer);
+
+  const [upcomingRes, scriptsRes, infoRes, todo, followups, callsRes, emailsRes, repliesRes, dealsRes, todayRes] =
     await Promise.all([
       supabase
         .from("tasks")
@@ -85,7 +94,22 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
             .order("received_at", { ascending: false })
             .limit(300)
         : none,
+      companyIds.length
+        ? supabase
+            .from("deals")
+            .select("company_id, stage, next_action, next_action_at")
+            .in("company_id", companyIds)
+            .not("stage", "in", "(kund,forlorad)")
+        : Promise.resolve({ data: [] as { company_id: string; stage: string; next_action: string | null; next_action_at: string | null }[], error: null }),
+      todayQuery,
     ]);
+
+  const todayRows = todayRes.data ?? [];
+  const today = {
+    called: todayRows.filter((a) => a.channel === "samtal").length,
+    answered: todayRows.filter((a) => a.channel === "samtal" && !["no_answer", "voicemail"].includes(a.outcome ?? "")).length,
+    booked: todayRows.filter((a) => a.channel === "möte" && a.type === "bokat").length,
+  };
 
   const timeline: Record<string, TimelineEvent[]> = {};
   const push = (companyId: string, e: TimelineEvent) => (timeline[companyId] ??= []).push(e);
@@ -133,6 +157,11 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
     phone: q.phone,
     email: q.email,
     offer: q.offer,
+    lastName: q.last_name,
+    deal: (() => {
+      const d = (dealsRes.data ?? []).find((x) => x.company_id === q.company_id && x.stage !== "kund" && x.stage !== "forlorad");
+      return d ? { stage: d.stage, nextAction: d.next_action, nextActionAt: d.next_action_at } : null;
+    })(),
   }));
   const upcoming = (upcomingRes.data ?? []).filter((t) => offer === "all" || t.company?.offer === offer).length;
 
@@ -159,6 +188,7 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
         scripts={scriptsRes.data ?? []}
         sendInfoTemplate={infoRes.data?.content ?? ""}
         todo={todo}
+        today={today}
         initialTaskId={typeof task === "string" ? task : null}
       />
     </div>

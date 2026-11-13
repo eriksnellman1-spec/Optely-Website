@@ -48,7 +48,7 @@ function addMonths(from: Date, months: number) {
 
 const META: Partial<Record<Outcome, { title: string; description: string }>> = {
   booked: {
-    title: "Bokat",
+    title: "Möte bokat",
     description: "Behovssamtalet sparas. Bekräftelse-SMS köas (mejl om mobilnummer saknas) och kalenderhändelsen läggs i Att göra.",
   },
   call_later: { title: "Ring senare", description: "Samtalet läggs exakt vid den tid du väljer." },
@@ -64,7 +64,7 @@ const META: Partial<Record<Outcome, { title: string; description: string }>> = {
     title: "Nej, inte nu",
     description: "Bolaget blir Vilande och samtalet ligger färdigt till tidpunkten de angav.",
   },
-  no_need: { title: "Nej, inget behov", description: "Status Nej. Alla kanaler stoppas för bolaget." },
+  no_need: { title: "Svar – nej", description: "De svarade men vill inte. Status Nej och alla kanaler stoppas. Erbjudandet kan bytas senare." },
   do_not_call: {
     title: "Ring ej",
     description: "Kontakta ej i alla kanaler, permanent. Inga fler samtal, mejl eller SMS.",

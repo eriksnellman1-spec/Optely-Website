@@ -126,6 +126,7 @@ export type Database = {
           offer: Database["public"]["Enums"]["offer"]
           partner_id: string | null
           phone: string | null
+          postal_city: string | null
           released_at: string | null
           revenue_eur: number | null
           sequence_contact_id: string | null
@@ -155,6 +156,7 @@ export type Database = {
           offer?: Database["public"]["Enums"]["offer"]
           partner_id?: string | null
           phone?: string | null
+          postal_city?: string | null
           released_at?: string | null
           revenue_eur?: number | null
           sequence_contact_id?: string | null
@@ -184,6 +186,7 @@ export type Database = {
           offer?: Database["public"]["Enums"]["offer"]
           partner_id?: string | null
           phone?: string | null
+          postal_city?: string | null
           released_at?: string | null
           revenue_eur?: number | null
           sequence_contact_id?: string | null
@@ -1168,8 +1171,16 @@ export type Database = {
         Args: { p_company_id: string; p_at: string }
         Returns: string
       }
+      clear_test_data: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       create_template_email: {
         Args: { p_company_id: string; p_contact_id: string; p_template: string; p_step: number; p_round: number; p_vars?: Json; p_status?: Database["public"]["Enums"]["email_status"] }
+        Returns: string
+      }
+      defer_task: {
+        Args: { p_task_id: string; p_mode: string }
         Returns: string
       }
       fill_template: {
@@ -1187,6 +1198,10 @@ export type Database = {
       helsinki_today: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      import_companies: {
+        Args: { p_rows: Json; p_skip_duplicates?: boolean }
+        Returns: Json
       }
       move_deal_stage: {
         Args: { p_company_id: string; p_stage: Database["public"]["Enums"]["deal_stage"] }
@@ -1211,6 +1226,14 @@ export type Database = {
       norm_phone: {
         Args: { p: string }
         Returns: string
+      }
+      offer_for_industry: {
+        Args: { p_industry: string }
+        Returns: Database["public"]["Enums"]["offer"]
+      }
+      preview_import: {
+        Args: { p_rows: Json }
+        Returns: Json
       }
       queue_template_sms: {
         Args: { p_company_id: string; p_contact_id: string; p_template: string; p_due: string; p_vars?: Json }
@@ -1239,6 +1262,10 @@ export type Database = {
       stop_all_channels: {
         Args: { p_company_id: string; p_keep_task?: string }
         Returns: undefined
+      }
+      test_data_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
     }
     Enums: {

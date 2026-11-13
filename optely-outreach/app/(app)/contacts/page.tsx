@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { Building2, SearchX, UserPlus } from "lucide-react";
+import Link from "next/link";
+import { Building2, FileUp, SearchX, UserPlus } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 import { CompanyTable } from "@/components/contacts/company-table";
 import { ContactsFilters } from "@/components/contacts/contacts-filters";
@@ -74,10 +77,18 @@ export default async function ContactsPage({ searchParams }: PageProps<"/contact
           </>
         }
         actions={
-          <OpenDialogButton dialog="new-contact" variant="default">
-            <UserPlus />
-            Ny kontakt
-          </OpenDialogButton>
+          <>
+            <Button asChild variant="outline">
+              <Link href="/contacts/import">
+                <FileUp />
+                Importera CSV
+              </Link>
+            </Button>
+            <OpenDialogButton dialog="new-contact" variant="default">
+              <UserPlus />
+              Ny kontakt
+            </OpenDialogButton>
+          </>
         }
       />
 

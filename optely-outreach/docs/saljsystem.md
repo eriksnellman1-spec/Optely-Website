@@ -74,8 +74,10 @@ Ett klick: (1) startar samtalet via `tel:`-länk (senare Twilio), (2) loggar fö
 (3) öppnar en ruta för utfall: inget svar / svar – nej / ring senare (datum) / möte bokat (tid) / fel person.
 Utfallet uppdaterar status, deal och nästa åtgärd automatiskt.
 
-> **Nuvarande läge:** Ringpasset har 8 utfall (se "Kvar från tidigare spec") och loggar försöket när utfallet
-> väljs. Omläggning till CONTEXT:s ring-knapp görs i en egen omgång.
+> **Nuvarande läge (2026-11-13):** Ring-knappen är en `tel:`-länk utan timer. Försöket loggas när utfallet
+> väljs i rutan för företaget. Fem stora utfall (Inget svar, Svar – nej, Ring senare, Möte bokat, Fel person,
+> tangent 1–5) och tre under Mer (Skicka info, Nej inte nu, Ring ej, 6–8). Kortet visar nästa steg per utfall
+> och ett eget fält för nästa åtgärd som sparas på affären.
 
 ## Automatik (n8n)
 
@@ -147,6 +149,13 @@ Det här finns i appen sedan fas A–C och ändras inte förrän en egen omgång
 | 2026-11-07 | "Svar" i samtalskanalen | Någon svarade i telefon: alla utfall utom Ej svar och Röstmeddelande (även nej). E-post: inkomna svar. LinkedIn: inkommande meddelanden. |
 | 2026-11-07 | Vilken kanal får ett bokat möte? | Kanalen som bokade det: bokat i samtal → samtal, annars kanalen för senaste utgående kontakt före bokningen. |
 | 2026-11-07 | Vad är ett "avtal"? | Bolag vars affär nådde steget Kund den veckan (Optely och SBA). |
+| 2026-11-13 | Utfall i Ringpasset | 5 stora (Inget svar, Svar – nej, Ring senare, Möte bokat, Fel person) + 3 under Mer (Skicka info, Nej inte nu, Ring ej). |
+| 2026-11-13 | Ring-knappen | Bara `tel:`-länk; ingen timer och ingen loggning vid klick. Försöket loggas med utfallet. |
+| 2026-11-13 | "Svar – nej" | Status Nej (befintligt utfall `no_need`); alla kanaler stoppas. |
+| 2026-11-13 | Nästa steg i kortet | Visas per utfall; eget fält för nästa åtgärd + datum sparas på bolagets öppna affär (syns i Pipeline). |
+| 2026-11-13 | Ringlistan | CSV-import i appen (Företag → Importera CSV) med kolumnval, gissning av PRH/Profinder-rubriker, dubblettkontroll och erbjudande utifrån bransch. Nya bolag får status Ny. |
+| 2026-11-13 | Extra i passet | Redigera kontakt i kortet (`e`), dagens siffror (ringda/svar/bokade/kvar), hoppa över (`s`) och skjut upp till nästa ringdag (`u`). |
+| 2026-11-13 | Testdata | Knappen "Töm testdata" tar bort bolag och partner med .test-adresser. Manus, mallar och inställningar behålls. |
 
 ## Implementationsnoter
 
