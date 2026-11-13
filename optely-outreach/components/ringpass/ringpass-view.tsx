@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Ban,
   Building2,
@@ -137,9 +138,20 @@ export function RingpassView({
   /** Förvalt samtal, t.ex. från "Ring nu" i idag-listan. */
   initialTaskId?: string | null;
 }) {
+  const router = useRouter();
   // Optimistiskt borttagna uppgifter – servern bekräftar via revalidering.
   const [removed, setRemoved] = useState<Set<string>>(() => new Set());
-  const visible = useMemo(() => queue.filter((q) => !removed.has(q.taskId)), [queue, removed]);
+  // Uppskjutna samtal (u) hålls dolda så länge kön är samma som när de sköts upp –
+  // annars kan de dyka upp igen om revalideringen hinner efter. När servern skickar
+  // en ny kö är den sanningen.
+  const [deferred, setDeferred] = useState<{ queue: QueueItem[]; ids: Set<string> }>(() => ({
+    queue,
+    ids: new Set(),
+  }));
+  const visible = useMemo(() => {
+    const hidden = deferred.queue === queue ? deferred.ids : null;
+    return queue.filter((q) => !removed.has(q.taskId) && !hidden?.has(q.taskId));
+  }, [queue, removed, deferred]);
 
   const [selectedId, setSelectedId] = useState<string | null>(
     queue.find((q) => q.taskId === initialTaskId)?.taskId ?? queue[0]?.taskId ?? null,
@@ -225,12 +237,18 @@ export function RingpassView({
     [visible, notes, voicemail, nextAction],
   );
 
-  /** Hoppa över (sist i kön) eller skjut upp till nästa ringdag – inget utfall loggas. */
+  /** Hoppa över (sist bland samtal med samma prioritet) eller skjut upp till nästa ringdag – inget utfall loggas. */
   const defer = useCallback(
     (item: QueueItem, mode: "skip" | "tomorrow") => {
       const index = visible.findIndex((q) => q.taskId === item.taskId);
       const following = visible[index + 1] ?? visible[index - 1] ?? null;
       setRemoved((r) => new Set(r).add(item.taskId));
+      if (mode === "tomorrow") {
+        setDeferred((d) => ({
+          queue,
+          ids: new Set(d.queue === queue ? d.ids : []).add(item.taskId),
+        }));
+      }
       setSelectedId(following?.taskId ?? null);
       startTransition(async () => {
         const r = await deferTask(item.taskId, mode);
@@ -240,14 +258,24 @@ export function RingpassView({
           return next;
         });
         if (!r.ok) {
+          setDeferred((d) => {
+            const ids = new Set(d.ids);
+            ids.delete(item.taskId);
+            return { queue: d.queue, ids };
+          });
           setSelectedId(item.taskId);
           toast.error(r.error);
-        } else {
-          toast(mode === "skip" ? `${item.companyName} ligger sist i kön` : `${item.companyName} flyttad till nästa ringdag`);
+          return;
         }
+        router.refresh();
+        toast(
+          mode === "skip"
+            ? `${item.companyName} flyttad sist bland samtal med samma prioritet`
+            : `${item.companyName} flyttad till nästa ringdag`,
+        );
       });
     },
-    [visible],
+    [visible, queue, router],
   );
 
   const choose = useCallback(
