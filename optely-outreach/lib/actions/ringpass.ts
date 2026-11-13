@@ -12,6 +12,11 @@ export type { Outcome };
 
 export type OutcomeInput = {
   taskId: string;
+  /** Bolaget – behövs för att spara egen nästa åtgärd på affären. */
+  companyId?: string;
+  /** Egen nästa åtgärd (sparas på öppen affär och syns i Pipeline). */
+  nextAction?: string;
+  nextActionAt?: string;
   outcome: Outcome;
   notes?: string;
   voicemail?: boolean;
@@ -128,6 +133,17 @@ export async function logCallOutcome(
     }
   }
 
+  // Egen nästa åtgärd sparas på bolagets öppna affär (om den fortfarande är öppen efter utfallet).
+  const nextAction = input.nextAction?.trim();
+  if (input.companyId && nextAction) {
+    const at = parseDate(input.nextActionAt);
+    await supabase
+      .from("deals")
+      .update({ next_action: nextAction, next_action_at: at ? at.toISOString() : null })
+      .eq("company_id", input.companyId)
+      .not("stage", "in", "(kund,forlorad)");
+  }
+
   revalidatePath("/", "layout");
   return { ok: true, data: { message: MESSAGES[input.outcome], emailsQueued, emailsFailed } };
 }
@@ -189,3 +205,14 @@ export async function releaseMoreCalls(count: number): Promise<ActionResult<{ re
   return { ok: true, data: { released: typeof data === "number" ? data : 0 } };
 }
 
+/** Hoppa över (sist i dagens kö) eller skjut upp till nästa ringdag – utan att logga utfall. */
+export async function deferTask(taskId: string, mode: "skip" | "tomorrow"): Promise<ActionResult> {
+  if (mode !== "skip" && mode !== "tomorrow") return { ok: false, error: "Okänt läge." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("defer_task", { p_task_id: taskId, p_mode: mode });
+  if (error) {
+    return { ok: false, error: error.message?.includes("redan hanterad") ? "Samtalet är redan hanterat." : "Kunde inte flytta samtalet." };
+  }
+  revalidatePath("/", "layout");
+  return { ok: true, data: undefined };
+}

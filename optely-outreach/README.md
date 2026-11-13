@@ -108,8 +108,11 @@ högst upp styr all data (sparas i `?offer=` och cookien `or_offer`).
 | Inställningar | `/settings` | Veckoplan, nya bolag per ringdag, senaste `webhook_events` |
 | Outreach (Mer) | `/outreach` | Mejl per status |
 
-**Ringpasset** (`/ringpass`): `j`/`k` byter samtal, `1`–`8` utfall, `v` röstmeddelande, `n` anteckning,
-`m` manus. Daglig cron: `GET /api/cron/sequence` med `Authorization: Bearer $CRON_SECRET`.
+**Ringpasset** (`/ringpass`): `j`/`k` byter samtal, `1`–`5` utfall (`6`–`8` under Mer), `s` hoppa över,
+`u` skjut upp till nästa ringdag, `e` redigera kontakt, `v` röstmeddelande, `n` anteckning, `m` manus.
+
+**Ringlistan:** Företag → *Importera CSV* (`/contacts/import`). Välj kolumner, förhandsgranska dubbletter och
+erbjudande, importera. Samma sida har *Töm testdata* (tar bort bolag/partner med .test-adresser). Daglig cron: `GET /api/cron/sequence` med `Authorization: Bearer $CRON_SECRET`.
 
 ## 6. Webhooks från n8n
 
