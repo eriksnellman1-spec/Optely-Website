@@ -159,6 +159,8 @@ Det här finns i appen sedan fas A–C och ändras inte förrän en egen omgång
 | 2026-11-13 | Smartlead efter trialen | Erik betalar billigaste planen så att uppvärmningen av de 5 inkorgarna fortsätter. Ingen integration med appen än. |
 | 2026-11-13 | Partnermejlen (109 byråer) | Skickas personligt från Eriks egen Gmail, ca 20 per dag. Svar och samtal loggas som check-in i appen. |
 | 2026-11-13 | Partnerlistan in i appen | CSV-import (Partner → Importera CSV) med kolumnval, typ gissad ur typkolumn eller namn, dubblettkontroll (namn, e-postdomän, telefon, samma fil). |
+| 2026-11-13 | Radera bolag och partner | På Företag och Partner: en i taget (papperskorg per rad), markera flera, eller Radera alla. Radera alla följer växeln och filtret och tar även bolag med historik. Allt kopplat raderas med. |
+| 2026-11-13 | Bekräftelse vid radering | Ett klick vid färre än 10. Vid 10 eller fler, och alltid vid Radera alla, måste RADERA skrivas. |
 
 ## Implementationsnoter
 

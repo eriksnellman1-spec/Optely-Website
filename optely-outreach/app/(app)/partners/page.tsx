@@ -7,12 +7,10 @@ import { OpenDialogButton } from "@/components/shell/open-dialog-button";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { formatDate, formatRelative } from "@/lib/format";
-import { PARTNER_TYPE } from "@/lib/labels";
+import { PartnerTable } from "@/components/partners/partner-table";
 import { getOfferFilter } from "@/lib/offer-server";
 import type { SearchParams } from "@/lib/page-types";
 import { createClient } from "@/lib/supabase/server";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Partner" };
 
@@ -86,52 +84,9 @@ export default async function PartnersPage({ searchParams }: { searchParams: Sea
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-border bg-surface">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="h-8 border-b border-border text-left text-[11px] tracking-wide text-subtle uppercase">
-                <th className="px-3 font-medium">Partner</th>
-                <th className="px-3 font-medium max-md:hidden">Kontakt</th>
-                <th className="px-3 font-medium">Senast hörd</th>
-                <th className="px-3 text-right font-medium max-sm:hidden">Hänvisade</th>
-                <th className="w-0 px-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {partners.map((p) => {
-                const isDue = due.has(p.id);
-                return (
-                  <tr key={p.id} className="h-11 border-b border-border/60 last:border-0">
-                    <td className="px-3">
-                      <div className="font-medium">{p.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {[PARTNER_TYPE[p.type], p.city].filter(Boolean).join(" · ")}
-                      </div>
-                    </td>
-                    <td className="px-3 text-xs text-muted-foreground max-md:hidden">
-                      {[p.contact_name, p.phone, p.email].filter(Boolean).join(" · ")}
-                    </td>
-                    <td className="px-3">
-                      <span className={cn("text-xs", isDue ? "text-status-yellow" : "text-muted-foreground")}>
-                        {p.last_checkin_at ? formatRelative(p.last_checkin_at) : "aldrig"}
-                        {isDue && " · behöver höras"}
-                      </span>
-                      {p.last_checkin_at && (
-                        <div className="font-mono text-[11px] text-subtle">{formatDate(p.last_checkin_at)}</div>
-                      )}
-                    </td>
-                    <td className="px-3 text-right font-mono tabular-nums max-sm:hidden">{referred.get(p.id) ?? 0}</td>
-                    <td className="px-3">
-                      <OpenDialogButton dialog="partner-checkin" payload={{ partnerId: p.id }} size="sm" variant="ghost">
-                        Check-in
-                      </OpenDialogButton>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <PartnerTable
+          partners={partners.map((p) => ({ ...p, due: due.has(p.id), referred: referred.get(p.id) ?? 0 }))}
+        />
       )}
     </div>
   );
