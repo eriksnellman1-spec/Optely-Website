@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { Handshake } from "lucide-react";
+import Link from "next/link";
+import { FileUp, Handshake } from "lucide-react";
 
 import { SwitchToOfferButton } from "@/components/offer/switch-to-button";
 import { OpenDialogButton } from "@/components/shell/open-dialog-button";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatDate, formatRelative } from "@/lib/format";
@@ -57,14 +59,32 @@ export default async function PartnersPage({ searchParams }: { searchParams: Sea
           </>
         }
         actions={
-          <OpenDialogButton dialog="partner-checkin" size="sm">
-            <Handshake /> Logga check-in
-          </OpenDialogButton>
+          <>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/partners/import">
+                <FileUp /> Importera CSV
+              </Link>
+            </Button>
+            <OpenDialogButton dialog="partner-checkin" size="sm">
+              <Handshake /> Logga check-in
+            </OpenDialogButton>
+          </>
         }
       />
 
       {partners.length === 0 ? (
-        <EmptyState icon={Handshake} title="Inga partner än" description="Bokföringsbyråer, IT-byråer och reklam-/webbyråer som kan tipsa om kunder." />
+        <EmptyState
+          icon={Handshake}
+          title="Inga partner än"
+          description="Bokföringsbyråer, IT-byråer och reklam-/webbyråer som kan tipsa om kunder. Importera partnerlistan som CSV."
+          action={
+            <Button asChild>
+              <Link href="/partners/import">
+                <FileUp /> Importera partner
+              </Link>
+            </Button>
+          }
+        />
       ) : (
         <div className="overflow-hidden rounded-lg border border-border bg-surface">
           <table className="w-full text-sm">

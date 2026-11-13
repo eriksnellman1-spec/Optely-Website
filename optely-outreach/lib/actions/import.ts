@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import type { ActionResult } from "@/lib/actions/types";
 import { createClient } from "@/lib/supabase/server";
-import type { Json } from "@/lib/supabase/types";
+import type { Enums, Json } from "@/lib/supabase/types";
 
 export type ImportRow = Partial<
   Record<
@@ -51,7 +51,7 @@ function toPreviewRow(v: Json, i: number): PreviewRow {
   };
 }
 
-function clean(rows: ImportRow[]): Json {
+function clean(rows: ImportRow[] | PartnerImportRow[]): Json {
   return rows.slice(0, MAX_ROWS).map((r) => {
     const o: Record<string, string> = {};
     for (const [k, v] of Object.entries(r)) if (typeof v === "string" && v.trim()) o[k] = v.trim();
@@ -95,4 +95,55 @@ export async function clearTestData(): Promise<ActionResult<{ companies: number;
   if (error || !data || typeof data !== "object" || Array.isArray(data)) return { ok: false, error: "Kunde inte tömma testdatan." };
   revalidatePath("/", "layout");
   return { ok: true, data: { companies: Number(data.companies ?? 0), partners: Number(data.partners ?? 0) } };
+}
+
+// --- Partnerlistan ---
+
+export type PartnerImportRow = Partial<
+  Record<"name" | "type" | "contact_name" | "email" | "phone" | "city" | "website" | "notes", string>
+>;
+
+export type PartnerPreviewRow = {
+  row: number;
+  type: Enums<"partner_type">;
+  duplicates: { name: string; matched_on: string }[];
+};
+
+const PARTNER_TYPES: readonly Enums<"partner_type">[] = ["it", "accounting", "web", "marketing", "other"];
+
+function toPartnerPreviewRow(v: Json, i: number): PartnerPreviewRow {
+  const o = isObj(v) ? v : {};
+  const dups = Array.isArray(o.duplicates) ? o.duplicates : [];
+  const t = PARTNER_TYPES.find((x) => x === o.type) ?? "other";
+  return {
+    row: typeof o.row === "number" ? o.row : i + 1,
+    type: t,
+    duplicates: dups.filter(isObj).map((d) => ({ name: str(d.name) ?? "okänd", matched_on: str(d.matched_on) ?? "" })),
+  };
+}
+
+/** Förhandsvisning av partnerlistan: typ och dubbletter per rad. */
+export async function previewPartnerImport(rows: PartnerImportRow[]): Promise<ActionResult<PartnerPreviewRow[]>> {
+  if (rows.length === 0) return { ok: false, error: "Filen innehåller inga rader." };
+  if (rows.length > MAX_ROWS) return { ok: false, error: `Max ${MAX_ROWS} rader per import.` };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("preview_partner_import", { p_rows: clean(rows) });
+  if (error || !Array.isArray(data)) return { ok: false, error: "Kunde inte förhandsgranska filen." };
+  return { ok: true, data: data.map(toPartnerPreviewRow) };
+}
+
+/** Import av partner. Dubbletter hoppas över om inget annat väljs. */
+export async function importPartners(
+  rows: PartnerImportRow[],
+  skipDuplicates: boolean,
+): Promise<ActionResult<{ imported: number; skipped: number }>> {
+  if (rows.length === 0) return { ok: false, error: "Inga rader att importera." };
+  if (rows.length > MAX_ROWS) return { ok: false, error: `Max ${MAX_ROWS} rader per import.` };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("import_partners", { p_rows: clean(rows), p_skip_duplicates: skipDuplicates });
+  if (error || !data || typeof data !== "object" || Array.isArray(data)) {
+    return { ok: false, error: "Importen misslyckades – inget sparades." };
+  }
+  revalidatePath("/", "layout");
+  return { ok: true, data: { imported: Number(data.imported ?? 0), skipped: Number(data.skipped ?? 0) } };
 }
