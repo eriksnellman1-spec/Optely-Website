@@ -43,8 +43,8 @@ export default async function ContactsPage({ searchParams }: PageProps<"/contact
   const [companiesRes, facetsRes] = await Promise.all([
     query,
     offer === "all"
-      ? supabase.from("companies").select("status, city").limit(5000)
-      : supabase.from("companies").select("status, city").eq("offer", offer).limit(5000),
+      ? supabase.from("companies").select("status, city, name").limit(5000)
+      : supabase.from("companies").select("status, city, name").eq("offer", offer).limit(5000),
   ]);
 
   if (companiesRes.error || facetsRes.error) {
@@ -66,6 +66,13 @@ export default async function ContactsPage({ searchParams }: PageProps<"/contact
     .map(([name, count]) => ({ name, count }));
 
   const filtered = Boolean(status || city || q);
+  const needle = q.toLowerCase().replace(/[%,()*\\]/g, " ");
+  const matching = facets.filter(
+    (f) =>
+      (!status || f.status === status) &&
+      (!city || f.city === city) &&
+      (!needle || f.name.toLowerCase().includes(needle)),
+  ).length;
 
   return (
     <div className="space-y-5">
@@ -96,12 +103,20 @@ export default async function ContactsPage({ searchParams }: PageProps<"/contact
         <EmptyState
           icon={Building2}
           title="Inga bolag ännu"
-          description="Importera leads eller lägg till den första kontakten för hand. Testdata finns i supabase/seed.sql."
+          description="Importera ringlistan som CSV eller lägg till det första bolaget för hand."
           action={
-            <OpenDialogButton dialog="new-contact" variant="default">
-              <UserPlus />
-              Lägg till kontakt
-            </OpenDialogButton>
+            <>
+              <Button asChild>
+                <Link href="/contacts/import">
+                  <FileUp />
+                  Importera CSV
+                </Link>
+              </Button>
+              <OpenDialogButton dialog="new-contact" variant="outline">
+                <UserPlus />
+                Lägg till kontakt
+              </OpenDialogButton>
+            </>
           }
         />
       ) : (
@@ -121,7 +136,12 @@ export default async function ContactsPage({ searchParams }: PageProps<"/contact
               description={filtered ? "Prova att ta bort ett filter eller ändra sökningen." : undefined}
             />
           ) : (
-            <CompanyTable companies={companies} />
+            <CompanyTable
+              companies={companies}
+              filter={{ offer, status, city, q }}
+              matching={matching}
+              filtered={filtered}
+            />
           )}
         </>
       )}
