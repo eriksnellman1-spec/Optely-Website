@@ -44,6 +44,8 @@ class DemoProvider:
                     hour = 5 + (r >> 4) % 17  # 05–21
                     depart = datetime.combine(day, time(hour, (r >> 9) % 4 * 15))
                     price = 199 + (r >> 12) % 1400
+                    if currency != "SEK":  # demo-priserna är i SEK; grov omräkning
+                        price = round(price / 11.5)
                     flights.append(
                         Flight(
                             provider=self.name,

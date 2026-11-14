@@ -1,12 +1,12 @@
 # Kopiera till config.yaml och justera.
 home_airports: [ARN, NYO]      # flygplatser du kan åka från/landa på
 destinations: []               # tomt = vart som helst; t.ex. [BCN, LIS, AGP]
-currency: SEK
+currency: EUR                  # alla priser i euro
 months_ahead: 3
 earliest_departure_hour: 7     # inga flyg före 07:00
 latest_arrival_hour: 23        # ingen landning efter 23:00
 after_work_hour: 17            # på arbetsdagar: åk tidigast 17:00
-deal_threshold: 1000           # t/r under detta pris → notis
+deal_threshold: 100            # t/r under detta pris (EUR) → notis
 max_results: 25
 # Källor: google_flights (SERPAPI_KEY), ryanair (gratis), aviasales (TRAVELPAYOUTS_TOKEN), demo
 # Källor utan nyckel i .env hoppas över automatiskt.

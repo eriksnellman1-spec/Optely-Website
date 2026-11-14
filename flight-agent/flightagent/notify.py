@@ -7,26 +7,26 @@ import html
 import httpx
 
 from .models import Trip
-from .search import fmt_dt
+from .search import fmt_dt, money
 
 
 def trip_text(trip: Trip) -> str:
     out, back = trip.outbound, trip.inbound
     if trip.indicative:
         return "\n".join([
-            f"✈️ {out.origin} → {trip.destination_name} ({trip.destination}) – ca {trip.total_price:.0f} {trip.currency} t/r",
+            f"✈️ {out.origin} → {trip.destination_name} ({trip.destination}) – ca {money(trip.total_price, trip.currency)} t/r",
             f"🗓 {trip.window.label}: {trip.window.depart_day:%d/%m}–{trip.window.return_day:%d/%m}, {trip.window.nights} nätter",
             *[f"💡 {n}" for n in trip.notes],
         ])
     lines = [
-        f"✈️ {out.origin} → {trip.destination_name} ({trip.destination}) – {trip.total_price:.0f} {trip.currency} t/r",
+        f"✈️ {out.origin} → {trip.destination_name} ({trip.destination}) – {money(trip.total_price, trip.currency)} t/r",
         f"🗓 {trip.window.label}, {trip.window.nights} nätter",
-        f"Ut: {fmt_dt(out.depart)} {out.flight_number} ({out.airline or out.provider}) – {out.price:.0f} {out.currency}",
+        f"Ut: {fmt_dt(out.depart)} {out.flight_number} ({out.airline or out.provider}) – {money(out.price, out.currency)}",
     ]
     if back:
         lines.append(
             f"Hem: {fmt_dt(back.depart)} {back.flight_number} ({back.airline or back.provider}) → {back.destination} – "
-            f"{back.price:.0f} {back.currency}"
+            f"{money(back.price, back.currency)}"
         )
     lines += [f"💡 {n}" for n in trip.notes]
     return "\n".join(lines)

@@ -189,6 +189,15 @@ def deal_key(trip: Trip) -> str:
     return f"{trip.window.depart_day}|{trip.window.return_day}|{trip.destination}"
 
 
+def money(amount: float, currency: str) -> str:
+    """19.99 EUR → "19,99 €"; 460 SEK → "460 kr"."""
+    if currency.upper() == "EUR":
+        return f"{amount:,.2f} €".replace(",", " ").replace(".", ",")
+    if currency.upper() == "SEK":
+        return f"{amount:,.0f} kr".replace(",", " ")
+    return f"{amount:,.2f} {currency}"
+
+
 def fmt_dt(dt: datetime) -> str:
     days = ["mån", "tis", "ons", "tor", "fre", "lör", "sön"]
     return f"{days[dt.weekday()]} {dt.day}/{dt.month} {dt:%H:%M}"

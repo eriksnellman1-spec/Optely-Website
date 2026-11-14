@@ -11,7 +11,7 @@ from flightagent import ai, notify
 from flightagent.calendar_sync import load_windows
 from flightagent.config import load_preferences, load_secrets
 from flightagent.providers import REGISTRY, build_providers
-from flightagent.search import deals, fmt_dt, search_all
+from flightagent.search import deals, fmt_dt, money, search_all
 from flightagent.state import State
 
 st.set_page_config(page_title="Flight Agent", page_icon="✈️", layout="wide")
@@ -29,7 +29,7 @@ with st.sidebar:
     prefs.months_ahead = st.slider("Månader framåt", 1, 6, prefs.months_ahead)
     prefs.earliest_departure_hour = st.slider("Inga avgångar före kl.", 0, 12, prefs.earliest_departure_hour)
     prefs.after_work_hour = st.slider("Efter jobbet – tidigast kl.", 12, 21, prefs.after_work_hour)
-    prefs.deal_threshold = float(st.number_input(f"Fyndgräns t/r ({prefs.currency})", 100, 20000, int(prefs.deal_threshold), step=100))
+    prefs.deal_threshold = float(st.number_input(f"Fyndgräns t/r ({prefs.currency})", 10, 5000, int(prefs.deal_threshold), step=10))
     prefs.providers = st.multiselect(
         "Källor", list(REGISTRY), prefs.providers, format_func=lambda n: f"{n} – {REGISTRY[n][0]}"
     )
@@ -90,12 +90,12 @@ for i, t in enumerate(trips):
         if t.indicative:
             lines = [f"**{t.window.depart_day:%d/%m}–{t.window.return_day:%d/%m}** · {o.origin}→{o.destination}"]
         else:
-            lines = [f"**Ut:** {fmt_dt(o.depart)} {o.origin}→{o.destination} · {o.price:.0f} ({o.airline or o.provider})"]
+            lines = [f"**Ut:** {fmt_dt(o.depart)} {o.origin}→{o.destination} · {money(o.price, o.currency)} ({o.airline or o.provider})"]
             if b:
-                lines.append(f"**Hem:** {fmt_dt(b.depart)} {b.origin}→{b.destination} · {b.price:.0f} ({b.airline or b.provider})")
+                lines.append(f"**Hem:** {fmt_dt(b.depart)} {b.origin}→{b.destination} · {money(b.price, b.currency)} ({b.airline or b.provider})")
         lines += [f"💡 {n}" for n in t.notes]
         c2.markdown("  \n".join(lines))
-        c3.metric("Totalt" + (" (ca)" if t.indicative else ""), f"{t.total_price:.0f} {t.currency}")
+        c3.metric("Totalt" + (" (ca)" if t.indicative else ""), money(t.total_price, t.currency))
         if t.indicative and o.booking_url:
             c3.link_button("Visa på Google Flights", o.booking_url)
         elif o.booking_url:

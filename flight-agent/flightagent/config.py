@@ -15,7 +15,7 @@ class Preferences:
     home_airports: list[str] = field(default_factory=lambda: ["ARN"])
     # Tom lista = "vart som helst" (om leverantören stödjer det).
     destinations: list[str] = field(default_factory=list)
-    currency: str = "SEK"
+    currency: str = "EUR"
     months_ahead: int = 3
     # Inga avgångar före denna timme (t.ex. inga 05:00-flyg).
     earliest_departure_hour: int = 7
@@ -24,7 +24,7 @@ class Preferences:
     # På en arbetsdag (kvällen innan ledigheten) – åk tidigast denna timme.
     after_work_hour: int = 17
     # Tur och retur under detta pris = "fynd" som skickas som notis.
-    deal_threshold: float = 1000.0
+    deal_threshold: float = 100.0
     max_results: int = 25
     providers: list[str] = field(default_factory=lambda: ["demo"])
     # Google Flights (SerpApi): kontrollera exakta tider för de N billigaste

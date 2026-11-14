@@ -22,7 +22,7 @@ from . import notify
 from .calendar_sync import load_windows
 from .config import ROOT, load_preferences, load_secrets
 from .providers import REGISTRY, build_providers
-from .search import deals, search_all
+from .search import deals, money, search_all
 from .state import State
 
 LABEL = "se.optely.flightagent"
@@ -115,7 +115,7 @@ def main(argv: list[str] | None = None) -> int:
         raise RuntimeError("Inga källor är aktiva – kontrollera providers i config.yaml och nycklarna i .env")
     trips = search_all(windows, prefs, providers)
     found = deals(trips, prefs)
-    print(f"{len(trips)} resor, varav {len(found)} under {prefs.deal_threshold:.0f} {prefs.currency}")
+    print(f"{len(trips)} resor, varav {len(found)} under {money(prefs.deal_threshold, prefs.currency)}")
     print(f"SerpApi denna månad: {state.serpapi_used()}/{prefs.serpapi_monthly_budget}")
     if args.dry_run:
         for trip in found:
