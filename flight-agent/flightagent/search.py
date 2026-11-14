@@ -71,8 +71,7 @@ def _query(provider: FlightProvider, origins: list[str], destinations: list[str 
         for dest in dest_groups:
             try:
                 flights += provider.search_one_way(origin, dest, date_from, date_to, currency)
-            except BudgetExceeded as exc:
-                log.info("%s: %s", provider.name, exc)
+            except BudgetExceeded:
                 return flights
             except Exception as exc:
                 log.warning("%s misslyckades (%s→%s): %s", provider.name, origin, dest, exc)
@@ -86,8 +85,8 @@ def _explore(providers: list[FlightProvider], window: TravelWindow, prefs: Prefe
             continue
         try:
             hits += p.explore(prefs.home_airports, window.depart_day, window.return_day, prefs.currency)
-        except BudgetExceeded as exc:
-            log.info("%s: %s", p.name, exc)
+        except BudgetExceeded:
+            pass  # sammanfattas en gång i slutet av körningen
         except Exception as exc:
             log.warning("%s explore misslyckades: %s", p.name, exc)
     return hits
@@ -120,7 +119,8 @@ def _notes(trip: Trip) -> None:
         trip.notes.append(f"{stops} byte totalt")
 
 
-def search_window(window: TravelWindow, prefs: Preferences, providers: list[FlightProvider]) -> list[Trip]:
+def search_window(window: TravelWindow, prefs: Preferences, providers: list[FlightProvider],
+                  hits: list[ExploreHit] | None = None) -> list[Trip]:
     homes = prefs.home_airports
     first_full_day = window.depart_day + timedelta(days=1)
     anywhere = [p for p in providers if not getattr(p, "needs_destination", False)]
@@ -133,8 +133,9 @@ def search_window(window: TravelWindow, prefs: Preferences, providers: list[Flig
         outbound += _query(p, homes, wanted, window.depart_day, first_full_day, prefs.currency)
     home = home_area(homes)
     outbound = [f for f in outbound if f.destination not in home]
-    hits = [h for h in (_explore(targeted, window, prefs) if not prefs.destinations else [])
-            if h.destination not in home]
+    if hits is None:
+        hits = _explore(targeted, window, prefs) if not prefs.destinations else []
+    hits = [h for h in hits if h.destination not in home]
 
     # 2. Kontroll med exakta tider
     verify = _pick_for_verification(outbound, hits, prefs) if targeted else []
@@ -185,18 +186,47 @@ def search_window(window: TravelWindow, prefs: Preferences, providers: list[Flig
             currency=h.currency, destination_name=h.destination_name, booking_url=h.booking_url,
             airline=h.airline, stops=h.stops,
         )
+        when = "" if not h.checked or h.checked == date.today().isoformat() else f", pris från {h.checked}"
         trips.append(Trip(
             window=window, outbound=placeholder, indicative=True, indicative_price=h.price,
             notes=[f"Indikativt t/r-pris från Google Flights ({h.airline or 'flera bolag'}"
-                   f"{', direkt' if not h.stops else f', {h.stops} byte'}) – tider ej kontrollerade"],
+                   f"{', direkt' if not h.stops else f', {h.stops} byte'}{when}) – tider ej kontrollerade"],
         ))
     return sorted(trips, key=lambda t: t.total_price)
 
 
+def explore_key(window: TravelWindow, prefs: Preferences) -> str:
+    return f"{'+'.join(prefs.home_airports)}|{prefs.currency}|{window.depart_day}|{window.return_day}"
+
+
+def _explore_rotating(windows: list[TravelWindow], prefs: Preferences,
+                      explorers: list[FlightProvider]) -> dict[TravelWindow, list[ExploreHit]]:
+    """Google-budgeten räcker inte till alla perioder varje gång. Uppdatera de
+    perioder som kontrollerades längst sedan; övriga använder sparade priser."""
+    result: dict[TravelWindow, list[ExploreHit]] = {w: [] for w in windows}
+    for p in explorers:
+        state = p.state
+        ordered = sorted(windows, key=lambda w: (state.explore_checked(explore_key(w, prefs)) or "", w.depart_day))
+        for w in ordered:
+            key = explore_key(w, prefs)
+            if p.budget_left() >= len(prefs.home_airports):
+                fresh = _explore([p], w, prefs)
+                if fresh or not p.budget_hit:
+                    state.store_explore(key, fresh)
+                    result[w] += fresh
+                    continue
+            result[w] += state.cached_explore(key, prefs.explore_cache_days) or []
+    return result
+
+
 def search_all(windows: list[TravelWindow], prefs: Preferences, providers: list[FlightProvider]) -> list[Trip]:
+    explorers = [p for p in providers if hasattr(p, "explore") and hasattr(p, "state")]
+    hits_by_window = _explore_rotating(windows, prefs, explorers) if explorers and not prefs.destinations else {}
     trips: list[Trip] = []
     for window in windows:
-        trips += search_window(window, prefs, providers)
+        trips += search_window(window, prefs, providers, hits_by_window.get(window))
+    if any(getattr(p, "budget_hit", False) for p in providers):
+        log.info("Google Flights: dagens/månadens sökbudget är använd – sparade priser används för resten")
     trips.sort(key=lambda t: t.total_price)
     return trips[: prefs.max_results]
 

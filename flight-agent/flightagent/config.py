@@ -33,6 +33,10 @@ class Preferences:
     verify_margin: float = 1.3
     serpapi_max_per_run: int = 40
     serpapi_monthly_budget: int = 240
+    # Gratisnivån räcker till ca 8 sökningar/dag. Google kontrollerar de
+    # resefönster som kollades längst sedan; övriga använder sparade priser.
+    serpapi_daily_budget: int = 8
+    explore_cache_days: int = 7
     min_nights: int = 1
     max_nights: int = 16
 

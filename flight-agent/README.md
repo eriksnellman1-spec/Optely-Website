@@ -39,9 +39,12 @@ Så samarbetar de för varje ledig period:
 Resmål som Google hittade men som inte hann kontrolleras visas som
 **"ca-pris"**, med en länk till Google Flights.
 
-**SerpApi-budget:** appen håller koll och stannar vid
-`serpapi_monthly_budget` (240). En sökning med 3 månader framåt använder ca
-15–40 sökningar. `python -m flightagent.cli sources` visar förbrukningen.
+**SerpApi-budget:** gratisnivån räcker till ca 8 Google-sökningar per dag
+(`serpapi_daily_budget`). Varje körning uppdaterar de perioder som kollades
+längst sedan. Övriga perioder visar sparade Google-priser (högst
+`explore_cache_days` gamla), märkta med datum. Ryanair och Aviasales söker
+alltid alla perioder. `python -m flightagent.cli sources` visar
+förbrukningen. Med ett betalt SerpApi-konto höjer du bara budgetarna.
 
 Wizz Air, SAS och Norwegian har inga egna källor. Deras sajter blockerar
 automatiska anrop, men alla tre finns med via Google Flights.
@@ -56,9 +59,8 @@ python -m flightagent.cli install-schedule --hours 4
 
 Samma fynd skickas bara en gång, eller igen om priset sjunker mer än 5 %.
 Stäng av med `python -m flightagent.cli remove-schedule`. Macen måste vara
-igång; missade körningar görs när den vaknar. Med 4 timmar och full
-SerpApi-budget räcker gratisnivån inte hela månaden. Sänk då
-`serpapi_max_per_run` till ca 8, eller kör var 12:e timme.
+igång; missade körningar görs när den vaknar. Google-budgeten fördelas
+automatiskt per dag, så du kan köra så ofta du vill.
 
 ## Första testnotisen i telefonen
 

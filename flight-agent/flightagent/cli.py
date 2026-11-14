@@ -63,7 +63,8 @@ def main(argv: list[str] | None = None) -> int:
             status = "✅ aktiv" if on and ready else ("⚠️ saknar " + key if on else "– av")
             print(f"{name:15} {status:24} {desc}")
         used = State().serpapi_used()
-        print(f"\nSerpApi denna månad: {used}/{prefs.serpapi_monthly_budget} sökningar")
+        print(f"\nSerpApi idag: {State().serpapi_used_today()}/{prefs.serpapi_daily_budget}, "
+              f"denna månad: {used}/{prefs.serpapi_monthly_budget} sökningar")
         return 0
 
     if args.command == "test-notify":
@@ -115,7 +116,8 @@ def main(argv: list[str] | None = None) -> int:
     trips = search_all(windows, prefs, providers)
     found = deals(trips, prefs)
     print(f"{len(trips)} resor, varav {len(found)} under {money(prefs.deal_threshold, prefs.currency)}")
-    print(f"SerpApi denna månad: {state.serpapi_used()}/{prefs.serpapi_monthly_budget}")
+    print(f"SerpApi idag: {state.serpapi_used_today()}/{prefs.serpapi_daily_budget}, "
+          f"denna månad: {state.serpapi_used()}/{prefs.serpapi_monthly_budget}")
     if args.dry_run:
         for trip in found:
             print("\n" + notify.trip_text(trip))

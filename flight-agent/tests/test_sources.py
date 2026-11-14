@@ -131,3 +131,33 @@ def test_explore_searches_each_home_airport_and_empty_is_not_error(tmp_path):
                               client=httpx.Client(transport=httpx.MockTransport(handler)))
     hits = p.explore(["HEL", "ARN"], date(2026, 12, 4), date(2026, 12, 6), "EUR")
     assert seen == ["HEL", "ARN"] and [h.destination for h in hits] == ["RIX"]
+
+
+def test_explore_rotates_windows_and_reuses_cached_prices(tmp_path):
+    from flightagent.search import search_all
+
+    asked = []
+
+    def handler(request):
+        asked.append(request.url.params["outbound_date"])
+        return httpx.Response(200, json={"destinations": [
+            {"name": "Riga", "destination_airport": {"code": "RIX"}, "flight_price": 40}]})
+
+    state = State(tmp_path / "s.json")
+    windows = [TravelWindow(date(2027, 1, d), date(2027, 1, d + 2), "Helg") for d in (8, 15, 22)]
+    prefs = Preferences(home_airports=["ARN"], verify_top_n=0, max_results=50)
+
+    def run():
+        gf = GoogleFlightsProvider("KEY", daily_budget=2, state=state,
+                                   client=httpx.Client(transport=httpx.MockTransport(handler)))
+        return search_all(windows, prefs, [gf])
+
+    trips = run()
+    assert asked == ["2027-01-08", "2027-01-15"]          # budget räcker till två perioder
+    assert len(trips) == 2
+
+    state.data["serpapi_day"] = {}                          # ny dag
+    asked.clear()
+    trips = run()
+    assert asked == ["2027-01-22", "2027-01-08"]          # aldrig kollad först, sedan äldst
+    assert len(trips) == 3                                  # 15/1 kommer från sparade priser

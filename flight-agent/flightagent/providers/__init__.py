@@ -36,7 +36,8 @@ def build_providers(names: list[str], secrets=None, prefs=None, state=None) -> t
                 continue
             kwargs = {}
             if prefs:
-                kwargs = {"max_per_run": prefs.serpapi_max_per_run, "monthly_budget": prefs.serpapi_monthly_budget}
+                kwargs = {"max_per_run": prefs.serpapi_max_per_run, "monthly_budget": prefs.serpapi_monthly_budget,
+                          "daily_budget": prefs.serpapi_daily_budget}
             providers.append(GoogleFlightsProvider(secrets.serpapi_key, state=state, **kwargs))
         elif name == "aviasales":
             if not (secrets and secrets.travelpayouts_token):

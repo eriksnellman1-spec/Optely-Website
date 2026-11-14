@@ -37,7 +37,8 @@ with st.sidebar:
     auto_notify = st.checkbox("Skicka fynd som notis automatiskt", value=False)
     st.caption(
         f"Telegram: {'✅' if secrets.telegram_chat_id else '—'} · Discord: {'✅' if secrets.discord_webhook_url else '—'}  \n"
-        f"SerpApi denna månad: {state.serpapi_used()}/{prefs.serpapi_monthly_budget}"
+        f"SerpApi idag: {state.serpapi_used_today()}/{prefs.serpapi_daily_budget} · "
+        f"månad: {state.serpapi_used()}/{prefs.serpapi_monthly_budget}"
     )
     if st.button("Skicka testnotis"):
         try:

@@ -61,7 +61,7 @@ def parse_flights(payload: dict, currency: str) -> list[Flight]:
     return flights
 
 
-def parse_explore(payload: dict, currency: str) -> list[ExploreHit]:
+def parse_explore(payload: dict, currency: str, checked: str = "") -> list[ExploreHit]:
     hits = []
     for d in payload.get("destinations") or []:
         code = (d.get("destination_airport") or {}).get("code")
@@ -77,6 +77,7 @@ def parse_explore(payload: dict, currency: str) -> list[ExploreHit]:
                 airline=d.get("airline", ""),
                 stops=int(d.get("number_of_stops") or 0),
                 booking_url=d.get("link", ""),
+                checked=checked,
             )
         )
     return hits
@@ -90,19 +91,30 @@ class GoogleFlightsProvider:
     multi_airport = False
 
     def __init__(self, api_key: str, max_per_run: int = 40, monthly_budget: int = 240,
-                 state: State | None = None, client: httpx.Client | None = None):
+                 state: State | None = None, client: httpx.Client | None = None, daily_budget: int = 8):
         self._key = api_key
         self._client = client or httpx.Client(timeout=60.0)
         self._state = state or State()
         self._max_per_run = max_per_run
         self._monthly_budget = monthly_budget
+        self._daily_budget = daily_budget
         self.calls = 0
+        self.budget_hit = False
+
+    @property
+    def state(self) -> State:
+        return self._state
 
     def budget_left(self) -> int:
-        return max(0, min(self._max_per_run - self.calls, self._monthly_budget - self._state.serpapi_used()))
+        return max(0, min(
+            self._max_per_run - self.calls,
+            self._monthly_budget - self._state.serpapi_used(),
+            self._daily_budget - self._state.serpapi_used_today(),
+        ))
 
     def _get(self, params: dict) -> dict:
         if self.budget_left() <= 0:
+            self.budget_hit = True
             raise BudgetExceeded("SerpApi-budgeten för den här körningen/månaden är slut")
         params = {**params, "api_key": self._key, "hl": "sv", "gl": "se"}
         resp = self._client.get(API, params=params)
@@ -140,7 +152,7 @@ class GoogleFlightsProvider:
                 if best:
                     break
                 raise
-            for hit in parse_explore(data, currency):
+            for hit in parse_explore(data, currency, checked=date.today().isoformat()):
                 if hit.destination not in best or hit.price < best[hit.destination].price:
                     best[hit.destination] = hit
         return list(best.values())

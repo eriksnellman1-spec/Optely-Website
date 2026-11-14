@@ -49,6 +49,7 @@ class ExploreHit:
     airline: str = ""
     stops: int = 0
     booking_url: str = ""
+    checked: str = ""  # datum (ÅÅÅÅ-MM-DD) då priset hämtades från Google
 
 
 @dataclass

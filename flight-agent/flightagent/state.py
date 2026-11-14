@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from datetime import date
 from pathlib import Path
 
@@ -29,10 +30,39 @@ class State:
         month = (today or date.today()).strftime("%Y-%m")
         return self.data.get("serpapi", {}).get(month, 0)
 
+    def serpapi_used_today(self, today: date | None = None) -> int:
+        return self.data.get("serpapi_day", {}).get((today or date.today()).isoformat(), 0)
+
     def add_serpapi(self, n: int = 1, today: date | None = None) -> None:
-        month = (today or date.today()).strftime("%Y-%m")
+        today = today or date.today()
         usage = self.data.setdefault("serpapi", {})
-        usage[month] = usage.get(month, 0) + n
+        usage[today.strftime("%Y-%m")] = usage.get(today.strftime("%Y-%m"), 0) + n
+        # Behåll bara dagens räknare.
+        self.data["serpapi_day"] = {today.isoformat(): self.serpapi_used_today(today) + n}
+        self.save()
+
+    # Sparade Google Explore-resultat per resefönster
+    def explore_checked(self, key: str) -> str | None:
+        return (self.data.get("explore", {}).get(key) or {}).get("checked")
+
+    def cached_explore(self, key: str, max_age_days: int, today: date | None = None):
+        from .models import ExploreHit
+
+        entry = self.data.get("explore", {}).get(key)
+        if not entry:
+            return None
+        age = ((today or date.today()) - date.fromisoformat(entry["checked"])).days
+        if age > max_age_days:
+            return None
+        return [ExploreHit(**h) for h in entry["hits"]]
+
+    def store_explore(self, key: str, hits, today: date | None = None) -> None:
+        checked = (today or date.today()).isoformat()
+        store = self.data.setdefault("explore", {})
+        store[key] = {"checked": checked, "hits": [asdict(h) for h in hits]}
+        # Rensa fönster som redan passerat (nyckeln innehåller hemresedatum sist).
+        for k in [k for k in store if k.rsplit("|", 1)[-1] < checked]:
+            del store[k]
         self.save()
 
     # Skickade fynd: nyckel → lägsta pris vi redan notifierat om.
