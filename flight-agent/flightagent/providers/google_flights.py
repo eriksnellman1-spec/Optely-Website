@@ -85,7 +85,9 @@ def parse_explore(payload: dict, currency: str) -> list[ExploreHit]:
 class GoogleFlightsProvider:
     name = "google_flights"
     needs_destination = True  # search_one_way kräver resmål; explore täcker "vart som helst"
-    multi_airport = True      # flera flygplatser kommaseparerade i ett anrop
+    # Kommaseparerade flygplatser ger ofta tomma svar (särskilt över landsgränser),
+    # så varje hemmaflygplats söks för sig.
+    multi_airport = False
 
     def __init__(self, api_key: str, max_per_run: int = 40, monthly_budget: int = 240,
                  state: State | None = None, client: httpx.Client | None = None):
@@ -110,7 +112,7 @@ class GoogleFlightsProvider:
         data = resp.json()
         if data.get("error"):
             # "hasn't returned any results" är inget fel, bara ett tomt svar.
-            if "any results" in data["error"]:
+            if "any results" in data["error"] or "Empty results" in data["error"]:
                 return {}
             raise RuntimeError(f"SerpApi: {data['error']}")
         return data
@@ -128,7 +130,17 @@ class GoogleFlightsProvider:
         return flights
 
     def explore(self, origins: list[str], outbound: date, inbound: date, currency: str) -> list[ExploreHit]:
-        data = self._get({"engine": "google_travel_explore", "type": 1, "departure_id": ",".join(origins),
-                          "outbound_date": outbound.isoformat(), "return_date": inbound.isoformat(),
-                          "currency": currency, "travel_mode": 1})
-        return parse_explore(data, currency)
+        best: dict[str, ExploreHit] = {}
+        for origin in origins:
+            try:
+                data = self._get({"engine": "google_travel_explore", "type": 1, "departure_id": origin,
+                                  "outbound_date": outbound.isoformat(), "return_date": inbound.isoformat(),
+                                  "currency": currency, "travel_mode": 1})
+            except BudgetExceeded:
+                if best:
+                    break
+                raise
+            for hit in parse_explore(data, currency):
+                if hit.destination not in best or hit.price < best[hit.destination].price:
+                    best[hit.destination] = hit
+        return list(best.values())

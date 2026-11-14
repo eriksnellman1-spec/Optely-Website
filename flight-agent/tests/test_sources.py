@@ -114,3 +114,20 @@ def test_dedupe_notifications(tmp_path):
 def test_schedule_plist():
     p = schedule_plist(3)
     assert p["StartInterval"] == 10800 and p["ProgramArguments"][-2:] == ["flightagent.cli", "scan"]
+
+
+def test_explore_searches_each_home_airport_and_empty_is_not_error(tmp_path):
+    seen = []
+
+    def handler(request):
+        origin = request.url.params["departure_id"]
+        seen.append(origin)
+        if origin == "HEL":
+            return httpx.Response(200, json={"error": 'Empty results for departure_id: "HEL".'})
+        return httpx.Response(200, json={"destinations": [
+            {"name": "Riga", "destination_airport": {"code": "RIX"}, "flight_price": 40}]})
+
+    p = GoogleFlightsProvider("KEY", state=State(tmp_path / "s.json"),
+                              client=httpx.Client(transport=httpx.MockTransport(handler)))
+    hits = p.explore(["HEL", "ARN"], date(2026, 12, 4), date(2026, 12, 6), "EUR")
+    assert seen == ["HEL", "ARN"] and [h.destination for h in hits] == ["RIX"]
