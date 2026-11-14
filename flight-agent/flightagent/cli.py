@@ -112,6 +112,10 @@ def main(argv: list[str] | None = None) -> int:
         raise RuntimeError("Inga källor är aktiva – kontrollera providers i config.yaml och nycklarna i .env")
     trips = search_all(prefs, providers)
     found = deals(trips, prefs)
+    per_source: dict[str, int] = {}
+    for t in trips:
+        per_source[t.outbound.provider] = per_source.get(t.outbound.provider, 0) + 1
+    print("Per källa:", ", ".join(f"{k} {v}" for k, v in sorted(per_source.items())) or "inga")
     print(f"{len(trips)} resor, varav {len(found)} under {money(prefs.deal_threshold, prefs.currency)}")
     print(f"SerpApi idag: {state.serpapi_used_today()}/{prefs.serpapi_daily_budget}, "
           f"denna månad: {state.serpapi_used()}/{prefs.serpapi_monthly_budget}")

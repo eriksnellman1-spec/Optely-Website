@@ -25,7 +25,7 @@ class Preferences:
     after_work_hour: int = 17
     # Tur och retur under detta pris = "fynd" som skickas som notis.
     deal_threshold: float = 100.0
-    max_results: int = 25
+    max_results: int = 25  # antal som visas i appen; notiser skickas för alla fynd
     providers: list[str] = field(default_factory=lambda: ["demo"])
     # Högst så här många förslag per resmål (olika datum).
     per_destination: int = 3

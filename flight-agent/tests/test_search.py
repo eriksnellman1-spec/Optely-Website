@@ -73,3 +73,9 @@ def test_search_all_filters_home_areas_lengths_and_keeps_best_dates():
     assert [t.destination for t in result] == ["RIX", "RIX", "RIX", "TLL"]
     assert [t.window.depart_day.day for t in result[:3]] == [8, 9, 10]
     assert len(deals(result, prefs)) == 3
+
+
+def test_max_results_never_hides_deals():
+    many = [trip(f"X{i:02d}", date(2026, 12, 8), date(2026, 12, 10), 10 + i) for i in range(40)]
+    prefs = Preferences(home_airports=["HEL"], max_results=25, deal_threshold=100)
+    assert len(deals(search_all(prefs, [FakeProvider(many)], today=TODAY), prefs)) == 40

@@ -68,8 +68,9 @@ if not trips:
 if "demo" in prefs.providers:
     st.warning("Källan **demo** visar påhittade priser för att testa appen. Välj riktiga källor i sidopanelen.")
 
-st.subheader(f"{len(trips)} billigaste resorna")
-for i, t in enumerate(trips):
+shown = trips[: prefs.max_results]
+st.subheader(f"{len(shown)} billigaste resorna" + (f" (av {len(trips)})" if len(trips) > len(shown) else ""))
+for i, t in enumerate(shown):
     hot = t.total_price <= prefs.deal_threshold
     with st.container(border=True):
         c1, c2, c3 = st.columns([3, 4, 2])
