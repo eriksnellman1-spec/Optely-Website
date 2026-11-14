@@ -22,9 +22,17 @@ def _rand(*parts: object) -> int:
 
 class DemoProvider:
     name = "demo"
+    needs_destination = False
+    multi_airport = False
+    cheap_anywhere = True  # svar "vart som helst" innehåller alla resmål
 
     def search_one_way(self, origin, destination, date_from, date_to, currency):
-        targets = [destination] if destination else [d for d in DESTINATIONS if d != origin]
+        if destination:
+            targets = [destination]
+        elif origin in DESTINATIONS:  # hemresa: tillbaka till hemmaflygplatserna
+            targets = list(ORIGINS)
+        else:
+            targets = [d for d in DESTINATIONS if d != origin]
         flights: list[Flight] = []
         day = date_from
         while day <= date_to:

@@ -1,32 +1,70 @@
 """Kommandorad: python -m flightagent.cli <kommando>
 
-  test-notify     skicka ett testmeddelande till Telegram/Discord
-  telegram-chatid visa chat-id:n som skrivit till din bot
-  scan            kör en hel sökning och skicka fynd som notiser
+  sources           visa vilka källor som är aktiva och SerpApi-förbrukning
+  test-notify       skicka ett testmeddelande till Telegram/Discord
+  telegram-chatid   visa chat-id:n som skrivit till din bot
+  scan              kör en hel sökning och skicka nya fynd som notiser
+  install-schedule  (Mac) kör scan automatiskt var N:e timme
+  remove-schedule   (Mac) stäng av den automatiska körningen
 """
 
 from __future__ import annotations
 
 import argparse
 import logging
+import plistlib
+import subprocess
 import sys
 from datetime import date
+from pathlib import Path
 
 from . import notify
 from .calendar_sync import load_windows
-from .config import load_preferences, load_secrets
-from .providers import build_providers
+from .config import ROOT, load_preferences, load_secrets
+from .providers import REGISTRY, build_providers
 from .search import deals, search_all
+from .state import State
+
+LABEL = "se.optely.flightagent"
+PLIST = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
+
+
+def schedule_plist(hours: int) -> dict:
+    log = str(ROOT / ".state" / "scan.log")
+    return {
+        "Label": LABEL,
+        "ProgramArguments": [sys.executable, "-m", "flightagent.cli", "scan"],
+        "WorkingDirectory": str(ROOT),
+        "StartInterval": hours * 3600,
+        "RunAtLoad": True,
+        "StandardOutPath": log,
+        "StandardErrorPath": log,
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="flightagent")
-    parser.add_argument("command", choices=["test-notify", "telegram-chatid", "scan"])
+    parser.add_argument("command", choices=["sources", "test-notify", "telegram-chatid", "scan",
+                                            "install-schedule", "remove-schedule"])
     parser.add_argument("--config", help="sökväg till config.yaml")
     parser.add_argument("--dry-run", action="store_true", help="scan: skriv ut i stället för att skicka")
+    parser.add_argument("--hours", type=int, default=4, help="install-schedule: intervall i timmar")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     secrets = load_secrets()
+
+    if args.command == "sources":
+        prefs = load_preferences(args.config)
+        keys = {"SERPAPI_KEY": secrets.serpapi_key, "TRAVELPAYOUTS_TOKEN": secrets.travelpayouts_token}
+        for name, (desc, key) in REGISTRY.items():
+            on = name in prefs.providers
+            ready = key is None or bool(keys.get(key))
+            status = "✅ aktiv" if on and ready else ("⚠️ saknar " + key if on else "– av")
+            print(f"{name:15} {status:24} {desc}")
+        used = State().serpapi_used()
+        print(f"\nSerpApi denna månad: {used}/{prefs.serpapi_monthly_budget} sökningar")
+        return 0
 
     if args.command == "test-notify":
         sent = notify.notify(secrets, "✅ Optely Flight Agent är ansluten! Här kommer dina flygfynd.")
@@ -45,20 +83,45 @@ def main(argv: list[str] | None = None) -> int:
             print(f"TELEGRAM_CHAT_ID={chat_id}   ({name})")
         return 0
 
+    if args.command == "install-schedule":
+        if sys.platform != "darwin":
+            print("Automatisk körning är bara inbyggd för Mac.")
+            return 1
+        (ROOT / ".state").mkdir(exist_ok=True)
+        PLIST.parent.mkdir(parents=True, exist_ok=True)
+        PLIST.write_bytes(plistlib.dumps(schedule_plist(args.hours)))
+        subprocess.run(["launchctl", "unload", str(PLIST)], capture_output=True)
+        subprocess.run(["launchctl", "load", "-w", str(PLIST)], check=True)
+        print(f"Klart! Sökningen körs nu var {args.hours}:e timme (även direkt efter att Macen vaknat).")
+        print(f"Logg: {ROOT / '.state' / 'scan.log'}")
+        return 0
+
+    if args.command == "remove-schedule":
+        if PLIST.exists():
+            subprocess.run(["launchctl", "unload", "-w", str(PLIST)], capture_output=True)
+            PLIST.unlink()
+        print("Automatisk körning avstängd.")
+        return 0
+
     prefs = load_preferences(args.config)
+    state = State()
     windows = load_windows(
         secrets.calendar_ics_urls, date.today(), months_ahead=prefs.months_ahead,
         vacation_keywords=prefs.vacation_keywords, min_nights=prefs.min_nights, max_nights=prefs.max_nights,
     )
     print(f"{len(windows)} lediga resefönster hittades")
-    trips = search_all(windows, prefs, build_providers(prefs.providers))
+    providers, _ = build_providers(prefs.providers, secrets, prefs, state)
+    if not providers:
+        raise RuntimeError("Inga källor är aktiva – kontrollera providers i config.yaml och nycklarna i .env")
+    trips = search_all(windows, prefs, providers)
     found = deals(trips, prefs)
     print(f"{len(trips)} resor, varav {len(found)} under {prefs.deal_threshold:.0f} {prefs.currency}")
-    for trip in found:
-        if args.dry_run:
+    print(f"SerpApi denna månad: {state.serpapi_used()}/{prefs.serpapi_monthly_budget}")
+    if args.dry_run:
+        for trip in found:
             print("\n" + notify.trip_text(trip))
-        else:
-            notify.notify_trip(secrets, trip)
+    else:
+        print(f"{notify.notify_new_deals(secrets, found, state)} nya fynd skickades")
     return 0
 
 

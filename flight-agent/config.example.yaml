@@ -8,7 +8,13 @@ latest_arrival_hour: 23        # ingen landning efter 23:00
 after_work_hour: 17            # på arbetsdagar: åk tidigast 17:00
 deal_threshold: 1000           # t/r under detta pris → notis
 max_results: 25
-providers: [demo]              # byt till [ryanair] för riktiga priser
+# Källor: google_flights (SERPAPI_KEY), ryanair (gratis), aviasales (TRAVELPAYOUTS_TOKEN), demo
+# Källor utan nyckel i .env hoppas över automatiskt.
+providers: [google_flights, ryanair, aviasales]
+verify_top_n: 3                # Google Flights: kontrollera exakta tider för 3 billigaste resmålen/period
+verify_margin: 1.3             # … om deras ungefärliga pris är under fyndgräns × 1,3
+serpapi_max_per_run: 40        # max SerpApi-sökningar per körning
+serpapi_monthly_budget: 240    # gratisnivån är 250/månad
 vacation_keywords: [semester, ledig, vacation, holiday, resa]
 min_nights: 1
 max_nights: 16

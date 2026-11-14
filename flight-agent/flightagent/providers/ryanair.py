@@ -34,6 +34,7 @@ def parse_fares(payload: dict) -> list[Flight]:
         flights.append(
             Flight(
                 provider="ryanair",
+                airline="Ryanair",
                 origin=dep["iataCode"],
                 destination=arr["iataCode"],
                 depart=depart,
@@ -53,6 +54,9 @@ def parse_fares(payload: dict) -> list[Flight]:
 
 class RyanairProvider:
     name = "ryanair"
+    needs_destination = False
+    multi_airport = False
+    cheap_anywhere = True  # svar "vart som helst" innehåller alla resmål
 
     def __init__(self, client: httpx.Client | None = None, market: str = "sv-se"):
         self._client = client or httpx.Client(

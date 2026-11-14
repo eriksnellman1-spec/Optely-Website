@@ -12,14 +12,20 @@ from .search import fmt_dt
 
 def trip_text(trip: Trip) -> str:
     out, back = trip.outbound, trip.inbound
+    if trip.indicative:
+        return "\n".join([
+            f"✈️ {out.origin} → {trip.destination_name} ({trip.destination}) – ca {trip.total_price:.0f} {trip.currency} t/r",
+            f"🗓 {trip.window.label}: {trip.window.depart_day:%d/%m}–{trip.window.return_day:%d/%m}, {trip.window.nights} nätter",
+            *[f"💡 {n}" for n in trip.notes],
+        ])
     lines = [
         f"✈️ {out.origin} → {trip.destination_name} ({trip.destination}) – {trip.total_price:.0f} {trip.currency} t/r",
         f"🗓 {trip.window.label}, {trip.window.nights} nätter",
-        f"Ut: {fmt_dt(out.depart)} {out.flight_number} ({out.provider}) – {out.price:.0f} {out.currency}",
+        f"Ut: {fmt_dt(out.depart)} {out.flight_number} ({out.airline or out.provider}) – {out.price:.0f} {out.currency}",
     ]
     if back:
         lines.append(
-            f"Hem: {fmt_dt(back.depart)} {back.flight_number} ({back.provider}) → {back.destination} – "
+            f"Hem: {fmt_dt(back.depart)} {back.flight_number} ({back.airline or back.provider}) → {back.destination} – "
             f"{back.price:.0f} {back.currency}"
         )
     lines += [f"💡 {n}" for n in trip.notes]
@@ -28,6 +34,8 @@ def trip_text(trip: Trip) -> str:
 
 def _buttons(trip: Trip) -> list[dict]:
     buttons = []
+    if trip.indicative and trip.outbound.booking_url:
+        return [{"text": "Visa på Google Flights", "url": trip.outbound.booking_url}]
     if trip.outbound.booking_url:
         buttons.append({"text": "Boka utresa", "url": trip.outbound.booking_url})
     if trip.inbound and trip.inbound.booking_url:
@@ -73,6 +81,20 @@ def notify(secrets, text: str, buttons: list[dict] | None = None) -> list[str]:
 
 def notify_trip(secrets, trip: Trip) -> list[str]:
     return notify(secrets, "🔥 Flygfynd!\n" + trip_text(trip), _buttons(trip))
+
+
+def notify_new_deals(secrets, trips: list[Trip], state) -> int:
+    """Skickar bara fynd som inte redan skickats (eller blivit >5 % billigare)."""
+    from .search import deal_key
+
+    sent = 0
+    for trip in trips:
+        key = deal_key(trip)
+        if state.should_notify(key, trip.total_price):
+            notify_trip(secrets, trip)
+            state.mark_sent(key, trip.total_price)
+            sent += 1
+    return sent
 
 
 def telegram_find_chat_id(token: str, client: httpx.Client | None = None) -> list[tuple[str, str]]:

@@ -12,12 +12,14 @@ from flightagent.calendar_sync import load_windows
 from flightagent.config import load_preferences, load_secrets
 from flightagent.providers import REGISTRY, build_providers
 from flightagent.search import deals, fmt_dt, search_all
+from flightagent.state import State
 
 st.set_page_config(page_title="Flight Agent", page_icon="✈️", layout="wide")
 st.title("✈️ Din privata flygagent")
 
 prefs = load_preferences()
 secrets = load_secrets()
+state = State()
 
 with st.sidebar:
     st.header("Inställningar")
@@ -28,12 +30,15 @@ with st.sidebar:
     prefs.earliest_departure_hour = st.slider("Inga avgångar före kl.", 0, 12, prefs.earliest_departure_hour)
     prefs.after_work_hour = st.slider("Efter jobbet – tidigast kl.", 12, 21, prefs.after_work_hour)
     prefs.deal_threshold = float(st.number_input(f"Fyndgräns t/r ({prefs.currency})", 100, 20000, int(prefs.deal_threshold), step=100))
-    prefs.providers = st.multiselect("Källor", list(REGISTRY), prefs.providers)
+    prefs.providers = st.multiselect(
+        "Källor", list(REGISTRY), prefs.providers, format_func=lambda n: f"{n} – {REGISTRY[n][0]}"
+    )
     use_ai = st.checkbox("AI-analys med Claude", value=bool(secrets.anthropic_api_key), disabled=not secrets.anthropic_api_key)
     auto_notify = st.checkbox("Skicka fynd som notis automatiskt", value=False)
     st.caption(
         f"Kalendrar: {len(secrets.calendar_ics_urls)} · "
-        f"Telegram: {'✅' if secrets.telegram_chat_id else '—'} · Discord: {'✅' if secrets.discord_webhook_url else '—'}"
+        f"Telegram: {'✅' if secrets.telegram_chat_id else '—'} · Discord: {'✅' if secrets.discord_webhook_url else '—'}  \n"
+        f"SerpApi denna månad: {state.serpapi_used()}/{prefs.serpapi_monthly_budget}"
     )
     if st.button("Skicka testnotis"):
         try:
@@ -52,13 +57,18 @@ if st.button("🔎 Sök nu", type="primary") or "trips" not in st.session_state:
             st.error(f"Kunde inte läsa kalendern: {exc}")
             st.stop()
     with st.spinner(f"Söker priser för {len(windows)} lediga perioder…"):
-        trips = search_all(windows, prefs, build_providers(prefs.providers))
-    st.session_state.update(windows=windows, trips=trips, analysis=None)
+        providers, warnings = build_providers(prefs.providers, secrets, prefs, state)
+        trips = search_all(windows, prefs, providers)
+    st.session_state.update(windows=windows, trips=trips, analysis=None, warnings=warnings)
     if auto_notify:
-        for trip in deals(trips, prefs):
-            notify.notify_trip(secrets, trip)
+        try:
+            st.toast(f"{notify.notify_new_deals(secrets, deals(trips, prefs), state)} nya fynd skickades")
+        except Exception as exc:
+            st.error(str(exc))
 
 windows, trips = st.session_state["windows"], st.session_state["trips"]
+for w in st.session_state.get("warnings", []):
+    st.warning(w)
 
 with st.expander(f"🗓 {len(windows)} lediga resefönster"):
     st.dataframe(pd.DataFrame([{"Period": w.label, "Avresa": w.depart_day, "Hem": w.return_day, "Nätter": w.nights} for w in windows]), hide_index=True)
@@ -68,7 +78,7 @@ if not trips:
     st.stop()
 
 if "demo" in prefs.providers:
-    st.warning("Källan **demo** visar påhittade priser för att testa appen. Välj ryanair för riktiga priser.")
+    st.warning("Källan **demo** visar påhittade priser för att testa appen. Välj riktiga källor i sidopanelen.")
 
 st.subheader(f"{len(trips)} billigaste resorna")
 for i, t in enumerate(trips):
@@ -76,14 +86,20 @@ for i, t in enumerate(trips):
     with st.container(border=True):
         c1, c2, c3 = st.columns([3, 4, 2])
         c1.markdown(f"### {'🔥 ' if hot else ''}{t.destination_name}\n{t.window.label} · {t.window.nights} nätter")
-        lines = [f"**Ut:** {fmt_dt(t.outbound.depart)} {t.outbound.origin}→{t.outbound.destination} · {t.outbound.price:.0f} ({t.outbound.provider})"]
-        if t.inbound:
-            lines.append(f"**Hem:** {fmt_dt(t.inbound.depart)} {t.inbound.origin}→{t.inbound.destination} · {t.inbound.price:.0f} ({t.inbound.provider})")
+        o, b = t.outbound, t.inbound
+        if t.indicative:
+            lines = [f"**{t.window.depart_day:%d/%m}–{t.window.return_day:%d/%m}** · {o.origin}→{o.destination}"]
+        else:
+            lines = [f"**Ut:** {fmt_dt(o.depart)} {o.origin}→{o.destination} · {o.price:.0f} ({o.airline or o.provider})"]
+            if b:
+                lines.append(f"**Hem:** {fmt_dt(b.depart)} {b.origin}→{b.destination} · {b.price:.0f} ({b.airline or b.provider})")
         lines += [f"💡 {n}" for n in t.notes]
         c2.markdown("  \n".join(lines))
-        c3.metric("Totalt", f"{t.total_price:.0f} {t.currency}")
-        if t.outbound.booking_url:
-            c3.link_button("Boka utresa", t.outbound.booking_url)
+        c3.metric("Totalt" + (" (ca)" if t.indicative else ""), f"{t.total_price:.0f} {t.currency}")
+        if t.indicative and o.booking_url:
+            c3.link_button("Visa på Google Flights", o.booking_url)
+        elif o.booking_url:
+            c3.link_button("Boka utresa", o.booking_url)
         if t.inbound and t.inbound.booking_url:
             c3.link_button("Boka hemresa", t.inbound.booking_url)
         if c3.button("Skicka notis", key=f"n{i}"):

@@ -16,8 +16,50 @@ cp config.example.yaml config.yaml
 streamlit run app.py
 ```
 
-Appen startar med källan `demo` (påhittade priser) så att du kan testa allt
-direkt. Byt till `ryanair` i sidopanelen eller i `config.yaml` för riktiga priser.
+Utan nycklar söker appen bara Ryanair (gratis). Lägg till nycklarna nedan för
+full täckning.
+
+## Källor – så missar du inga fynd
+
+| Källa | Täcker | Pris | Nyckel i `.env` |
+|---|---|---|---|
+| `google_flights` | Nästan alla flygbolag: SAS, Norwegian, Wizz Air, Lufthansa, KLM, Finnair, airBaltic, Vueling … Livepriser. | Gratis 250 sökningar/mån ([serpapi.com](https://serpapi.com)) | `SERPAPI_KEY` |
+| `ryanair` | Ryanair, direkt från bolaget. Livepriser. | Gratis | – |
+| `aviasales` | Hundratals bolag och resebyråer, även kombinationer. **Cachade** priser. | Gratis ([travelpayouts.com](https://www.travelpayouts.com)) | `TRAVELPAYOUTS_TOKEN` |
+| `demo` | Påhittade priser för test | – | – |
+
+Så samarbetar de för varje ledig period:
+1. **Radar:** Ryanair och Aviasales söker "vart som helst". Google Explore ger
+   tur-och-retur-priser till alla resmål med ett enda anrop.
+2. **Kontroll:** för de 3 billigaste resmålen som ser ut som fynd hämtar
+   Google Flights exakta avgångstider (`verify_top_n`). Det sparar
+   SerpApi-sökningar.
+3. **Hemresa:** söks i alla källor till alla hemmaflygplatser. Billigaste
+   kombinationen vinner, även med olika bolag.
+
+Resmål som Google hittade men som inte hann kontrolleras visas som
+**"ca-pris"**, med en länk till Google Flights.
+
+**SerpApi-budget:** appen håller koll och stannar vid
+`serpapi_monthly_budget` (240). En sökning med 3 månader framåt använder ca
+15–40 sökningar. `python -m flightagent.cli sources` visar förbrukningen.
+
+Wizz Air, SAS och Norwegian har inga egna källor. Deras sajter blockerar
+automatiska anrop, men alla tre finns med via Google Flights.
+
+## Automatisk bevakning (Mac)
+
+Låt Macen söka själv var 4:e timme och skicka nya fynd till telefonen:
+
+```bash
+python -m flightagent.cli install-schedule --hours 4
+```
+
+Samma fynd skickas bara en gång, eller igen om priset sjunker mer än 5 %.
+Stäng av med `python -m flightagent.cli remove-schedule`. Macen måste vara
+igång; missade körningar görs när den vaknar. Med 4 timmar och full
+SerpApi-budget räcker gratisnivån inte hela månaden. Sänk då
+`serpapi_max_per_run` till ca 8, eller kör var 12:e timme.
 
 ## Första testnotisen i telefonen
 
@@ -69,14 +111,12 @@ Lägg till `--dry-run` för att bara skriva ut resultatet.
 
 ## Ärligt om begränsningarna
 
-- **Källor:** Just nu finns bara Ryanair som riktig källa. Den använder
-  flygbolagets eget pris-API, samma som lågpriskalendern på ryanair.com. API:t
-  är inofficiellt och kan ändras. Använd det sparsamt och för privat bruk.
-  Nya flygbolag läggs till som en klass i `flightagent/providers/` med metoden
-  `search_one_way`.
-- **"Alltid billigast" kan ingen lova.** Agenten jämför bara de källor den har.
-  Grundpriset från lågprisbolag är utan väska, och priset kan ändras innan du
-  bokar.
+- **Ryanairs pris-API** är inofficiellt och kan ändras. Använd det sparsamt.
+- **Aviasales-priser är cachade.** De kan vara inaktuella, så kontrollera alltid
+  innan du bokar. Resan märks med det.
+- **"Alltid billigast" kan ingen lova.** Google Flights täcker nästan allt,
+  men små bolag och resebyråers specialpriser kan saknas. Grundpriset från
+  lågprisbolag är utan väska, och priset kan ändras innan du bokar.
 - **Skrapning med webbläsare (Playwright)** av flygbolagssajter är bräckligt.
   Sajterna har bot-skydd, och skrapning bryter ofta mot deras villkor. Därför
   föredras flygbolagens egna JSON-endpoints där de finns.

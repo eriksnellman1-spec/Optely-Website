@@ -27,6 +27,12 @@ class Preferences:
     deal_threshold: float = 1000.0
     max_results: int = 25
     providers: list[str] = field(default_factory=lambda: ["demo"])
+    # Google Flights (SerpApi): kontrollera exakta tider för de N billigaste
+    # resmålen per period, om deras indikativa pris är under fyndgräns × marginal.
+    verify_top_n: int = 3
+    verify_margin: float = 1.3
+    serpapi_max_per_run: int = 40
+    serpapi_monthly_budget: int = 240
     # Ord i heldagshändelser som markerar semester/ledighet.
     vacation_keywords: list[str] = field(
         default_factory=lambda: ["semester", "ledig", "vacation", "holiday", "resa"]
@@ -44,6 +50,8 @@ class Secrets:
     telegram_chat_id: str | None
     discord_webhook_url: str | None
     calendar_ics_urls: list[str]
+    serpapi_key: str | None = None
+    travelpayouts_token: str | None = None
 
 
 def load_preferences(path: str | Path | None = None) -> Preferences:
@@ -75,5 +83,7 @@ def load_secrets() -> Secrets:
         telegram_bot_token=env("TELEGRAM_BOT_TOKEN"),
         telegram_chat_id=env("TELEGRAM_CHAT_ID"),
         discord_webhook_url=env("DISCORD_WEBHOOK_URL"),
+        serpapi_key=env("SERPAPI_KEY"),
+        travelpayouts_token=env("TRAVELPAYOUTS_TOKEN"),
         calendar_ics_urls=[u.strip() for u in (env("CALENDAR_ICS_URLS") or "").split(",") if u.strip()],
     )
