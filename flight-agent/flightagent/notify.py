@@ -7,7 +7,7 @@ import html
 import httpx
 
 from .models import Trip
-from .search import fmt_dt, money
+from .search import fmt_day, fmt_dt, money, nights_text
 
 
 def trip_text(trip: Trip) -> str:
@@ -15,18 +15,19 @@ def trip_text(trip: Trip) -> str:
     if trip.indicative:
         return "\n".join([
             f"✈️ {out.origin} → {trip.destination_name} ({trip.destination}) – ca {money(trip.total_price, trip.currency)} t/r",
-            f"🗓 {trip.window.label}: {trip.window.depart_day:%d/%m}–{trip.window.return_day:%d/%m}, {trip.window.nights} nätter",
+            f"🗓 {fmt_day(trip.window.depart_day)} – {fmt_day(trip.window.return_day)}, {nights_text(trip.window.nights)} ({trip.window.label})",
             *[f"💡 {n}" for n in trip.notes],
         ])
     lines = [
         f"✈️ {out.origin} → {trip.destination_name} ({trip.destination}) – {money(trip.total_price, trip.currency)} t/r",
-        f"🗓 {trip.window.label}, {trip.window.nights} nätter",
-        f"Ut: {fmt_dt(out.depart)} {out.flight_number} ({out.airline or out.provider}) – {money(out.price, out.currency)}",
+        f"🗓 {nights_text(trip.window.nights)} ({trip.window.label})",
+        f"Ut: {fmt_dt(out.depart)} {out.flight_number + ' ' if out.flight_number else ''}({out.airline or out.provider})"
+        + ("" if trip.bundled else f" – {money(out.price, out.currency)}"),
     ]
     if back:
         lines.append(
-            f"Hem: {fmt_dt(back.depart)} {back.flight_number} ({back.airline or back.provider}) → {back.destination} – "
-            f"{money(back.price, back.currency)}"
+            f"Hem: {fmt_dt(back.depart)} {back.flight_number + ' ' if back.flight_number else ''}({back.airline or back.provider}) → {back.destination}"
+            + ("" if trip.bundled else f" – {money(back.price, back.currency)}")
         )
     lines += [f"💡 {n}" for n in trip.notes]
     return "\n".join(lines)
@@ -37,8 +38,8 @@ def _buttons(trip: Trip) -> list[dict]:
     if trip.indicative and trip.outbound.booking_url:
         return [{"text": "Visa på Google Flights", "url": trip.outbound.booking_url}]
     if trip.outbound.booking_url:
-        buttons.append({"text": "Boka utresa", "url": trip.outbound.booking_url})
-    if trip.inbound and trip.inbound.booking_url:
+        buttons.append({"text": "Boka resan" if trip.bundled else "Boka utresa", "url": trip.outbound.booking_url})
+    if trip.inbound and trip.inbound.booking_url and not trip.bundled:
         buttons.append({"text": "Boka hemresa", "url": trip.inbound.booking_url})
     return buttons
 

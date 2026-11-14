@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import date
 
-import pandas as pd
 import streamlit as st
 
 from flightagent import ai, notify
-from flightagent.windows import find_travel_windows
 from flightagent.config import load_preferences, load_secrets
 from flightagent.providers import REGISTRY, build_providers
-from flightagent.search import deals, fmt_dt, money, search_all
+from flightagent.search import deals, fmt_day, fmt_dt, money, nights_text, search_all, search_range
 from flightagent.state import State
 
 st.set_page_config(page_title="Flight Agent", page_icon="✈️", layout="wide")
@@ -47,25 +44,22 @@ with st.sidebar:
             st.error(str(exc))
 
 if st.button("🔎 Sök nu", type="primary") or "trips" not in st.session_state:
-    windows = find_travel_windows(
-        date.today(), months_ahead=prefs.months_ahead, min_nights=prefs.min_nights, max_nights=prefs.max_nights
-    )
-    with st.spinner(f"Söker priser för {len(windows)} lediga perioder…"):
+    with st.spinner("Söker alla datum…"):
         providers, warnings = build_providers(prefs.providers, secrets, prefs, state)
-        trips = search_all(windows, prefs, providers)
-    st.session_state.update(windows=windows, trips=trips, analysis=None, warnings=warnings)
+        trips = search_all(prefs, providers)
+    st.session_state.update(trips=trips, analysis=None, warnings=warnings)
     if auto_notify:
         try:
             st.toast(f"{notify.notify_new_deals(secrets, deals(trips, prefs), state)} nya fynd skickades")
         except Exception as exc:
             st.error(str(exc))
 
-windows, trips = st.session_state["windows"], st.session_state["trips"]
+trips = st.session_state["trips"]
+start, end = search_range(prefs)
+st.caption(f"Tur och retur från {', '.join(prefs.home_airports)} · avresa {fmt_day(start)}–{fmt_day(end)} · "
+           f"{prefs.min_nights}–{prefs.max_nights} nätter · alla veckodagar")
 for w in st.session_state.get("warnings", []):
     st.warning(w)
-
-with st.expander(f"🗓 {len(windows)} lediga resefönster"):
-    st.dataframe(pd.DataFrame([{"Period": w.label, "Avresa": w.depart_day, "Hem": w.return_day, "Nätter": w.nights} for w in windows]), hide_index=True)
 
 if not trips:
     st.info("Inga resor matchade dina preferenser. Testa fler destinationer, källor eller en högre fyndgräns.")
@@ -79,22 +73,24 @@ for i, t in enumerate(trips):
     hot = t.total_price <= prefs.deal_threshold
     with st.container(border=True):
         c1, c2, c3 = st.columns([3, 4, 2])
-        c1.markdown(f"### {'🔥 ' if hot else ''}{t.destination_name}\n{t.window.label} · {t.window.nights} nätter")
+        c1.markdown(f"### {'🔥 ' if hot else ''}{t.destination_name}\n{fmt_day(t.window.depart_day)} – "
+                    f"{fmt_day(t.window.return_day)} · {nights_text(t.window.nights)}  \n{t.window.label}")
         o, b = t.outbound, t.inbound
         if t.indicative:
             lines = [f"**{t.window.depart_day:%d/%m}–{t.window.return_day:%d/%m}** · {o.origin}→{o.destination}"]
         else:
-            lines = [f"**Ut:** {fmt_dt(o.depart)} {o.origin}→{o.destination} · {money(o.price, o.currency)} ({o.airline or o.provider})"]
+            price = (lambda f: "" if t.bundled else f" · {money(f.price, f.currency)}")
+            lines = [f"**Ut:** {fmt_dt(o.depart)} {o.origin}→{o.destination}{price(o)} ({o.airline or o.provider})"]
             if b:
-                lines.append(f"**Hem:** {fmt_dt(b.depart)} {b.origin}→{b.destination} · {money(b.price, b.currency)} ({b.airline or b.provider})")
+                lines.append(f"**Hem:** {fmt_dt(b.depart)} {b.origin}→{b.destination}{price(b)} ({b.airline or b.provider})")
         lines += [f"💡 {n}" for n in t.notes]
         c2.markdown("  \n".join(lines))
         c3.metric("Totalt" + (" (ca)" if t.indicative else ""), money(t.total_price, t.currency))
         if t.indicative and o.booking_url:
             c3.link_button("Visa på Google Flights", o.booking_url)
         elif o.booking_url:
-            c3.link_button("Boka utresa", o.booking_url)
-        if t.inbound and t.inbound.booking_url:
+            c3.link_button("Boka resan" if t.bundled else "Boka utresa", o.booking_url)
+        if t.inbound and t.inbound.booking_url and not t.bundled:
             c3.link_button("Boka hemresa", t.inbound.booking_url)
         if c3.button("Skicka notis", key=f"n{i}"):
             try:

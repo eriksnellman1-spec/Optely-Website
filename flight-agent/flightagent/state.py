@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import asdict
 from datetime import date
 from pathlib import Path
@@ -60,9 +61,11 @@ class State:
         checked = (today or date.today()).isoformat()
         store = self.data.setdefault("explore", {})
         store[key] = {"checked": checked, "hits": [asdict(h) for h in hits]}
-        # Rensa fönster som redan passerat (nyckeln innehåller hemresedatum sist).
-        for k in [k for k in store if k.rsplit("|", 1)[-1] < checked]:
-            del store[k]
+        # Rensa sparade resultat vars datum/månad redan passerat.
+        for k in list(store):
+            stamps = [p for p in k.split("|") if re.fullmatch(r"\d{4}-\d{2}(-\d{2})?", p)]
+            if stamps and max(stamps) < checked[: len(max(stamps))]:
+                del store[k]
         self.save()
 
     # Skickade fynd: nyckel → lägsta pris vi redan notifierat om.

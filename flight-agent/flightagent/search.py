@@ -1,24 +1,23 @@
-"""Kombinerar resefönster, källor och preferenser till rankade resor.
+"""Flexibel sökning: tur-och-retur med avresa vilken dag som helst inom
+`months_ahead` och en längd på `min_nights`–`max_nights` nätter.
 
-Flöde per resefönster:
-1. Radar: källor som kan söka "vart som helst" (Ryanair, Aviasales) hämtar
-   utresor, och Google Travel Explore ger t/r-priser till alla resmål.
-2. Kontroll: för de resmål som ser ut som fynd hämtar Google Flights exakta
-   avgångar (sparar SerpApi-budget).
-3. Hemresan söks i alla källor till alla hemmaflygplatser → billigaste
-   kombinationen, även med olika flygbolag eller annan hemmaflygplats.
+Varje källa levererar förslag via `round_trips(...)`:
+* Ryanair – billigaste pris per dag och rutt, kombineras till alla längder.
+* Aviasales – cachade tur-och-retur-priser per månad.
+* Google Flights – Explore med flexibla datum (billigaste datum per resmål),
+  roterande inom en daglig sökbudget.
+Resultatet filtreras mot dina preferenser och de billigaste datumen per
+resmål behålls.
 """
 
 from __future__ import annotations
 
 import logging
-from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 
 from .config import Preferences
-from .models import ExploreHit, Flight, TravelWindow, Trip
-from .providers import FlightProvider
-from .providers.google_flights import BudgetExceeded
+from .models import Flight, Trip
+from .windows import is_day_off, make_window  # noqa: F401 (make_window används av källorna)
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +40,11 @@ def home_area(homes: list[str]) -> set[str]:
     return area
 
 
+def search_range(prefs: Preferences, today: date | None = None) -> tuple[date, date]:
+    today = today or date.today()
+    return today + timedelta(days=1), today + timedelta(days=round(prefs.months_ahead * 30.5))
+
+
 def flight_ok(flight: Flight, prefs: Preferences, after_hour: int | None = None) -> bool:
     if flight.depart.hour < max(prefs.earliest_departure_hour, after_hour or 0):
         return False
@@ -51,67 +55,44 @@ def flight_ok(flight: Flight, prefs: Preferences, after_hour: int | None = None)
     return True
 
 
-def _outbound_ok(flight: Flight, window: TravelWindow, prefs: Preferences) -> bool:
-    # Avresedagen är en arbetsdag om den ligger före ledigheten → åk efter jobbet.
-    is_workday_evening = (
-        flight.depart.date() == window.depart_day
-        and window.depart_day.weekday() < 5
-    )
-    return flight_ok(flight, prefs, prefs.after_work_hour if is_workday_evening else None)
+def outbound_ok(flight: Flight, prefs: Preferences) -> bool:
+    """På en arbetsdag kan man åka först efter jobbet (`after_work_hour`)."""
+    return flight_ok(flight, prefs, None if is_day_off(flight.depart.date()) else prefs.after_work_hour)
 
 
-def _query(provider: FlightProvider, origins: list[str], destinations: list[str | None],
-           date_from: date, date_to: date, currency: str) -> list[Flight]:
-    """Anropar en källa och samlar ihop fel så att en trasig källa inte stoppar sökningen."""
-    multi = getattr(provider, "multi_airport", False)
-    origin_groups = [",".join(origins)] if multi else origins
-    dest_groups = [",".join(d for d in destinations if d)] if multi and all(destinations) else destinations
-    flights: list[Flight] = []
-    for origin in origin_groups:
-        for dest in dest_groups:
-            try:
-                flights += provider.search_one_way(origin, dest, date_from, date_to, currency)
-            except BudgetExceeded:
-                return flights
-            except Exception as exc:
-                log.warning("%s misslyckades (%s→%s): %s", provider.name, origin, dest, exc)
-    return flights
-
-
-def _explore(providers: list[FlightProvider], window: TravelWindow, prefs: Preferences) -> list[ExploreHit]:
-    hits: list[ExploreHit] = []
-    for p in providers:
-        if not hasattr(p, "explore"):
+def combine(out_by_day: dict[date, Flight], in_by_day: dict[date, Flight], prefs: Preferences,
+            start: date, end: date) -> list[Trip]:
+    """Bygger alla tur-och-retur-kombinationer (min–max nätter) av dagspriser."""
+    trips: list[Trip] = []
+    for day, out in out_by_day.items():
+        if not (start <= day <= end) or not outbound_ok(out, prefs):
             continue
-        try:
-            hits += p.explore(prefs.home_airports, window.depart_day, window.return_day, prefs.currency)
-        except BudgetExceeded:
-            pass  # sammanfattas en gång i slutet av körningen
-        except Exception as exc:
-            log.warning("%s explore misslyckades: %s", p.name, exc)
-    return hits
+        for nights in range(prefs.min_nights, prefs.max_nights + 1):
+            back = in_by_day.get(day + timedelta(days=nights))
+            if back is None or back.depart.date() > end or not flight_ok(back, prefs):
+                continue
+            if back.depart <= (out.arrive or out.depart):
+                continue
+            trips.append(Trip(window=make_window(day, back.depart.date()), outbound=out, inbound=back))
+    return trips
 
 
-def _pick_for_verification(outbound: list[Flight], hits: list[ExploreHit], prefs: Preferences) -> list[str]:
-    """Väljer resmål att kontrollera med exakta tider (kostar SerpApi-sökningar)."""
-    if prefs.destinations:
-        return list(prefs.destinations)
-    indicative: dict[str, float] = {}
-    for h in hits:
-        indicative[h.destination] = min(indicative.get(h.destination, h.price), h.price)
-    for f in outbound:  # grov uppskattning: enkelresa × 2
-        indicative[f.destination] = min(indicative.get(f.destination, f.price * 2), f.price * 2)
-    limit = prefs.deal_threshold * prefs.verify_margin
-    ranked = sorted((p, d) for d, p in indicative.items() if p <= limit)
-    return [d for _, d in ranked[: prefs.verify_top_n]]
+def cheapest_by_day(flights: list[Flight]) -> dict[date, Flight]:
+    best: dict[date, Flight] = {}
+    for f in flights:
+        d = f.depart.date()
+        if d not in best or f.price < best[d].price:
+            best[d] = f
+    return best
 
 
-def _notes(trip: Trip) -> None:
+def notes(trip: Trip) -> None:
     out, back = trip.outbound, trip.inbound
-    if trip.mixed_carriers:
-        trip.notes.append(f"Kombinerar {out.airline or out.provider} + {back.airline or back.provider}")
-    if trip.different_return_airport:
-        trip.notes.append(f"Landar på {back.destination} i stället för {out.origin}")
+    if back and not trip.bundled:
+        if trip.mixed_carriers:
+            trip.notes.append(f"Kombinerar {out.airline or out.provider} + {back.airline or back.provider}")
+        if trip.different_return_airport:
+            trip.notes.append(f"Landar på {back.destination} i stället för {out.origin}")
     if out.cached or (back and back.cached):
         trip.notes.append("Cachat pris från Aviasales – kontrollera innan du bokar")
     stops = out.stops + (back.stops if back else 0)
@@ -119,116 +100,44 @@ def _notes(trip: Trip) -> None:
         trip.notes.append(f"{stops} byte totalt")
 
 
-def search_window(window: TravelWindow, prefs: Preferences, providers: list[FlightProvider],
-                  hits: list[ExploreHit] | None = None) -> list[Trip]:
-    homes = prefs.home_airports
-    first_full_day = window.depart_day + timedelta(days=1)
-    anywhere = [p for p in providers if not getattr(p, "needs_destination", False)]
-    targeted = [p for p in providers if getattr(p, "needs_destination", False)]
-    wanted: list[str | None] = list(prefs.destinations) or [None]
-
-    # 1. Radar
-    outbound: list[Flight] = []
-    for p in anywhere:
-        outbound += _query(p, homes, wanted, window.depart_day, first_full_day, prefs.currency)
-    home = home_area(homes)
-    outbound = [f for f in outbound if f.destination not in home]
-    if hits is None:
-        hits = _explore(targeted, window, prefs) if not prefs.destinations else []
-    hits = [h for h in hits if h.destination not in home]
-
-    # 2. Kontroll med exakta tider
-    verify = _pick_for_verification(outbound, hits, prefs) if targeted else []
-    for p in targeted:
-        for dest in verify:
-            outbound += _query(p, homes, [dest], window.depart_day, first_full_day, prefs.currency)
-
-    outbound = [f for f in outbound if f.destination not in home and _outbound_ok(f, window, prefs)]
-    best_out: dict[str, Flight] = {}
-    for f in sorted(outbound, key=lambda f: f.price):
-        best_out.setdefault(f.destination, f)
-
-    # 3. Hemresa – sökningarna per resmål körs parallellt.
-    def inbound_for(dest: str) -> list[Flight]:
-        flights: list[Flight] = []
-        for p in anywhere:
-            if getattr(p, "cheap_anywhere", False):  # ett anrop "vart som helst", filtrera hemma
-                flights += [f for f in _query(p, [dest], [None], window.return_day, window.return_day,
-                                               prefs.currency) if f.destination in homes]
-            else:
-                flights += _query(p, [dest], list(homes), window.return_day, window.return_day, prefs.currency)
-        if dest in verify:
-            for p in targeted:
-                flights += _query(p, [dest], list(homes), window.return_day, window.return_day, prefs.currency)
-        return flights
-
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        inbound_by_dest = dict(zip(best_out, pool.map(inbound_for, best_out)))
-
-    trips: list[Trip] = []
-    for dest, out in best_out.items():
-        inbound = [f for f in inbound_by_dest[dest] if flight_ok(f, prefs) and f.depart > (out.arrive or out.depart)]
-        if not inbound:
+def _best_per_destination(trips: list[Trip], per_destination: int) -> list[Trip]:
+    """Behåller de billigaste förslagen per resmål, med olika avresedagar."""
+    kept: list[Trip] = []
+    seen: dict[str, set[date]] = {}
+    for t in sorted(trips, key=lambda t: t.total_price):
+        days = seen.setdefault(t.destination, set())
+        if t.window.depart_day in days or len(days) >= per_destination:
             continue
-        trip = Trip(window=window, outbound=out, inbound=min(inbound, key=lambda f: f.price))
-        _notes(trip)
-        trips.append(trip)
-
-    # Explore-träffar som inte kunde kontrolleras visas som indikativa priser.
-    covered = {t.destination for t in trips}
-    for h in sorted(hits, key=lambda h: h.price):
-        if h.destination in covered:
-            continue
-        covered.add(h.destination)
-        placeholder = Flight(
-            provider=h.provider, origin="/".join(homes), destination=h.destination,
-            depart=datetime.combine(window.depart_day, datetime.min.time()), price=h.price,
-            currency=h.currency, destination_name=h.destination_name, booking_url=h.booking_url,
-            airline=h.airline, stops=h.stops,
-        )
-        when = "" if not h.checked or h.checked == date.today().isoformat() else f", pris från {h.checked}"
-        trips.append(Trip(
-            window=window, outbound=placeholder, indicative=True, indicative_price=h.price,
-            notes=[f"Indikativt t/r-pris från Google Flights ({h.airline or 'flera bolag'}"
-                   f"{', direkt' if not h.stops else f', {h.stops} byte'}{when}) – tider ej kontrollerade"],
-        ))
-    return sorted(trips, key=lambda t: t.total_price)
+        days.add(t.window.depart_day)
+        kept.append(t)
+    return kept
 
 
-def explore_key(window: TravelWindow, prefs: Preferences) -> str:
-    return f"{'+'.join(prefs.home_airports)}|{prefs.currency}|{window.depart_day}|{window.return_day}"
-
-
-def _explore_rotating(windows: list[TravelWindow], prefs: Preferences,
-                      explorers: list[FlightProvider]) -> dict[TravelWindow, list[ExploreHit]]:
-    """Google-budgeten räcker inte till alla perioder varje gång. Uppdatera de
-    perioder som kontrollerades längst sedan; övriga använder sparade priser."""
-    result: dict[TravelWindow, list[ExploreHit]] = {w: [] for w in windows}
-    for p in explorers:
-        state = p.state
-        ordered = sorted(windows, key=lambda w: (state.explore_checked(explore_key(w, prefs)) or "", w.depart_day))
-        for w in ordered:
-            key = explore_key(w, prefs)
-            if p.budget_left() >= len(prefs.home_airports):
-                fresh = _explore([p], w, prefs)
-                if fresh or not p.budget_hit:
-                    state.store_explore(key, fresh)
-                    result[w] += fresh
-                    continue
-            result[w] += state.cached_explore(key, prefs.explore_cache_days) or []
-    return result
-
-
-def search_all(windows: list[TravelWindow], prefs: Preferences, providers: list[FlightProvider]) -> list[Trip]:
-    explorers = [p for p in providers if hasattr(p, "explore") and hasattr(p, "state")]
-    hits_by_window = _explore_rotating(windows, prefs, explorers) if explorers and not prefs.destinations else {}
+def search_all(prefs: Preferences, providers: list, today: date | None = None) -> list[Trip]:
+    start, end = search_range(prefs, today)
+    home = home_area(prefs.home_airports)
     trips: list[Trip] = []
-    for window in windows:
-        trips += search_window(window, prefs, providers, hits_by_window.get(window))
+    for p in providers:
+        try:
+            trips += p.round_trips(prefs, start, end)
+        except Exception as exc:  # en trasig källa ska inte stoppa hela sökningen
+            log.warning("%s misslyckades: %s", p.name, exc)
     if any(getattr(p, "budget_hit", False) for p in providers):
-        log.info("Google Flights: dagens/månadens sökbudget är använd – sparade priser används för resten")
-    trips.sort(key=lambda t: t.total_price)
-    return trips[: prefs.max_results]
+        log.info("Google Flights: dagens sökbudget är använd – sparade priser används för resten")
+
+    wanted = set(prefs.destinations)
+    filtered = []
+    for t in trips:
+        if t.destination in home or (wanted and t.destination not in wanted):
+            continue
+        if not (prefs.min_nights <= t.window.nights <= prefs.max_nights):
+            continue
+        if t.window.depart_day < start or t.window.return_day > end:
+            continue
+        if not t.notes:
+            notes(t)
+        filtered.append(t)
+    return _best_per_destination(filtered, prefs.per_destination)[: prefs.max_results]
 
 
 def deals(trips: list[Trip], prefs: Preferences) -> list[Trip]:
@@ -251,3 +160,12 @@ def money(amount: float, currency: str) -> str:
 def fmt_dt(dt: datetime) -> str:
     days = ["mån", "tis", "ons", "tor", "fre", "lör", "sön"]
     return f"{days[dt.weekday()]} {dt.day}/{dt.month} {dt:%H:%M}"
+
+
+def nights_text(n: int) -> str:
+    return "1 natt" if n == 1 else f"{n} nätter"
+
+
+def fmt_day(d: date) -> str:
+    days = ["mån", "tis", "ons", "tor", "fre", "lör", "sön"]
+    return f"{days[d.weekday()]} {d.day}/{d.month}"

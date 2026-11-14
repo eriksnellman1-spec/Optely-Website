@@ -15,14 +15,12 @@ import logging
 import plistlib
 import subprocess
 import sys
-from datetime import date
 from pathlib import Path
 
 from . import notify
-from .windows import find_travel_windows
 from .config import ROOT, load_preferences, load_secrets
 from .providers import REGISTRY, build_providers
-from .search import deals, money, search_all
+from .search import deals, fmt_day, money, search_all, search_range
 from .state import State
 
 LABEL = "se.optely.flightagent"
@@ -106,14 +104,13 @@ def main(argv: list[str] | None = None) -> int:
 
     prefs = load_preferences(args.config)
     state = State()
-    windows = find_travel_windows(
-        date.today(), months_ahead=prefs.months_ahead, min_nights=prefs.min_nights, max_nights=prefs.max_nights
-    )
-    print(f"{len(windows)} lediga resefönster hittades")
+    start, end = search_range(prefs)
+    print(f"Söker tur och retur från {', '.join(prefs.home_airports)}: avresa {fmt_day(start)}–{fmt_day(end)}, "
+          f"{prefs.min_nights}–{prefs.max_nights} nätter")
     providers, _ = build_providers(prefs.providers, secrets, prefs, state)
     if not providers:
         raise RuntimeError("Inga källor är aktiva – kontrollera providers i config.yaml och nycklarna i .env")
-    trips = search_all(windows, prefs, providers)
+    trips = search_all(prefs, providers)
     found = deals(trips, prefs)
     print(f"{len(trips)} resor, varav {len(found)} under {money(prefs.deal_threshold, prefs.currency)}")
     print(f"SerpApi idag: {state.serpapi_used_today()}/{prefs.serpapi_daily_budget}, "

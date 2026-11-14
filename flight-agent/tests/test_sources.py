@@ -4,10 +4,8 @@ import httpx
 
 from flightagent.cli import schedule_plist
 from flightagent.config import Preferences
-from flightagent.models import ExploreHit, Flight, TravelWindow
 from flightagent.providers.google_flights import BudgetExceeded, GoogleFlightsProvider, parse_explore, parse_flights
-from flightagent.providers.travelpayouts import parse_prices
-from flightagent.search import search_window
+from flightagent.providers.travelpayouts import parse_prices, parse_round_trips
 from flightagent.state import State
 
 GF = {
@@ -67,42 +65,6 @@ def test_serpapi_budget_and_usage(tmp_path):
         pass
 
 
-class FakeTargeted:
-    name = "google_flights"
-    needs_destination = True
-    multi_airport = True
-
-    def __init__(self):
-        self.searched = []
-
-    def explore(self, origins, outbound, inbound, currency):
-        return [ExploreHit("google_flights", "RIX", "Riga", 500, "SEK", airline="airBaltic"),
-                ExploreHit("google_flights", "TFS", "Teneriffa", 900, "SEK"),
-                ExploreHit("google_flights", "JFK", "New York", 5000, "SEK")]
-
-    def search_one_way(self, origin, destination, date_from, date_to, currency):
-        self.searched.append((origin, destination))
-        if destination == "RIX":
-            return [Flight("google_flights", "ARN", "RIX", datetime(2026, 12, 4, 18, 0), 250, "SEK", airline="airBaltic")]
-        if origin == "RIX":
-            return [Flight("google_flights", "RIX", "ARN", datetime(2026, 12, 6, 17, 0), 260, "SEK", airline="airBaltic")]
-        return []
-
-
-def test_explore_then_verify_only_promising_destinations():
-    gf = FakeTargeted()
-    prefs = Preferences(home_airports=["ARN", "NYO"], deal_threshold=1000, verify_top_n=3, verify_margin=1.3)
-    trips = search_window(TravelWindow(date(2026, 12, 4), date(2026, 12, 6), "Helg"), prefs, [gf])
-    # JFK (5000) är för dyrt för att kontrolleras; RIX och TFS kontrolleras.
-    assert ("ARN,NYO", "RIX") in gf.searched and ("ARN,NYO", "TFS") in gf.searched
-    assert all(d != "JFK" for _, d in gf.searched)
-    assert ("RIX", "ARN,NYO") in gf.searched  # hemresa till valfri hemmaflygplats i ett anrop
-    rix = next(t for t in trips if t.destination == "RIX")
-    assert not rix.indicative and rix.total_price == 510
-    # TFS och JFK gav inga exakta flyg → visas som indikativa
-    assert {t.destination for t in trips if t.indicative} == {"TFS", "JFK"}
-
-
 def test_dedupe_notifications(tmp_path):
     s = State(tmp_path / "s.json")
     assert s.should_notify("k", 800)
@@ -133,31 +95,40 @@ def test_explore_searches_each_home_airport_and_empty_is_not_error(tmp_path):
     assert seen == ["HEL", "ARN"] and [h.destination for h in hits] == ["RIX"]
 
 
-def test_explore_rotates_windows_and_reuses_cached_prices(tmp_path):
-    from flightagent.search import search_all
-
+def test_google_flexible_round_trips_rotate_and_reuse_cache(tmp_path):
     asked = []
 
     def handler(request):
-        asked.append(request.url.params["outbound_date"])
+        p = request.url.params
+        asked.append((p["month"], p["travel_duration"]))
         return httpx.Response(200, json={"destinations": [
-            {"name": "Riga", "destination_airport": {"code": "RIX"}, "flight_price": 40}]})
+            {"name": "Riga", "destination_airport": {"code": "RIX"}, "flight_price": 40,
+             "start_date": "2026-12-08", "end_date": "2026-12-11", "airline": "airBaltic"}]})
 
     state = State(tmp_path / "s.json")
-    windows = [TravelWindow(date(2027, 1, d), date(2027, 1, d + 2), "Helg") for d in (8, 15, 22)]
-    prefs = Preferences(home_airports=["ARN"], verify_top_n=0, max_results=50)
+    prefs = Preferences(home_airports=["HEL"], min_nights=1, max_nights=7)
 
     def run():
-        gf = GoogleFlightsProvider("KEY", daily_budget=2, state=state,
+        gf = GoogleFlightsProvider("KEY", daily_budget=3, state=state,
                                    client=httpx.Client(transport=httpx.MockTransport(handler)))
-        return search_all(windows, prefs, [gf])
+        return gf.round_trips(prefs, date(2026, 12, 1), date(2027, 1, 31))
 
     trips = run()
-    assert asked == ["2027-01-08", "2027-01-15"]          # budget räcker till två perioder
-    assert len(trips) == 2
-
-    state.data["serpapi_day"] = {}                          # ny dag
+    assert asked == [("12", "1"), ("12", "2"), ("1", "1")]       # 3 av 4 kombinationer idag
+    assert len(trips) == 3 and trips[0].window.nights == 3 and trips[0].indicative
+    state.data["serpapi_day"] = {}                                  # ny dag
     asked.clear()
     trips = run()
-    assert asked == ["2027-01-22", "2027-01-08"]          # aldrig kollad först, sedan äldst
-    assert len(trips) == 3                                  # 15/1 kommer från sparade priser
+    assert asked[0] == ("1", "2")                                   # aldrig kollad först
+    assert len(trips) == 4                                          # resten från sparade priser
+
+
+def test_travelpayouts_round_trip_is_one_ticket():
+    payload = {"data": [{"origin_airport": "HEL", "destination_airport": "BCN", "price": 120, "airline": "AY",
+                         "flight_number": "1651", "departure_at": "2026-12-08T07:10:00+02:00",
+                         "return_at": "2026-12-12T18:00:00+01:00", "transfers": 0, "return_transfers": 0,
+                         "link": "/search/HEL0812BCN12121"}]}
+    [t] = parse_round_trips(payload, "EUR", "HEL")
+    assert t.bundled and t.total_price == 120 and t.window.nights == 4
+    assert t.inbound.destination == "HEL" and t.outbound.cached
+

@@ -13,11 +13,11 @@ budget (se config: serpapi_max_per_run, serpapi_monthly_budget).
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 import httpx
 
-from ..models import ExploreHit, Flight
+from ..models import ExploreHit, Flight, Trip
 from ..state import State
 
 log = logging.getLogger(__name__)
@@ -78,6 +78,8 @@ def parse_explore(payload: dict, currency: str, checked: str = "") -> list[Explo
                 stops=int(d.get("number_of_stops") or 0),
                 booking_url=d.get("link", ""),
                 checked=checked,
+                start_date=d.get("start_date", ""),
+                end_date=d.get("end_date", ""),
             )
         )
     return hits
@@ -156,3 +158,67 @@ class GoogleFlightsProvider:
                 if hit.destination not in best or hit.price < best[hit.destination].price:
                     best[hit.destination] = hit
         return list(best.values())
+
+
+DURATIONS = {1: (1, 3), 2: (6, 8)}  # travel_duration → ungefärligt antal nätter (helg, en vecka)
+
+
+def _months_between(start: date, end: date) -> list[date]:
+    months, d = [], start.replace(day=1)
+    while d <= end:
+        months.append(d)
+        d = (d.replace(day=28) + timedelta(days=4)).replace(day=1)
+    return months
+
+
+def _round_trips(self, prefs, start: date, end: date):
+    """Google Explore med flexibla datum: billigaste datum per resmål för varje
+    (hemmaflygplats, månad, reslängd). Budgeten räcker inte till alla
+    kombinationer varje dag, så de som kollades längst sedan uppdateras först
+    och övriga använder sparade priser (högst `explore_cache_days` gamla)."""
+    from ..search import make_window
+
+    combos = [(home, m, dur)
+              for home in prefs.home_airports
+              for m in _months_between(start, end)[:6]
+              for dur, (lo, hi) in DURATIONS.items()
+              if hi >= prefs.min_nights and lo <= prefs.max_nights]
+    key = lambda c: f"flex|{c[0]}|{prefs.currency}|{c[1]:%Y-%m}|{c[2]}"
+    combos.sort(key=lambda c: (self.state.explore_checked(key(c)) or "", c[1]))
+
+    hits: list[tuple[str, ExploreHit]] = []
+    for combo in combos:
+        home, month, dur = combo
+        fresh = None
+        if self.budget_left() > 0:
+            try:
+                data = self._get({"engine": "google_travel_explore", "departure_id": home, "type": 1,
+                                  "month": month.month, "travel_duration": dur,
+                                  "currency": prefs.currency, "travel_mode": 1})
+                fresh = parse_explore(data, prefs.currency, checked=date.today().isoformat())
+                self.state.store_explore(key(combo), fresh)
+            except BudgetExceeded:
+                pass
+        found = fresh if fresh is not None else (self.state.cached_explore(key(combo), prefs.explore_cache_days) or [])
+        hits += [(home, h) for h in found]
+
+    trips = []
+    for home, h in hits:
+        if not (h.start_date and h.end_date):
+            continue
+        dep, ret = date.fromisoformat(h.start_date), date.fromisoformat(h.end_date)
+        placeholder = Flight(
+            provider="google_flights", origin=home, destination=h.destination,
+            depart=datetime.combine(dep, datetime.min.time()), price=h.price, currency=h.currency,
+            destination_name=h.destination_name, booking_url=h.booking_url, airline=h.airline, stops=h.stops,
+        )
+        when = "" if h.checked == date.today().isoformat() else f", pris från {h.checked}"
+        trips.append(Trip(
+            window=make_window(dep, ret), outbound=placeholder, indicative=True, indicative_price=h.price,
+            notes=[f"Google Flights ({h.airline or 'flera bolag'}{', direkt' if not h.stops else f', {h.stops} byte'}"
+                   f"{when}) – tider ej kontrollerade"],
+        ))
+    return trips
+
+
+GoogleFlightsProvider.round_trips = _round_trips

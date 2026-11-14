@@ -4,7 +4,7 @@ rankningen och notiserna kan testas utan nätverk."""
 from __future__ import annotations
 
 import hashlib
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time, timedelta
 
 from ..models import Flight
 
@@ -63,3 +63,20 @@ class DemoProvider:
                     )
             day += timedelta(days=1)
         return flights
+
+
+def _round_trips(self, prefs, start, end):
+    from ..search import cheapest_by_day, combine, home_area
+
+    trips = []
+    home = home_area(prefs.home_airports)
+    for dest in DESTINATIONS:
+        if dest in home:
+            continue
+        out = [f for o in prefs.home_airports for f in self.search_one_way(o, dest, start, end, prefs.currency)]
+        back = [f for h in prefs.home_airports for f in self.search_one_way(dest, h, start, end, prefs.currency)]
+        trips += combine(cheapest_by_day(out), cheapest_by_day(back), prefs, start, end)
+    return trips
+
+
+DemoProvider.round_trips = _round_trips

@@ -11,11 +11,10 @@ max_results: 25
 # Källor: google_flights (SERPAPI_KEY), ryanair (gratis), aviasales (TRAVELPAYOUTS_TOKEN), demo
 # Källor utan nyckel i .env hoppas över automatiskt.
 providers: [google_flights, ryanair, aviasales]
-verify_top_n: 3                # Google Flights: kontrollera exakta tider för 3 billigaste resmålen/period
-verify_margin: 1.3             # … om deras ungefärliga pris är under fyndgräns × 1,3
+per_destination: 3             # max antal datumförslag per resmål
 serpapi_max_per_run: 40        # max SerpApi-sökningar per körning
 serpapi_monthly_budget: 240    # gratisnivån är 250/månad
 serpapi_daily_budget: 8        # ≈ 250/31; Google turas om mellan perioderna
 explore_cache_days: 7          # hur länge sparade Google-priser används
-min_nights: 1
-max_nights: 16
+min_nights: 1                  # resans längd: 1–7 nätter, avresa vilken dag som helst
+max_nights: 7

@@ -6,8 +6,8 @@ from datetime import date, datetime
 
 @dataclass(frozen=True)
 class TravelWindow:
-    """En ledig period (helg eller röd dag). `depart_day` är dagen man kan åka (ofta kvällen
-    före en ledig dag), `return_day` den sista lediga dagen."""
+    """Resans datum: avresedag och hemresedag. `label` beskriver perioden,
+    t.ex. "Helg", "Långhelg (Juldagen)" eller "Vardagar"."""
 
     depart_day: date
     return_day: date
@@ -50,6 +50,8 @@ class ExploreHit:
     stops: int = 0
     booking_url: str = ""
     checked: str = ""  # datum (ÅÅÅÅ-MM-DD) då priset hämtades från Google
+    start_date: str = ""  # flexibel sökning: billigaste avresedag
+    end_date: str = ""    # … och hemresedag
 
 
 @dataclass
@@ -61,6 +63,8 @@ class Trip:
     # Sant när tiderna inte är kontrollerade (bara ett t/r-pris från Explore).
     indicative: bool = False
     indicative_price: float | None = None
+    # Sant när priset gäller hela tur-och-returresan som en biljett.
+    bundled: bool = False
 
     @property
     def total_price(self) -> float:

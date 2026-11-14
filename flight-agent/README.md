@@ -1,6 +1,6 @@
 # ✈️ Optely Flight Agent
 
-En privat, lokal flygprisagent. Den hittar lediga helger och långhelger, hämtar priser direkt från flygbolaget och skickar
+En privat, lokal flygprisagent. Den söker tur-och-retur-resor alla dagar, hämtar priser direkt från flygbolaget och skickar
 fynd till Telegram eller Discord. Inga konton och inga provisioner, och den
 körs bara när du startar den.
 
@@ -27,23 +27,21 @@ full täckning.
 | `aviasales` | Hundratals bolag och resebyråer, även kombinationer. **Cachade** priser. | Gratis ([travelpayouts.com](https://www.travelpayouts.com)) | `TRAVELPAYOUTS_TOKEN` |
 | `demo` | Påhittade priser för test | – | – |
 
-Så samarbetar de för varje ledig period:
-1. **Radar:** Ryanair och Aviasales söker "vart som helst". Google Explore ger
-   tur-och-retur-priser till alla resmål med ett enda anrop.
-2. **Kontroll:** för de 3 billigaste resmålen som ser ut som fynd hämtar
-   Google Flights exakta avgångstider (`verify_top_n`). Det sparar
-   SerpApi-sökningar.
-3. **Hemresa:** söks i alla källor till alla hemmaflygplatser. Billigaste
-   kombinationen vinner, även med olika bolag.
+Så samarbetar de:
+1. **Ryanair** hittar alla resmål och hämtar billigaste pris för varje dag åt
+   båda hållen. Det kombineras till alla reslängder.
+2. **Aviasales** ger cachade tur-och-retur-priser per månad (en biljett).
+3. **Google Flights Explore** hittar billigaste datum per resmål och månad
+   (helg- och veckoresor), inom den dagliga sökbudgeten.
 
-Resmål som Google hittade men som inte hann kontrolleras visas som
-**"ca-pris"**, med en länk till Google Flights.
+Google-förslag visas som **"ca-pris"** utan exakta tider, med en länk till
+Google Flights.
 
 **SerpApi-budget:** gratisnivån räcker till ca 8 Google-sökningar per dag
-(`serpapi_daily_budget`). Varje körning uppdaterar de perioder som kollades
-längst sedan. Övriga perioder visar sparade Google-priser (högst
+(`serpapi_daily_budget`). Varje körning uppdaterar de månader som kollades
+längst sedan. Övriga månader visar sparade Google-priser (högst
 `explore_cache_days` gamla), märkta med datum. Ryanair och Aviasales söker
-alltid alla perioder. `python -m flightagent.cli sources` visar
+alltid alla datum. `python -m flightagent.cli sources` visar
 förbrukningen. Med ett betalt SerpApi-konto höjer du bara budgetarna.
 
 Wizz Air, SAS och Norwegian har inga egna källor. Deras sajter blockerar
@@ -73,11 +71,14 @@ automatiskt per dag, så du kan köra så ofta du vill.
 **Discord:** Serverinställningar → Integrationer → Webhooks → Ny webhook →
 kopiera URL till `DISCORD_WEBHOOK_URL` → `python -m flightagent.cli test-notify`.
 
-## Lediga perioder
+## Vilka datum söks?
 
-Agenten söker resor till alla helger och svenska röda dagar, inklusive jul-,
-nyårs- och midsommarafton. Avresan är kvällen före ledigheten, tidigast
-`after_work_hour`.
+Alla dagar de närmaste `months_ahead` månaderna, även mitt i veckan.
+Resorna är tur och retur på `min_nights`–`max_nights` nätter (standard 1–7).
+Varje förslag visar hur många lediga dagar du behöver ta, t.ex. "Helg",
+"Långhelg (Juldagen)" eller "2 lediga dagar behövs". Svenska röda dagar
+räknas, inklusive jul-, nyårs- och midsommarafton. Högst `per_destination`
+datum visas per resmål (standard 3), så att listan inte fylls av samma stad.
 
 ## Hur sökningen fungerar
 

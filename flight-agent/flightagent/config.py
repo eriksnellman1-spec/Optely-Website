@@ -27,10 +27,8 @@ class Preferences:
     deal_threshold: float = 100.0
     max_results: int = 25
     providers: list[str] = field(default_factory=lambda: ["demo"])
-    # Google Flights (SerpApi): kontrollera exakta tider för de N billigaste
-    # resmålen per period, om deras indikativa pris är under fyndgräns × marginal.
-    verify_top_n: int = 3
-    verify_margin: float = 1.3
+    # Högst så här många förslag per resmål (olika datum).
+    per_destination: int = 3
     serpapi_max_per_run: int = 40
     serpapi_monthly_budget: int = 240
     # Gratisnivån räcker till ca 8 sökningar/dag. Google kontrollerar de
@@ -38,7 +36,7 @@ class Preferences:
     serpapi_daily_budget: int = 8
     explore_cache_days: int = 7
     min_nights: int = 1
-    max_nights: int = 16
+    max_nights: int = 7
 
 
 @dataclass
@@ -58,7 +56,7 @@ def load_preferences(path: str | Path | None = None) -> Preferences:
     if not path.exists():
         path = ROOT / "config.example.yaml"
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    for removed in ("vacation_keywords",):  # borttagna inställningar ignoreras
+    for removed in ("vacation_keywords", "verify_top_n", "verify_margin"):  # borttagna inställningar ignoreras
         data.pop(removed, None)
     known = Preferences.__dataclass_fields__.keys()
     unknown = set(data) - set(known)
