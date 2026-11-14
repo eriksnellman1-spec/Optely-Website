@@ -19,7 +19,7 @@ from datetime import date
 from pathlib import Path
 
 from . import notify
-from .calendar_sync import load_windows
+from .windows import find_travel_windows
 from .config import ROOT, load_preferences, load_secrets
 from .providers import REGISTRY, build_providers
 from .search import deals, money, search_all
@@ -105,9 +105,8 @@ def main(argv: list[str] | None = None) -> int:
 
     prefs = load_preferences(args.config)
     state = State()
-    windows = load_windows(
-        secrets.calendar_ics_urls, date.today(), months_ahead=prefs.months_ahead,
-        vacation_keywords=prefs.vacation_keywords, min_nights=prefs.min_nights, max_nights=prefs.max_nights,
+    windows = find_travel_windows(
+        date.today(), months_ahead=prefs.months_ahead, min_nights=prefs.min_nights, max_nights=prefs.max_nights
     )
     print(f"{len(windows)} lediga resefönster hittades")
     providers, _ = build_providers(prefs.providers, secrets, prefs, state)

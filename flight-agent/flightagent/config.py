@@ -33,10 +33,6 @@ class Preferences:
     verify_margin: float = 1.3
     serpapi_max_per_run: int = 40
     serpapi_monthly_budget: int = 240
-    # Ord i heldagshändelser som markerar semester/ledighet.
-    vacation_keywords: list[str] = field(
-        default_factory=lambda: ["semester", "ledig", "vacation", "holiday", "resa"]
-    )
     min_nights: int = 1
     max_nights: int = 16
 
@@ -49,7 +45,6 @@ class Secrets:
     telegram_bot_token: str | None
     telegram_chat_id: str | None
     discord_webhook_url: str | None
-    calendar_ics_urls: list[str]
     serpapi_key: str | None = None
     travelpayouts_token: str | None = None
 
@@ -59,6 +54,8 @@ def load_preferences(path: str | Path | None = None) -> Preferences:
     if not path.exists():
         path = ROOT / "config.example.yaml"
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    for removed in ("vacation_keywords",):  # borttagna inställningar ignoreras
+        data.pop(removed, None)
     known = Preferences.__dataclass_fields__.keys()
     unknown = set(data) - set(known)
     if unknown:
@@ -85,5 +82,4 @@ def load_secrets() -> Secrets:
         discord_webhook_url=env("DISCORD_WEBHOOK_URL"),
         serpapi_key=env("SERPAPI_KEY"),
         travelpayouts_token=env("TRAVELPAYOUTS_TOKEN"),
-        calendar_ics_urls=[u.strip() for u in (env("CALENDAR_ICS_URLS") or "").split(",") if u.strip()],
     )

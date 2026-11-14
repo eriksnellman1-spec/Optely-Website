@@ -6,7 +6,7 @@ from datetime import date, datetime
 
 @dataclass(frozen=True)
 class TravelWindow:
-    """En ledig period i kalendern. `depart_day` är dagen man kan åka (ofta kvällen
+    """En ledig period (helg eller röd dag). `depart_day` är dagen man kan åka (ofta kvällen
     före en ledig dag), `return_day` den sista lediga dagen."""
 
     depart_day: date

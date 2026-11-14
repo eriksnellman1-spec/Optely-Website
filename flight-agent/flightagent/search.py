@@ -37,7 +37,6 @@ def _outbound_ok(flight: Flight, window: TravelWindow, prefs: Preferences) -> bo
     # Avresedagen är en arbetsdag om den ligger före ledigheten → åk efter jobbet.
     is_workday_evening = (
         flight.depart.date() == window.depart_day
-        and window.label != "Semester"
         and window.depart_day.weekday() < 5
     )
     return flight_ok(flight, prefs, prefs.after_work_hour if is_workday_evening else None)

@@ -1,7 +1,6 @@
 # ✈️ Optely Flight Agent
 
-En privat, lokal flygprisagent. Den läser din kalender, hittar lediga helger,
-långhelger och semestrar, hämtar priser direkt från flygbolaget och skickar
+En privat, lokal flygprisagent. Den hittar lediga helger och långhelger, hämtar priser direkt från flygbolaget och skickar
 fynd till Telegram eller Discord. Inga konton och inga provisioner, och den
 körs bara när du startar den.
 
@@ -72,19 +71,11 @@ SerpApi-budget räcker gratisnivån inte hela månaden. Sänk då
 **Discord:** Serverinställningar → Integrationer → Webhooks → Ny webhook →
 kopiera URL till `DISCORD_WEBHOOK_URL` → `python -m flightagent.cli test-notify`.
 
-## Kalender
+## Lediga perioder
 
-Lägg en eller flera iCal-länkar (kommaseparerade) i `CALENDAR_ICS_URLS`:
-- **Google:** Inställningar → välj kalender → *Hemlig adress i iCal-format*.
-- **iCloud:** Dela kalendern som offentlig → kopiera `webcal://`-länken.
-- En lokal `.ics`-fil fungerar också.
-
-Agenten hittar sammanhängande lediga block: helger, svenska röda dagar
-(inklusive jul-, nyårs- och midsommarafton) och heldagshändelser som heter
-t.ex. "Semester" eller "Ledig". Avresan är kvällen före ledigheten, tidigast
-`after_work_hour`. Block med en upptagen händelse hoppas över. Händelser
-markerade som "Ledig" i kalendern blockerar inte. Utan kalender används bara
-helger och röda dagar.
+Agenten söker resor till alla helger och svenska röda dagar, inklusive jul-,
+nyårs- och midsommarafton. Avresan är kvällen före ledigheten, tidigast
+`after_work_hour`.
 
 ## Hur sökningen fungerar
 

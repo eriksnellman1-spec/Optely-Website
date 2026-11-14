@@ -8,7 +8,7 @@ import pandas as pd
 import streamlit as st
 
 from flightagent import ai, notify
-from flightagent.calendar_sync import load_windows
+from flightagent.windows import find_travel_windows
 from flightagent.config import load_preferences, load_secrets
 from flightagent.providers import REGISTRY, build_providers
 from flightagent.search import deals, fmt_dt, money, search_all
@@ -36,7 +36,6 @@ with st.sidebar:
     use_ai = st.checkbox("AI-analys med Claude", value=bool(secrets.anthropic_api_key), disabled=not secrets.anthropic_api_key)
     auto_notify = st.checkbox("Skicka fynd som notis automatiskt", value=False)
     st.caption(
-        f"Kalendrar: {len(secrets.calendar_ics_urls)} · "
         f"Telegram: {'✅' if secrets.telegram_chat_id else '—'} · Discord: {'✅' if secrets.discord_webhook_url else '—'}  \n"
         f"SerpApi denna månad: {state.serpapi_used()}/{prefs.serpapi_monthly_budget}"
     )
@@ -47,15 +46,9 @@ with st.sidebar:
             st.error(str(exc))
 
 if st.button("🔎 Sök nu", type="primary") or "trips" not in st.session_state:
-    with st.spinner("Läser kalendern…"):
-        try:
-            windows = load_windows(
-                secrets.calendar_ics_urls, date.today(), months_ahead=prefs.months_ahead,
-                vacation_keywords=prefs.vacation_keywords, min_nights=prefs.min_nights, max_nights=prefs.max_nights,
-            )
-        except Exception as exc:
-            st.error(f"Kunde inte läsa kalendern: {exc}")
-            st.stop()
+    windows = find_travel_windows(
+        date.today(), months_ahead=prefs.months_ahead, min_nights=prefs.min_nights, max_nights=prefs.max_nights
+    )
     with st.spinner(f"Söker priser för {len(windows)} lediga perioder…"):
         providers, warnings = build_providers(prefs.providers, secrets, prefs, state)
         trips = search_all(windows, prefs, providers)
