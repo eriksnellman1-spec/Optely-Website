@@ -22,6 +22,24 @@ from .providers.google_flights import BudgetExceeded
 
 log = logging.getLogger(__name__)
 
+# Flygplatser i samma stad räknas som "hemma" – inga resor dit.
+METRO = [
+    {"ARN", "BMA", "NYO", "VST"},  # Stockholm
+    {"HEL"},                       # Helsingfors
+    {"CPH", "MMX"},                # Köpenhamn/Malmö
+    {"OSL", "TRF", "RYG"},         # Oslo
+    {"GOT"},                       # Göteborg
+    {"TKU"},                       # Åbo
+]
+
+
+def home_area(homes: list[str]) -> set[str]:
+    area = set(homes)
+    for group in METRO:
+        if area & group:
+            area |= group
+    return area
+
 
 def flight_ok(flight: Flight, prefs: Preferences, after_hour: int | None = None) -> bool:
     if flight.depart.hour < max(prefs.earliest_departure_hour, after_hour or 0):
@@ -113,7 +131,10 @@ def search_window(window: TravelWindow, prefs: Preferences, providers: list[Flig
     outbound: list[Flight] = []
     for p in anywhere:
         outbound += _query(p, homes, wanted, window.depart_day, first_full_day, prefs.currency)
-    hits = _explore(targeted, window, prefs) if not prefs.destinations else []
+    home = home_area(homes)
+    outbound = [f for f in outbound if f.destination not in home]
+    hits = [h for h in (_explore(targeted, window, prefs) if not prefs.destinations else [])
+            if h.destination not in home]
 
     # 2. Kontroll med exakta tider
     verify = _pick_for_verification(outbound, hits, prefs) if targeted else []
@@ -121,7 +142,7 @@ def search_window(window: TravelWindow, prefs: Preferences, providers: list[Flig
         for dest in verify:
             outbound += _query(p, homes, [dest], window.depart_day, first_full_day, prefs.currency)
 
-    outbound = [f for f in outbound if _outbound_ok(f, window, prefs)]
+    outbound = [f for f in outbound if f.destination not in home and _outbound_ok(f, window, prefs)]
     best_out: dict[str, Flight] = {}
     for f in sorted(outbound, key=lambda f: f.price):
         best_out.setdefault(f.destination, f)

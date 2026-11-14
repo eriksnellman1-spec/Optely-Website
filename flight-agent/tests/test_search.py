@@ -58,3 +58,17 @@ def test_late_arrival_is_rejected():
         fl("a", "ATH", "ARN", datetime(2026, 11, 8, 10, 0), 100),
     ])
     assert search_window(WINDOW, Preferences(latest_arrival_hour=23), [p]) == []
+
+
+def test_never_suggests_trips_between_home_areas():
+    p = FakeProvider("a", [
+        fl("a", "HEL", "ARN", datetime(2026, 11, 7, 9, 0), 10),   # hem → hem
+        fl("a", "HEL", "NYO", datetime(2026, 11, 7, 9, 0), 10),   # Skavsta = Stockholm
+        fl("a", "HEL", "RIX", datetime(2026, 11, 7, 9, 0), 50),
+        fl("a", "ARN", "HEL", datetime(2026, 11, 8, 9, 0), 10),
+        fl("a", "NYO", "HEL", datetime(2026, 11, 8, 9, 0), 10),
+        fl("a", "RIX", "ARN", datetime(2026, 11, 8, 18, 0), 40),
+    ])
+    trips = search_window(WINDOW, Preferences(home_airports=["HEL", "ARN"]), [p])
+    assert [t.destination for t in trips] == ["RIX"]
+    assert trips[0].inbound.destination == "ARN"  # hemresan får landa på valfri hemmaflygplats
