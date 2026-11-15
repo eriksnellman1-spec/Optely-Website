@@ -18,6 +18,7 @@ class Preferences:
     where: str = ""
     # Flygplatskoder (fylls i automatiskt från `where`).
     destinations: list[str] = field(default_factory=list)
+    destination_names: dict[str, str] = field(default_factory=dict)  # kod → stad (från `where`)
     currency: str = "EUR"
     months_ahead: int = 3
     # Inga avgångar före denna timme (t.ex. inga 05:00-flyg).

@@ -109,6 +109,7 @@ def main(argv: list[str] | None = None) -> int:
     where = resolve_where(args.where if args.where is not None else prefs.where, prefs.home_airports, secrets, state)
     if where:
         prefs.destinations = where.codes
+        prefs.destination_names = {a["code"]: a["city"] for a in where.airports}
         print(f"Vart: {where.summary}")
         print("Söker till: " + ", ".join(f"{a['city']} ({a['code']})" for a in where.airports))
     start, end = search_range(prefs)

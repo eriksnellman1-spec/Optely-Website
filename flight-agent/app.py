@@ -54,6 +54,7 @@ except Exception as exc:
     st.stop()
 if where:
     prefs.destinations = where.codes
+    prefs.destination_names = {a["code"]: a["city"] for a in where.airports}
     st.caption(f"🧭 {where.summary}  \nSöker till: " + ", ".join(f"{a['city']} ({a['code']})" for a in where.airports))
     prefs.max_results = max(prefs.max_results, 100)
 else:

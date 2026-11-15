@@ -87,6 +87,14 @@ svaret sparas. Det kräver `ANTHROPIC_API_KEY`. Utan nyckel kan du skriva
 flygplatskoder direkt, t.ex. `BCN, AGP, PMI`. Lämnar du fältet tomt söker
 appen vart som helst.
 
+**Med angivna resmål söker Google varje dag.** Googles datumkalender ger
+priset för varje avresedag i hela perioden med ett anrop åt varje håll. Det
+blir 2 sökningar per resmål, som kombineras till alla reslängder. Med
+gratisnivåns 8 sökningar per dag uppdateras ca 4 resmål per dag. Övriga
+använder sparade priser, högst en vecka gamla. Ju färre resmål, desto
+färskare priser. Priserna är två enkelresor, så en riktig tur-och-retur-
+biljett hos t.ex. Finnair kan ibland vara billigare.
+
 Från terminalen:
 
 ```bash

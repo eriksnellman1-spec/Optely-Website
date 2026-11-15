@@ -171,7 +171,7 @@ def _months_between(start: date, end: date) -> list[date]:
     return months
 
 
-def _round_trips(self, prefs, start: date, end: date):
+def _explore_round_trips(self, prefs, start: date, end: date):
     """Google Explore med flexibla datum: billigaste datum per resmål för varje
     (hemmaflygplats, månad, reslängd). Budgeten räcker inte till alla
     kombinationer varje dag, så de som kollades längst sedan uppdateras först
@@ -218,6 +218,113 @@ def _round_trips(self, prefs, start: date, end: date):
             notes=[f"Google Flights ({h.airline or 'flera bolag'}{', direkt' if not h.stops else f', {h.stops} byte'}"
                    f"{when}) – tider ej kontrollerade"],
         ))
+    return trips
+
+
+
+
+def parse_calendar(payload: dict) -> dict[date, float]:
+    prices: dict[date, float] = {}
+    for row in payload.get("prices") or []:
+        if row.get("price") is None or not row.get("outbound_date"):
+            continue
+        prices[date.fromisoformat(row["outbound_date"])] = float(row["price"])
+    return prices
+
+
+def _calendar(self, origin: str, dest: str, start: date, end: date, currency: str) -> dict[date, float]:
+    """Enkelresepris för varje avresedag i perioden (Google Flights datumkalender).
+    Försöker hela perioden i ett anrop; vid fel delas den upp per månad."""
+    params = {"engine": "google_flights_calendar", "type": 2, "departure_id": origin, "arrival_id": dest,
+              "currency": currency}
+    try:
+        return parse_calendar(self._get({**params, "date_range_start": start.isoformat(),
+                                         "date_range_end": end.isoformat()}))
+    except RuntimeError as exc:
+        if isinstance(exc, BudgetExceeded):
+            raise
+        log.info("Kalendern för %s→%s i ett anrop gick inte (%s) – delar upp per månad", origin, dest, exc)
+    prices: dict[date, float] = {}
+    for m in _months_between(start, end):
+        chunk_start = max(start, m)
+        chunk_end = min(end, (m.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1))
+        prices.update(parse_calendar(self._get({**params, "date_range_start": chunk_start.isoformat(),
+                                                 "date_range_end": chunk_end.isoformat()})))
+    return prices
+
+
+def _calendar_round_trips(self, prefs, start: date, end: date):
+    """När du angett resmål: hämta Googles pris för varje dag åt båda hållen
+    och kombinera till alla reslängder. Kalendrar som kollades längst sedan
+    uppdateras först; övriga använder sparade priser."""
+    from ..search import home_area, make_window
+
+    home = home_area(prefs.home_airports)
+    dests = [d for d in prefs.destinations if d not in home]
+    last_day = end + timedelta(days=prefs.max_nights)
+    jobs = [(h, d) for d in dests for h in prefs.home_airports] + [(d, h) for d in dests for h in prefs.home_airports]
+    store = self.state.data.setdefault("calendar", {})
+    key = lambda j: f"{j[0]}>{j[1]}|{prefs.currency}"
+    jobs.sort(key=lambda j: (store.get(key(j)) or {}).get("checked", ""))
+
+    prices: dict[tuple[str, str], dict[date, float]] = {}
+    today = date.today().isoformat()
+    for job in jobs:
+        cached = store.get(key(job))
+        fresh = None
+        if self.budget_left() > 0:
+            try:
+                fresh = _calendar(self, job[0], job[1], start, last_day, prefs.currency)
+                store[key(job)] = {"checked": today, "prices": {d.isoformat(): p for d, p in fresh.items()}}
+                self.state.save()
+            except BudgetExceeded:
+                pass
+            except Exception as exc:
+                log.warning("Google-kalender %s→%s misslyckades: %s", job[0], job[1], exc)
+        if fresh is not None:
+            prices[job] = fresh
+        elif cached and (date.today() - date.fromisoformat(cached["checked"])).days <= prefs.explore_cache_days:
+            prices[job] = {date.fromisoformat(d): p for d, p in cached["prices"].items()}
+
+    trips = []
+    for d in dests:
+        for h in prefs.home_airports:
+            out = prices.get((h, d))
+            if not out:
+                continue
+            # Hem till valfri hemmaflygplats: billigaste per dag.
+            back: dict[date, tuple[float, str]] = {}
+            for h2 in prefs.home_airports:
+                for day, p in (prices.get((d, h2)) or {}).items():
+                    if day not in back or p < back[day][0]:
+                        back[day] = (p, h2)
+            for day, p_out in out.items():
+                if not (start <= day <= end):
+                    continue
+                for nights in range(prefs.min_nights, prefs.max_nights + 1):
+                    ret = day + timedelta(days=nights)
+                    if ret not in back:
+                        continue
+                    p_back, h_back = back[ret]
+                    url = (f"https://www.google.com/travel/flights?hl=sv&curr={prefs.currency}"
+                           f"&q=Flights%20from%20{h}%20to%20{d}%20on%20{day.isoformat()}%20through%20{ret.isoformat()}")
+                    placeholder = Flight(provider="google_flights", origin=h, destination=d,
+                                         depart=datetime.combine(day, datetime.min.time()), price=p_out,
+                                         currency=prefs.currency, destination_name=prefs.destination_names.get(d, d),
+                                         booking_url=url)
+                    note = "Google Flights datumkalender – tider ej kontrollerade"
+                    if h_back != h:
+                        note += f", hem till {h_back}"
+                    trips.append(Trip(window=make_window(day, ret), outbound=placeholder, indicative=True,
+                                      indicative_price=p_out + p_back, notes=[note]))
+    return trips
+
+
+def _round_trips(self, prefs, start: date, end: date):
+    trips = []
+    if prefs.destinations:  # utvalda resmål först: varje dag, alla reslängder
+        trips += _calendar_round_trips(self, prefs, start, end)
+    trips += _explore_round_trips(self, prefs, start, end)  # resterande budget: utforska
     return trips
 
 

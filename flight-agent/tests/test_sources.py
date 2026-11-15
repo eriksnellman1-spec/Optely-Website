@@ -132,3 +132,53 @@ def test_travelpayouts_round_trip_is_one_ticket():
     assert t.bundled and t.total_price == 120 and t.window.nights == 4
     assert t.inbound.destination == "HEL" and t.outbound.cached
 
+
+
+def test_google_calendar_every_day_both_ways(tmp_path):
+    asked = []
+
+    def handler(request):
+        p = request.url.params
+        asked.append((p["engine"], p["departure_id"], p["arrival_id"]))
+        if p["engine"] == "google_travel_explore":
+            return httpx.Response(200, json={"destinations": []})
+        if p["departure_id"] == "HEL":   # utresor 8–10 dec
+            prices = [{"outbound_date": f"2026-12-{d:02d}", "price": 30 + d} for d in (8, 9, 10)]
+        else:                            # hemresor 9–20 dec
+            prices = [{"outbound_date": f"2026-12-{d:02d}", "price": 20} for d in range(9, 21)]
+        return httpx.Response(200, json={"prices": prices})
+
+    state = State(tmp_path / "s.json")
+    prefs = Preferences(home_airports=["HEL"], destinations=["BCN"], destination_names={"BCN": "Barcelona"},
+                        min_nights=1, max_nights=7)
+    gf = GoogleFlightsProvider("KEY", daily_budget=2, state=state,
+                               client=httpx.Client(transport=httpx.MockTransport(handler)))
+    trips = gf.round_trips(prefs, date(2026, 12, 1), date(2027, 1, 31))
+    assert asked == [("google_flights_calendar", "HEL", "BCN"), ("google_flights_calendar", "BCN", "HEL")]
+    assert len(trips) == 3 * 7                                 # 3 avresedagar × 7 reslängder
+    best = min(trips, key=lambda t: t.total_price)
+    assert best.total_price == 58 and best.destination_name == "Barcelona" and best.indicative
+
+    # Nästa körning samma dag: budgeten är slut → sparade kalendrar används.
+    gf2 = GoogleFlightsProvider("KEY", daily_budget=2, state=state,
+                                client=httpx.Client(transport=httpx.MockTransport(handler)))
+    assert len(gf2.round_trips(prefs, date(2026, 12, 1), date(2027, 1, 31))) == 21
+    assert len(asked) == 2
+
+
+def test_google_calendar_falls_back_to_monthly_chunks(tmp_path):
+    asked = []
+
+    def handler(request):
+        p = request.url.params
+        asked.append((p["date_range_start"], p["date_range_end"]))
+        if len(asked) == 1:
+            return httpx.Response(200, json={"error": "date range too long"})
+        return httpx.Response(200, json={"prices": [{"outbound_date": p["date_range_start"], "price": 10}]})
+
+    from flightagent.providers.google_flights import _calendar
+    gf = GoogleFlightsProvider("KEY", state=State(tmp_path / "s.json"),
+                               client=httpx.Client(transport=httpx.MockTransport(handler)))
+    prices = _calendar(gf, "HEL", "BCN", date(2026, 12, 15), date(2027, 2, 10), "EUR")
+    assert asked[1:] == [("2026-12-15", "2026-12-31"), ("2027-01-01", "2027-01-31"), ("2027-02-01", "2027-02-10")]
+    assert len(prices) == 3
