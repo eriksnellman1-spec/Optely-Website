@@ -71,6 +71,28 @@ automatiskt per dag, så du kan köra så ofta du vill.
 **Discord:** Serverinställningar → Integrationer → Webhooks → Ny webhook →
 kopiera URL till `DISCORD_WEBHOOK_URL` → `python -m flightagent.cli test-notify`.
 
+## Vart vill du?
+
+Skriv fritt i appens fält **"Vart vill du?"**, eller i `where:` i
+`config.yaml`, så söker alla källor just dit. Några exempel:
+- `varmt i Spanien`
+- `Barcelona eller Lissabon`
+- `grekiska öarna`
+- `storstad i Italien`
+
+Claude tolkar beskrivningen till flygplatser, även mindre som
+lågprisbolagen använder (t.ex. Girona för Barcelona). Du ser i appen exakt
+vilka flygplatser som söks. Samma beskrivning kostar bara en gång, eftersom
+svaret sparas. Det kräver `ANTHROPIC_API_KEY`. Utan nyckel kan du skriva
+flygplatskoder direkt, t.ex. `BCN, AGP, PMI`. Lämnar du fältet tomt söker
+appen vart som helst.
+
+Från terminalen:
+
+```bash
+python -m flightagent.cli scan --where "varmt i Spanien"
+```
+
 ## Vilka datum söks?
 
 Alla dagar de närmaste `months_ahead` månaderna, även mitt i veckan.

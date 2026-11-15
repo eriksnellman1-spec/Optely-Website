@@ -8,6 +8,7 @@ innan du bokar. Gratis token: travelpayouts.com → Profil → API-token.
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 
 import httpx
@@ -111,18 +112,27 @@ def _months(start: date, end: date) -> list[date]:
 def _round_trips(self, prefs, start: date, end: date):
     from ..search import flight_ok, outbound_ok
 
-    trips = []
+    jobs = []
     for home in prefs.home_airports:
-        months = _months(start, end)
-        for m in months:
+        for m in _months(start, end):
             nxt = (m.replace(day=28) + timedelta(days=4)).replace(day=1)
             for ret_month in (m, nxt):  # hemresan samma eller nästa månad
-                params = {"origin": home, "departure_at": f"{m:%Y-%m}", "return_at": f"{ret_month:%Y-%m}",
-                          "one_way": "false", "unique": "false", "sorting": "price", "limit": 1000,
-                          "currency": prefs.currency.lower()}
-                resp = self._client.get(API, params=params, headers={"X-Access-Token": self._token})
-                resp.raise_for_status()
-                trips += parse_round_trips(resp.json(), prefs.currency, home)
+                for dest in prefs.destinations or [None]:
+                    jobs.append((home, m, ret_month, dest))
+
+    def fetch(job):
+        home, m, ret_month, dest = job
+        params = {"origin": home, "departure_at": f"{m:%Y-%m}", "return_at": f"{ret_month:%Y-%m}",
+                  "one_way": "false", "unique": "false", "sorting": "price", "limit": 1000,
+                  "currency": prefs.currency.lower()}
+        if dest:
+            params["destination"] = dest
+        resp = self._client.get(API, params=params, headers={"X-Access-Token": self._token})
+        resp.raise_for_status()
+        return parse_round_trips(resp.json(), prefs.currency, home)
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        trips = [t for batch in pool.map(fetch, jobs) for t in batch]
     return [t for t in trips if outbound_ok(t.outbound, prefs) and flight_ok(t.inbound, prefs)]
 
 

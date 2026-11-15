@@ -22,6 +22,7 @@ from .config import ROOT, load_preferences, load_secrets
 from .providers import REGISTRY, build_providers
 from .search import deals, fmt_day, money, search_all, search_range
 from .state import State
+from .where import resolve as resolve_where
 
 LABEL = "se.optely.flightagent"
 PLIST = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
@@ -47,6 +48,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", help="sökväg till config.yaml")
     parser.add_argument("--dry-run", action="store_true", help="scan: skriv ut i stället för att skicka")
     parser.add_argument("--hours", type=int, default=4, help="install-schedule: intervall i timmar")
+    parser.add_argument("--where", help='scan: beskriv vart du vill, t.ex. "varmt i Spanien"')
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -104,6 +106,11 @@ def main(argv: list[str] | None = None) -> int:
 
     prefs = load_preferences(args.config)
     state = State()
+    where = resolve_where(args.where if args.where is not None else prefs.where, prefs.home_airports, secrets, state)
+    if where:
+        prefs.destinations = where.codes
+        print(f"Vart: {where.summary}")
+        print("Söker till: " + ", ".join(f"{a['city']} ({a['code']})" for a in where.airports))
     start, end = search_range(prefs)
     print(f"Söker tur och retur från {', '.join(prefs.home_airports)}: avresa {fmt_day(start)}–{fmt_day(end)}, "
           f"{prefs.min_nights}–{prefs.max_nights} nätter")

@@ -10,6 +10,7 @@ from flightagent.config import load_preferences, load_secrets
 from flightagent.providers import REGISTRY, build_providers
 from flightagent.search import deals, fmt_day, fmt_dt, money, nights_text, search_all, search_range
 from flightagent.state import State
+from flightagent.where import resolve as resolve_where
 
 st.set_page_config(page_title="Flight Agent", page_icon="✈️", layout="wide")
 st.title("✈️ Din privata flygagent")
@@ -21,8 +22,6 @@ state = State()
 with st.sidebar:
     st.header("Inställningar")
     prefs.home_airports = [a.strip().upper() for a in st.text_input("Hemmaflygplatser", ", ".join(prefs.home_airports)).split(",") if a.strip()]
-    dest = st.text_input("Destinationer (tomt = vart som helst)", ", ".join(prefs.destinations))
-    prefs.destinations = [a.strip().upper() for a in dest.split(",") if a.strip()]
     prefs.months_ahead = st.slider("Månader framåt", 1, 6, prefs.months_ahead)
     prefs.earliest_departure_hour = st.slider("Inga avgångar före kl.", 0, 12, prefs.earliest_departure_hour)
     prefs.after_work_hour = st.slider("Efter jobbet – tidigast kl.", 12, 21, prefs.after_work_hour)
@@ -43,7 +42,26 @@ with st.sidebar:
         except Exception as exc:
             st.error(str(exc))
 
-if st.button("🔎 Sök nu", type="primary") or "trips" not in st.session_state:
+where_text = st.text_input(
+    "Vart vill du?",
+    value=prefs.where or ", ".join(prefs.destinations),
+    placeholder='Beskriv fritt, t.ex. "varmt i Spanien", "Barcelona eller Lissabon", "grekiska öarna" – tomt = vart som helst',
+)
+try:
+    where = resolve_where(where_text, prefs.home_airports, secrets, state)
+except Exception as exc:
+    st.error(str(exc))
+    st.stop()
+if where:
+    prefs.destinations = where.codes
+    st.caption(f"🧭 {where.summary}  \nSöker till: " + ", ".join(f"{a['city']} ({a['code']})" for a in where.airports))
+    prefs.max_results = max(prefs.max_results, 100)
+else:
+    prefs.destinations = []
+
+search_key = (where_text, tuple(prefs.home_airports))
+if st.button("🔎 Sök nu", type="primary") or st.session_state.get("search_key") != search_key:
+    st.session_state["search_key"] = search_key
     with st.spinner("Söker alla datum…"):
         providers, warnings = build_providers(prefs.providers, secrets, prefs, state)
         trips = search_all(prefs, providers)

@@ -13,7 +13,10 @@ ROOT = Path(__file__).resolve().parent.parent
 @dataclass
 class Preferences:
     home_airports: list[str] = field(default_factory=lambda: ["ARN"])
-    # Tom lista = "vart som helst" (om leverantören stödjer det).
+    # Beskriv fritt vart du vill, t.ex. "varmt i Spanien" eller "Barcelona eller Lissabon".
+    # Tomt = vart som helst. Flygplatskoder ("BCN, AGP") fungerar också.
+    where: str = ""
+    # Flygplatskoder (fylls i automatiskt från `where`).
     destinations: list[str] = field(default_factory=list)
     currency: str = "EUR"
     months_ahead: int = 3

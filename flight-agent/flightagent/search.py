@@ -138,7 +138,8 @@ def search_all(prefs: Preferences, providers: list, today: date | None = None) -
             notes(t)
         filtered.append(t)
     # Alla resor returneras (fynd får aldrig klippas bort); max_results gäller bara visningen.
-    return _best_per_destination(filtered, prefs.per_destination)
+    per_dest = max(prefs.per_destination, 10) if wanted else prefs.per_destination
+    return _best_per_destination(filtered, per_dest)
 
 
 def deals(trips: list[Trip], prefs: Preferences) -> list[Trip]:

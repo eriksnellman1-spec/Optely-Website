@@ -1,6 +1,6 @@
 # Kopiera till config.yaml och justera.
 home_airports: [ARN, NYO]      # flygplatser du kan åka från/landa på
-destinations: []               # tomt = vart som helst; t.ex. [BCN, LIS, AGP]
+where: ""                      # beskriv fritt: "varmt i Spanien", "Barcelona eller Lissabon" – tomt = vart som helst
 currency: EUR                  # alla priser i euro
 months_ahead: 3
 earliest_departure_hour: 7     # inga flyg före 07:00

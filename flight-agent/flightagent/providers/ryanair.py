@@ -127,9 +127,10 @@ def _round_trips(self, prefs, start: date, end: date):
         names[f.destination] = f.destination_name
     # Utresan ensam får inte redan vara dyrare än fyndgränsen – men ta alltid med de 15 billigaste.
     ranked = sorted(cheapest, key=cheapest.get)
-    dests = [d for i, d in enumerate(ranked) if i < 15 or cheapest[d] <= prefs.deal_threshold]
-    if prefs.destinations:
-        dests = [d for d in dests if d in prefs.destinations]
+    if prefs.destinations:  # du har sagt vart du vill → alla de resmål Ryanair flyger till
+        dests = [d for d in ranked if d in prefs.destinations]
+    else:
+        dests = [d for i, d in enumerate(ranked) if i < 15 or cheapest[d] <= prefs.deal_threshold]
 
     # 2. Dagspriser åt båda hållen, parallellt.
     months = _months(start, end + timedelta(days=prefs.max_nights))
