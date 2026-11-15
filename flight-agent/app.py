@@ -50,7 +50,7 @@ if st.button("🔎 Sök nu", type="primary") or "trips" not in st.session_state:
     st.session_state.update(trips=trips, analysis=None, warnings=warnings)
     if auto_notify:
         try:
-            st.toast(f"{notify.notify_new_deals(secrets, deals(trips, prefs), state)} nya fynd skickades")
+            st.toast(f"{notify.notify_new_deals(secrets, deals(trips, prefs), state, prefs.digest_after)} nya fynd skickades")
         except Exception as exc:
             st.error(str(exc))
 

@@ -123,7 +123,7 @@ def main(argv: list[str] | None = None) -> int:
         for trip in found:
             print("\n" + notify.trip_text(trip))
     else:
-        print(f"{notify.notify_new_deals(secrets, found, state)} nya fynd skickades")
+        print(f"{notify.notify_new_deals(secrets, found, state, prefs.digest_after)} nya fynd skickades")
     return 0
 
 

@@ -89,3 +89,30 @@ def test_discord_embeds_links():
     send_discord("https://discord.test/hook", "hej", [{"text": "Boka", "url": "https://x.se"}],
                  client=httpx.Client(transport=httpx.MockTransport(handler)))
     assert "[Boka](https://x.se)" in seen["body"]["embeds"][0]["description"]
+
+
+def test_many_new_deals_become_one_digest(tmp_path, monkeypatch):
+    from flightagent import notify as n
+    from flightagent.state import State
+
+    sent = []
+    monkeypatch.setattr(n, "notify", lambda secrets, text, buttons=None: sent.append((text, buttons)) or ["Telegram"])
+    trips = DemoProvider().round_trips(Preferences(home_airports=["HEL"]), date(2026, 12, 1), date(2026, 12, 31))[:40]
+    state = State(tmp_path / "s.json")
+    assert n.notify_new_deals(None, trips, state, digest_after=5) == 40
+    [(text, buttons)] = sent
+    assert text.startswith("🔥 40 nya flygfynd") and "och 25 till" in text and len(buttons) == 3
+    assert n.notify_new_deals(None, trips, state, digest_after=5) == 0      # redan skickade
+    assert len(sent) == 1
+
+
+def test_discord_accepts_button_rows():
+    seen = {}
+
+    def handler(request):
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(204)
+
+    send_discord("https://discord.test/hook", "hej", [[{"text": "A", "url": "https://a.se"}], [{"text": "B", "url": "https://b.se"}]],
+                 client=httpx.Client(transport=httpx.MockTransport(handler)))
+    assert "[B](https://b.se)" in seen["body"]["embeds"][0]["description"]

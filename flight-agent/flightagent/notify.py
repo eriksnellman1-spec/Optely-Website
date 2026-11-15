@@ -47,7 +47,9 @@ def _buttons(trip: Trip) -> list[dict]:
 def send_telegram(token: str, chat_id: str, text: str, buttons: list[dict] | None = None, client: httpx.Client | None = None) -> None:
     payload: dict = {"chat_id": chat_id, "text": html.escape(text), "parse_mode": "HTML", "disable_web_page_preview": True}
     if buttons:
-        payload["reply_markup"] = {"inline_keyboard": [buttons]}
+        # En lista med knappar = en rad; en lista med listor = flera rader.
+        rows = buttons if isinstance(buttons[0], list) else [buttons]
+        payload["reply_markup"] = {"inline_keyboard": rows}
     c = client or httpx.Client(timeout=15.0)
     resp = c.post(f"https://api.telegram.org/bot{token}/sendMessage", json=payload)
     if resp.status_code != 200:
@@ -56,7 +58,8 @@ def send_telegram(token: str, chat_id: str, text: str, buttons: list[dict] | Non
 
 def send_discord(webhook_url: str, text: str, buttons: list[dict] | None = None, client: httpx.Client | None = None) -> None:
     # Vanliga webhooks kan inte ha knappar – länkarna läggs i en embed i stället.
-    links = "\n".join(f"[{b['text']}]({b['url']})" for b in buttons or [])
+    flat = [b for row in (buttons or []) for b in (row if isinstance(row, list) else [row])]
+    links = "\n".join(f"[{b['text']}]({b['url']})" for b in flat)
     payload: dict = {"content": text[:2000]}
     if links:
         payload["embeds"] = [{"description": links, "color": 0x2F80ED}]
@@ -84,18 +87,37 @@ def notify_trip(secrets, trip: Trip) -> list[str]:
     return notify(secrets, "🔥 Flygfynd!\n" + trip_text(trip), _buttons(trip))
 
 
-def notify_new_deals(secrets, trips: list[Trip], state) -> int:
-    """Skickar bara fynd som inte redan skickats (eller blivit >5 % billigare)."""
+def digest_text(trips: list[Trip], top: int = 15) -> str:
+    best = sorted(trips, key=lambda t: t.total_price)[:top]
+    lines = [f"🔥 {len(trips)} nya flygfynd! De {len(best)} billigaste:", ""]
+    for t in best:
+        ca = "ca " if t.indicative else ""
+        lines.append(f"{ca}{money(t.total_price, t.currency)} – {t.destination_name} ({t.destination}), "
+                     f"{fmt_day(t.window.depart_day)}–{fmt_day(t.window.return_day)}, {nights_text(t.window.nights)}")
+    if len(trips) > len(best):
+        lines += ["", f"…och {len(trips) - len(best)} till. Se alla i appen."]
+    return "\n".join(lines)
+
+
+def notify_new_deals(secrets, trips: list[Trip], state, digest_after: int = 5) -> int:
+    """Skickar bara fynd som inte redan skickats (eller blivit >5 % billigare).
+    Fler än `digest_after` nya fynd samlas i ett enda meddelande."""
     from .search import deal_key
 
-    sent = 0
-    for trip in trips:
-        key = deal_key(trip)
-        if state.should_notify(key, trip.total_price):
+    new = [t for t in trips if state.should_notify(deal_key(t), t.total_price)]
+    if not new:
+        return 0
+    if len(new) <= digest_after:
+        for trip in new:
             notify_trip(secrets, trip)
-            state.mark_sent(key, trip.total_price)
-            sent += 1
-    return sent
+    else:
+        best = sorted(new, key=lambda t: t.total_price)[:3]
+        buttons = [[{"text": f"{money(t.total_price, t.currency)} {t.destination_name}"[:60],
+                     "url": t.outbound.booking_url}] for t in best if t.outbound.booking_url]
+        notify(secrets, digest_text(new), buttons)
+    for trip in new:
+        state.mark_sent(deal_key(trip), trip.total_price)
+    return len(new)
 
 
 def telegram_find_chat_id(token: str, client: httpx.Client | None = None) -> list[tuple[str, str]]:
