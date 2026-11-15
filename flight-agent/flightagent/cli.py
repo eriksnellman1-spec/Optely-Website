@@ -4,6 +4,8 @@
   test-notify       skicka ett testmeddelande till Telegram/Discord
   telegram-chatid   visa chat-id:n som skrivit till din bot
   scan              kör en hel sökning och skicka nya fynd som notiser
+  install-app       (Mac) skapa appen Flygagent – starta den som vilken app som helst
+  stop-app          (Mac) stäng Flygagent i bakgrunden
   install-schedule  (Mac) kör scan automatiskt var N:e timme
   remove-schedule   (Mac) stäng av den automatiska körningen
 """
@@ -12,9 +14,12 @@ from __future__ import annotations
 
 import argparse
 import logging
+import json
 import plistlib
+import shlex
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from . import notify
@@ -26,6 +31,32 @@ from .where import resolve as resolve_where
 
 LABEL = "se.optely.flightagent"
 PLIST = Path.home() / "Library" / "LaunchAgents" / f"{LABEL}.plist"
+APP = Path.home() / "Applications" / "Flygagent.app"
+PORT = 8501
+
+
+def app_script(root: Path = ROOT, python: str = sys.executable, port: int = PORT) -> str:
+    """AppleScript för Flygagent.app: startar appen i bakgrunden om den inte redan
+    körs och öppnar den i webbläsaren."""
+    start = (f"cd {shlex.quote(str(root))} && mkdir -p .state && "
+             f"nohup {shlex.quote(python)} -m streamlit run app.py --server.headless true "
+             f"--server.port {port} > .state/app.log 2>&1 &")
+    url = f"http://localhost:{port}"
+    return "\n".join([
+        "try",
+        f'  do shell script "curl -s -o /dev/null {url}"',
+        "on error",
+        f"  do shell script {json.dumps(start, ensure_ascii=False)}",
+        "  repeat 30 times",
+        "    delay 0.5",
+        "    try",
+        f'      do shell script "curl -s -o /dev/null {url}"',
+        "      exit repeat",
+        "    end try",
+        "  end repeat",
+        "end try",
+        f'open location "{url}"',
+    ])
 
 
 def schedule_plist(hours: int) -> dict:
@@ -44,7 +75,7 @@ def schedule_plist(hours: int) -> dict:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="flightagent")
     parser.add_argument("command", choices=["sources", "test-notify", "telegram-chatid", "scan",
-                                            "install-schedule", "remove-schedule"])
+                                            "install-schedule", "remove-schedule", "install-app", "stop-app"])
     parser.add_argument("--config", help="sökväg till config.yaml")
     parser.add_argument("--dry-run", action="store_true", help="scan: skriv ut i stället för att skicka")
     parser.add_argument("--hours", type=int, default=4, help="install-schedule: intervall i timmar")
@@ -95,6 +126,24 @@ def main(argv: list[str] | None = None) -> int:
         subprocess.run(["launchctl", "load", "-w", str(PLIST)], check=True)
         print(f"Klart! Sökningen körs nu var {args.hours}:e timme (även direkt efter att Macen vaknat).")
         print(f"Logg: {ROOT / '.state' / 'scan.log'}")
+        return 0
+
+    if args.command == "install-app":
+        if sys.platform != "darwin":
+            print("Appen kan bara skapas på Mac.")
+            return 1
+        APP.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile("w", suffix=".applescript", delete=False) as f:
+            f.write(app_script())
+        subprocess.run(["osacompile", "-o", str(APP), f.name], check=True)
+        print(f"Klart! Appen Flygagent finns nu i {APP.parent}.")
+        print("Öppna den från Launchpad eller Spotlight (Cmd + mellanslag, skriv Flygagent).")
+        print("Tips: dra den till Dock för att ha den nära till hands.")
+        return 0
+
+    if args.command == "stop-app":
+        subprocess.run(["pkill", "-f", f"streamlit run app.py --server.headless true --server.port {PORT}"])
+        print("Flygagent stängd.")
         return 0
 
     if args.command == "remove-schedule":

@@ -182,3 +182,13 @@ def test_google_calendar_falls_back_to_monthly_chunks(tmp_path):
     prices = _calendar(gf, "HEL", "BCN", date(2026, 12, 15), date(2027, 2, 10), "EUR")
     assert asked[1:] == [("2026-12-15", "2026-12-31"), ("2027-01-01", "2027-01-31"), ("2027-02-01", "2027-02-10")]
     assert len(prices) == 3
+
+
+def test_app_script_starts_once_and_opens_browser():
+    from pathlib import Path
+
+    from flightagent.cli import app_script
+    s = app_script(Path("/Users/erik/Desktop/Optely-Website/flight-agent"), "/Users/erik/x/.venv/bin/python")
+    assert "streamlit run app.py --server.headless true --server.port 8501" in s
+    assert s.index('curl -s -o /dev/null http://localhost:8501') < s.index("nohup")   # kör den redan? då ingen ny
+    assert s.strip().endswith('open location "http://localhost:8501"')

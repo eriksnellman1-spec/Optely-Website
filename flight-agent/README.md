@@ -60,6 +60,17 @@ Stäng av med `python -m flightagent.cli remove-schedule`. Macen måste vara
 igång; missade körningar görs när den vaknar. Google-budgeten fördelas
 automatiskt per dag, så du kan köra så ofta du vill.
 
+## Som en vanlig Mac-app
+
+```bash
+python -m flightagent.cli install-app
+```
+
+Det skapar **Flygagent** i din Program-mapp. Öppna den från Launchpad eller
+Spotlight, eller dra den till Dock. Den startar sökmotorn i bakgrunden och
+öppnar sidan i webbläsaren. Stäng sökmotorn med
+`python -m flightagent.cli stop-app`. Den stängs också när Macen startas om.
+
 ## Första testnotisen i telefonen
 
 **Telegram**
