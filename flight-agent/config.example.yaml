@@ -11,11 +11,11 @@ max_results: 25                # antal resor som visas i appen (notiser gäller 
 digest_after: 5                # fler nya fynd än så → ett samlat Telegram-meddelande
 # Källor: google_flights (SERPAPI_KEY), ryanair (gratis), aviasales (TRAVELPAYOUTS_TOKEN), demo
 # Källor utan nyckel i .env hoppas över automatiskt.
-providers: [google_flights, ryanair, aviasales]
+providers: [google_flights, ryanair]   # aviasales (cachade priser) är avstängd som standard
 per_destination: 3             # max antal datumförslag per resmål
 serpapi_max_per_run: 40        # max SerpApi-sökningar per körning
 serpapi_monthly_budget: 240    # gratisnivån är 250/månad
 serpapi_daily_budget: 8        # ≈ 250/31; Google turas om mellan perioderna
-explore_cache_days: 7          # hur länge sparade Google-priser används
+explore_cache_days: 0          # 0 = bara Google-priser hämtade idag (live); högre = fler men äldre priser
 min_nights: 1                  # resans längd: 1–7 nätter, avresa vilken dag som helst
 max_nights: 7
