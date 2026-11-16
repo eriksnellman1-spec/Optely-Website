@@ -126,10 +126,12 @@ Händelsen loggas i `webhook_events` och bearbetas om typen är känd (`processe
 |---|---|
 | `gmail.message` | Ett mejl från Gmail. Skickat till eller mottaget från en partner (adress eller domän) loggas i `partner_emails` + check-in; svar visas på Idag tills de markeras Hanterad. Övriga mejl ignoreras. |
 
-**Gmail → appen (n8n):** importera `n8n/gmail-partner-sync.json` i n8n. Skapa två credentials: *Gmail* (OAuth2)
-och *Optely O.R. webhook* (Header Auth: namn `x-optely-secret`, värde = `WEBHOOK_SECRET`). Byt `DIN-APP` i
-HTTP-noderna mot appens adress. Kör *Hämta bakåt* en gång (ändra datumet i Gmail-noderna vid behov) och
-aktivera sedan flödet – det kollar Skickat och Inkorgen var 10:e minut.
+**Gmail → appen (n8n):** importera `n8n/gmail-partner-sync.json` i n8n. Flödet frågar först appen
+(`GET /api/webhooks/n8n/gmail-query?minutes=11`, samma `x-optely-secret`) efter en Gmail-sökning som bara träffar
+mejl till/från partnerna, och hämtar sedan bara de mejlen. Skapa två credentials: *Gmail* (OAuth2) och
+*Optely O.R. webhook* (Header Auth: namn `x-optely-secret`, värde = `WEBHOOK_SECRET`). Byt `DIN-APP` i
+HTTP-noderna mot appens adress. Kör *Hämta bakåt* en gång (ändra `since=` i noden *Bakåt: hämta partnersökning*)
+och aktivera sedan flödet – det körs var 10:e minut.
 
 ```bash
 curl -X POST http://localhost:3000/api/webhooks/n8n \
