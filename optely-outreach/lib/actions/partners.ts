@@ -28,3 +28,17 @@ export async function logPartnerCheckin(input: {
   revalidatePath("/", "layout");
   return { ok: true, data: undefined };
 }
+
+/** Markerar ett partnersvar (från Gmail) som hanterat – det försvinner från Idag. */
+export async function markPartnerReplyHandled(id: string): Promise<ActionResult> {
+  if (!id) return { ok: false, error: "Saknar svar." };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("partner_emails")
+    .update({ handled_at: new Date().toISOString() })
+    .eq("id", id)
+    .is("handled_at", null);
+  if (error) return { ok: false, error: "Kunde inte markera svaret." };
+  revalidatePath("/", "layout");
+  return { ok: true, data: undefined };
+}

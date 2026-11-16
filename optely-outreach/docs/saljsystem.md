@@ -162,6 +162,8 @@ Det här finns i appen sedan fas A–C och ändras inte förrän en egen omgång
 | 2026-11-13 | Radera bolag och partner | På Företag och Partner: en i taget (papperskorg per rad), markera flera, eller Radera alla. Radera alla följer växeln och filtret och tar även bolag med historik. Allt kopplat raderas med. |
 | 2026-11-13 | Bekräftelse vid radering | Ett klick vid färre än 10. Vid 10 eller fler, och alltid vid Radera alla, måste RADERA skrivas. |
 | 2026-11-16 | Lägga till i pipeline för hand | Knappen "Lägg till i pipeline" på Pipeline. Ett fält för företaget: välj befintligt eller skapa nytt (dubblettkontroll). Fält: steg, kontaktperson, telefon, e-post, källa (Rekommendation, Nätverk, Partner, Inkommande, Egen kontakt, Annat). Källan sparas som anteckning på bolaget. Bolag med öppen affär eller Kontakta ej stoppas. |
+| 2026-11-16 | Partnermejl loggas automatiskt | n8n läser Eriks Gmail (Skickat + Inkorg, var 10:e min) och skickar varje mejl till `/api/webhooks/n8n` (`gmail.message`). Mejl till/från en partners adress eller domän loggas i `partner_emails` och som check-in. Redan skickade mejl hämtas bakåt en gång. |
+| 2026-11-16 | Svar från partner | Visas överst på Idag ("Svar från partner") tills Erik klickar Hanterad. |
 
 ## Implementationsnoter
 

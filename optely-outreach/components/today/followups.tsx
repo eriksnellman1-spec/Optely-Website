@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { CalendarClock, Handshake, MessageSquareReply, Phone } from "lucide-react";
+import { CalendarClock, Handshake, Mail, MessageSquareReply, Phone } from "lucide-react";
 
 import { MeetingActions, TaskDoneButton } from "@/components/home/row-actions";
 import { OfferBadge } from "@/components/offer/offer-badge";
 import { OpenDialogButton } from "@/components/shell/open-dialog-button";
+import { PartnerReplyDone } from "@/components/today/partner-reply-done";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
 import { formatRelative, formatTime } from "@/lib/format";
@@ -43,8 +44,8 @@ function Block({
 
 /** Dagens uppföljningar överst på Idag: svar och partnertips, möten, partner att höra. */
 export function TodayFollowups({ data }: { data: FollowupData }) {
-  const { notices, meetings, partners } = data;
-  if (notices.length + meetings.length + partners.length === 0) return null;
+  const { notices, meetings, partners, partnerReplies } = data;
+  if (notices.length + meetings.length + partners.length + partnerReplies.length === 0) return null;
 
   return (
     <div className="grid gap-4 xl:grid-cols-2">
@@ -78,6 +79,29 @@ export function TodayFollowups({ data }: { data: FollowupData }) {
                 ) : (
                   n.task_id && <TaskDoneButton taskId={n.task_id} />
                 )}
+              </li>
+            ))}
+          </ul>
+        </Block>
+      )}
+
+      {partnerReplies.length > 0 && (
+        <Block title="Svar från partner" icon={Mail} count={partnerReplies.length} tone="green">
+          <ul className="divide-y divide-border">
+            {partnerReplies.map((r) => (
+              <li key={r.id} className="flex flex-wrap items-start gap-3 px-4 py-3">
+                <StatusDot tone="green" pulse className="mt-1.5" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-2">
+                    <span className="font-medium">{r.partnerName}</span>
+                    <span className="font-mono text-xs text-subtle">{formatRelative(r.occurredAt)}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {[r.contactName, r.phone, r.subject].filter(Boolean).join(" · ")}
+                  </div>
+                  {r.snippet && <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{r.snippet}</p>}
+                </div>
+                <PartnerReplyDone id={r.id} />
               </li>
             ))}
           </ul>

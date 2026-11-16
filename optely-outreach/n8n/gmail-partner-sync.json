@@ -1,0 +1,294 @@
+{
+  "name": "Optely O.R. – partnermejl från Gmail",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 10,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "simple": true,
+        "filters": {
+          "labelIds": [
+            "SENT"
+          ]
+        },
+        "options": {}
+      },
+      "name": "Gmail: nya skickade",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://DIN-APP.vercel.app/api/webhooks/n8n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'gmail.message', direction: 'sent', message: { id: $json.id, threadId: $json.threadId, From: $json.From, To: $json.To, Cc: $json.Cc, Subject: $json.Subject, snippet: $json.snippet, internalDate: $json.internalDate, labelIds: $json.labelIds } }) }}",
+        "options": {}
+      },
+      "name": "Till appen: skickat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Optely O.R. webhook"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 10,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "simple": true,
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ]
+        },
+        "options": {}
+      },
+      "name": "Gmail: nya i inkorgen",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        200
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://DIN-APP.vercel.app/api/webhooks/n8n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'gmail.message', direction: 'received', message: { id: $json.id, threadId: $json.threadId, From: $json.From, To: $json.To, Cc: $json.Cc, Subject: $json.Subject, snippet: $json.snippet, internalDate: $json.internalDate, labelIds: $json.labelIds } }) }}",
+        "options": {}
+      },
+      "name": "Till appen: mottaget",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        200
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Optely O.R. webhook"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "name": "Hämta bakåt (kör en gång)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "simple": true,
+        "filters": {
+          "q": "in:sent after:2026/11/01"
+        }
+      },
+      "name": "Gmail: skickat sedan datum",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        300,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "simple": true,
+        "filters": {
+          "q": "in:inbox after:2026/11/01"
+        }
+      },
+      "name": "Gmail: inkorg sedan datum",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        300,
+        550
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://DIN-APP.vercel.app/api/webhooks/n8n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'gmail.message', direction: 'sent', message: { id: $json.id, threadId: $json.threadId, From: $json.From, To: $json.To, Cc: $json.Cc, Subject: $json.Subject, snippet: $json.snippet, internalDate: $json.internalDate, labelIds: $json.labelIds } }) }}",
+        "options": {}
+      },
+      "name": "Bakåt: skickat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        400
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Optely O.R. webhook"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://DIN-APP.vercel.app/api/webhooks/n8n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'gmail.message', direction: 'received', message: { id: $json.id, threadId: $json.threadId, From: $json.From, To: $json.To, Cc: $json.Cc, Subject: $json.Subject, snippet: $json.snippet, internalDate: $json.internalDate, labelIds: $json.labelIds } }) }}",
+        "options": {}
+      },
+      "name": "Bakåt: mottaget",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        550
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Optely O.R. webhook"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail: nya skickade": {
+      "main": [
+        [
+          {
+            "node": "Till appen: skickat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: nya i inkorgen": {
+      "main": [
+        [
+          {
+            "node": "Till appen: mottaget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: skickat sedan datum": {
+      "main": [
+        [
+          {
+            "node": "Bakåt: skickat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: inkorg sedan datum": {
+      "main": [
+        [
+          {
+            "node": "Bakåt: mottaget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hämta bakåt (kör en gång)": {
+      "main": [
+        [
+          {
+            "node": "Gmail: skickat sedan datum",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail: inkorg sedan datum",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Helsinki"
+  },
+  "pinData": {}
+}

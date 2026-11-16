@@ -120,7 +120,16 @@ gissas ur en typkolumn eller byråns namn. Daglig cron: `GET /api/cron/sequence`
 ## 6. Webhooks från n8n
 
 `POST /api/webhooks/n8n` med headern `x-optely-secret: <WEBHOOK_SECRET>` och JSON-kropp.
-Händelsen loggas i `webhook_events`. Bearbetning byggs i steg 3.
+Händelsen loggas i `webhook_events` och bearbetas om typen är känd (`processed_at` eller `error` sätts).
+
+| Typ | Vad händer |
+|---|---|
+| `gmail.message` | Ett mejl från Gmail. Skickat till eller mottaget från en partner (adress eller domän) loggas i `partner_emails` + check-in; svar visas på Idag tills de markeras Hanterad. Övriga mejl ignoreras. |
+
+**Gmail → appen (n8n):** importera `n8n/gmail-partner-sync.json` i n8n. Skapa två credentials: *Gmail* (OAuth2)
+och *Optely O.R. webhook* (Header Auth: namn `x-optely-secret`, värde = `WEBHOOK_SECRET`). Byt `DIN-APP` i
+HTTP-noderna mot appens adress. Kör *Hämta bakåt* en gång (ändra datumet i Gmail-noderna vid behov) och
+aktivera sedan flödet – det kollar Skickat och Inkorgen var 10:e minut.
 
 ```bash
 curl -X POST http://localhost:3000/api/webhooks/n8n \
