@@ -165,6 +165,8 @@ Det här finns i appen sedan fas A–C och ändras inte förrän en egen omgång
 | 2026-11-16 | Partnermejl loggas automatiskt | n8n läser Eriks Gmail (Skickat + Inkorg, var 10:e min) och skickar varje mejl till `/api/webhooks/n8n` (`gmail.message`). Mejl till/från en partners adress eller domän loggas i `partner_emails` och som check-in. Redan skickade mejl hämtas bakåt en gång. |
 | 2026-11-16 | Svar från partner | Visas överst på Idag ("Svar från partner") tills Erik klickar Hanterad. |
 | 2026-11-16 | Bara partnermejl hämtas | n8n frågar först appen (`GET /api/webhooks/n8n/gmail-query`) efter en Gmail-sökning byggd på partnerlistan (domän, eller hela adressen för gmail.com m.fl.) och hämtar bara de mejlen. Övrig post lämnas orörd. Nya partner kommer med automatiskt. |
+| 2026-11-16 | Idag bara för samtal | Idag visar bara dagens siffror, kön och kontaktkortet. Svar och partnertips, svar från partner, möten, Att göra för hand och partner som behöver höras ligger överst på Översikt, följt av Partnermejl (veckosiffror + logg) och veckostatistiken. |
+| 2026-11-16 | Gmail-synk med knapp | Ett n8n-flöde i stället för schema: knappen "Synka Gmail" på Översikt (Partnermejl) startar flödet, som hämtar skickade partnermejl sedan dagen före det senast loggade. Svar synkas inte – Erik läser dem i Gmail. Blocket "Svar från partner" är borttaget. Ny env: `N8N_GMAIL_SYNC_URL`. |
 
 ## Implementationsnoter
 

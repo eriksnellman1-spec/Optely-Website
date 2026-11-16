@@ -49,7 +49,6 @@ import type { Offer } from "@/lib/offer";
 import { ContactEditor, EditContactButton } from "./contact-editor";
 import { OutcomeDialog } from "./outcome-dialog";
 import { ScriptPanel, type ScriptEntry } from "./script-panel";
-import { TodoPanel, type TodoData } from "./todo-panel";
 
 export type QueueItem = {
   taskId: string;
@@ -124,7 +123,6 @@ export function RingpassView({
   timeline,
   scripts,
   sendInfoTemplate,
-  todo,
   today,
   initialTaskId = null,
 }: {
@@ -132,7 +130,6 @@ export function RingpassView({
   timeline: Record<string, TimelineEvent[]>;
   scripts: ScriptEntry[];
   sendInfoTemplate: string;
-  todo: TodoData;
   today: TodayStats;
   /** Förvalt samtal, t.ex. från "Ring nu" i idag-listan. */
   initialTaskId?: string | null;
@@ -324,7 +321,6 @@ export function RingpassView({
           <span className="font-mono tabular-nums">{visible.length}</span> kvar i kön
         </span>
       </section>
-      <TodoPanel data={todo} />
     </>
   );
 

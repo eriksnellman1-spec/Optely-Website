@@ -97,8 +97,8 @@ högst upp styr all data (sparas i `?offer=` och cookien `or_offer`).
 
 | Sida | Väg | Grund |
 |---|---|---|
-| Översikt | `/` | Kontaktade, svar, bokade, avtal denna/förra veckan; bokade per 100 per kanal (`offer_stats_weekly`) |
-| Idag | `/ringpass` | Svar/tips, möten, partner att höra, Att göra + Ringpasset (oförändrad logik), rätt manus per erbjudande |
+| Översikt | `/` | Att hantera (svar/tips, partnersvar, möten, Att göra, partner att höra), Partnermejl (vecka + logg), kontaktade/svar/bokade/avtal per vecka, bokade per 100 per kanal |
+| Idag | `/ringpass` | Bara samtal: dagens siffror, kön och kontaktkortet med manus per erbjudande |
 | Företag | `/contacts`, `/contacts/[id]` | Registret med erbjudande; kontaktkort med historik (`activities`), Logga LinkedIn, byte av erbjudande med spärr |
 | Pipeline | `/pipeline` | Kontaktad → Kund med antal och värde; flytt via `move_deal_stage` |
 | Kunder | `/customers` | Optely: projekt, faktura, driftsavtal. SBA: bokningar mot garantin (3/mån) |
@@ -124,14 +124,13 @@ Händelsen loggas i `webhook_events` och bearbetas om typen är känd (`processe
 
 | Typ | Vad händer |
 |---|---|
-| `gmail.message` | Ett mejl från Gmail. Skickat till eller mottaget från en partner (adress eller domän) loggas i `partner_emails` + check-in; svar visas på Idag tills de markeras Hanterad. Övriga mejl ignoreras. |
+| `gmail.message` | Ett mejl från Gmail. Skickat till en partner (adress eller domän) loggas i `partner_emails` + check-in och syns under Partnermejl på Översikt. Övriga mejl ignoreras. |
 
-**Gmail → appen (n8n):** importera `n8n/gmail-partner-sync.json` i n8n. Flödet frågar först appen
-(`GET /api/webhooks/n8n/gmail-query?minutes=11`, samma `x-optely-secret`) efter en Gmail-sökning som bara träffar
-mejl till/från partnerna, och hämtar sedan bara de mejlen. Skapa två credentials: *Gmail* (OAuth2) och
-*Optely O.R. webhook* (Header Auth: namn `x-optely-secret`, värde = `WEBHOOK_SECRET`). Byt `DIN-APP` i
-HTTP-noderna mot appens adress. Kör *Hämta bakåt* en gång (ändra `since=` i noden *Bakåt: hämta partnersökning*)
-och aktivera sedan flödet – det körs var 10:e minut.
+**Gmail → appen (n8n):** importera `n8n/gmail-partner-sync.json` i n8n och aktivera det. Knappen **Synka Gmail**
+(Översikt → Partnermejl) anropar flödets webhook (`N8N_GMAIL_SYNC_URL`, med `x-optely-secret`). Flödet frågar appen
+efter en Gmail-sökning som bara träffar mejl till partnerna (`GET /api/webhooks/n8n/gmail-query?since=…`), hämtar de
+skickade mejlen och postar dem som `gmail.message`. Credentials i n8n: *Gmail* (OAuth2) och *Optely O.R. webhook*
+(Header Auth: namn `x-optely-secret`, värde = `WEBHOOK_SECRET`) – samma används i Webhook-noden och HTTP-noderna.
 
 ```bash
 curl -X POST http://localhost:3000/api/webhooks/n8n \
