@@ -20,16 +20,26 @@ export type FollowupData = {
     isToday: boolean;
   }[];
   partners: Tables<"partners_due">[];
+  partnerReplies: {
+    id: string;
+    partnerId: string;
+    partnerName: string;
+    contactName: string | null;
+    phone: string | null;
+    subject: string | null;
+    snippet: string | null;
+    occurredAt: string;
+  }[];
 };
 
-/** Dagens uppföljningar på Idag: svar/tips, möten i dag och i morgon, partner att höra (bara Optely). */
+/** Dagens uppföljningar på Idag: svar/tips, partnersvar, möten i dag och i morgon, partner att höra (bara Optely). */
 export async function loadFollowups(supabase: Client, tomorrowIso: string, offer: OfferFilter): Promise<FollowupData> {
   const dayAfter = new Date(new Date(tomorrowIso).getTime() + 86_400_000).toISOString();
 
   let noticesQuery = supabase.from("notices").select("*").order("created_at", { ascending: false });
   if (offer !== "all") noticesQuery = noticesQuery.eq("offer", offer);
 
-  const [noticesRes, meetingsRes, partnersRes] = await Promise.all([
+  const [noticesRes, meetingsRes, partnersRes, repliesRes] = await Promise.all([
     noticesQuery,
     supabase
       .from("meetings")
@@ -40,6 +50,15 @@ export async function loadFollowups(supabase: Client, tomorrowIso: string, offer
     offer === "sba"
       ? Promise.resolve({ data: [] as Tables<"partners_due">[], error: null })
       : supabase.from("partners_due").select("*").order("last_checkin_at", { ascending: true, nullsFirst: true }),
+    offer === "sba"
+      ? Promise.resolve({ data: [], error: null })
+      : supabase
+          .from("partner_emails")
+          .select("id, partner_id, subject, snippet, occurred_at, partner:partners(name, contact_name, phone)")
+          .eq("direction", "received")
+          .is("handled_at", null)
+          .order("occurred_at", { ascending: false })
+          .limit(50),
   ]);
 
   return {
@@ -58,5 +77,15 @@ export async function loadFollowups(supabase: Client, tomorrowIso: string, offer
         isToday: m.starts_at < tomorrowIso,
       })),
     partners: partnersRes.data ?? [],
+    partnerReplies: (repliesRes.data ?? []).map((r) => ({
+      id: r.id,
+      partnerId: r.partner_id,
+      partnerName: r.partner?.name ?? "Partner",
+      contactName: r.partner?.contact_name ?? null,
+      phone: r.partner?.phone ?? null,
+      subject: r.subject,
+      snippet: r.snippet,
+      occurredAt: r.occurred_at,
+    })),
   };
 }

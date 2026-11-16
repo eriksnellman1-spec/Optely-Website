@@ -637,6 +637,59 @@ export type Database = {
           },
         ]
       }
+      partner_emails: {
+        Row: {
+          created_at: string
+          direction: string
+          external_id: string
+          from_address: string | null
+          handled_at: string | null
+          id: string
+          occurred_at: string
+          partner_id: string
+          snippet: string | null
+          subject: string | null
+          thread_id: string | null
+          to_addresses: string[]
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          external_id: string
+          from_address?: string | null
+          handled_at?: string | null
+          id?: string
+          occurred_at?: string
+          partner_id: string
+          snippet?: string | null
+          subject?: string | null
+          thread_id?: string | null
+          to_addresses?: string[]
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          external_id?: string
+          from_address?: string | null
+          handled_at?: string | null
+          id?: string
+          occurred_at?: string
+          partner_id?: string
+          snippet?: string | null
+          subject?: string | null
+          thread_id?: string | null
+          to_addresses?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_emails_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partners: {
         Row: {
           checkin_interval_days: number
@@ -1205,6 +1258,10 @@ export type Database = {
       }
       import_partners: {
         Args: { p_rows: Json; p_skip_duplicates?: boolean }
+        Returns: Json
+      }
+      log_gmail_message: {
+        Args: { p: Json }
         Returns: Json
       }
       move_deal_stage: {
