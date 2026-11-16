@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Kanban } from "lucide-react";
 
+import { AddDealButton } from "@/components/pipeline/add-deal";
 import { MoveStage } from "@/components/pipeline/move-stage";
 import { OfferBadge } from "@/components/offer/offer-badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -35,13 +36,15 @@ export default async function PipelinePage({ searchParams }: { searchParams: Sea
             <span className="font-mono tabular-nums">{total}</span> öppna affärer · Kontaktad → Svar → Möte bokat → Möte hållet → Offert → Kund
           </>
         }
+        actions={<AddDealButton defaultOffer={offer === "sba" ? "sba" : "optely"} />}
       />
 
       {cards.length === 0 ? (
         <EmptyState
           icon={Kanban}
           title="Inga affärer än"
-          description="En affär skapas automatiskt när ett bolag kommer in i sekvensen. Ring från Idag så fylls pipelinen."
+          description="En affär skapas automatiskt när ett bolag kommer in i sekvensen, eller lägg till en själv."
+          action={<AddDealButton defaultOffer={offer === "sba" ? "sba" : "optely"} label="Lägg till affär" />}
         />
       ) : (
         <div className="space-y-4 md:grid md:grid-cols-6 md:gap-4 md:space-y-0 md:overflow-x-auto">
