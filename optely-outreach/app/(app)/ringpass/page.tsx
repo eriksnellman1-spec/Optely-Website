@@ -3,10 +3,7 @@ import type { Metadata } from "next";
 import { RingpassView, type QueueItem, type TimelineEvent } from "@/components/ringpass/ringpass-view";
 import { PageHeader } from "@/components/ui/page-header";
 import { startOfTomorrowHelsinki } from "@/lib/format";
-import { TodayFollowups } from "@/components/today/followups";
 import { getOfferFilter } from "@/lib/offer-server";
-import { loadFollowups } from "@/lib/queries/followups";
-import { loadTodo } from "@/lib/queries/todo";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Idag" };
@@ -51,7 +48,7 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
     .lt("occurred_at", tomorrow);
   if (offer !== "all") todayQuery = todayQuery.eq("offer", offer);
 
-  const [upcomingRes, scriptsRes, infoRes, todo, followups, callsRes, emailsRes, repliesRes, dealsRes, todayRes] =
+  const [upcomingRes, scriptsRes, infoRes, callsRes, emailsRes, repliesRes, dealsRes, todayRes] =
     await Promise.all([
       supabase
         .from("tasks")
@@ -67,8 +64,6 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
         .eq("is_active", true)
         .order("sort_order"),
       supabase.from("context_entries").select("content").eq("slug", "mejl-skicka-info").maybeSingle(),
-      loadTodo(supabase, tomorrow, offer),
-      loadFollowups(supabase, tomorrow, offer),
       companyIds.length
         ? supabase
             .from("calls")
@@ -181,13 +176,11 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
           </>
         }
       />
-      <TodayFollowups data={followups} />
       <RingpassView
         queue={items}
         timeline={timeline}
         scripts={scriptsRes.data ?? []}
         sendInfoTemplate={infoRes.data?.content ?? ""}
-        todo={todo}
         today={today}
         initialTaskId={typeof task === "string" ? task : null}
       />

@@ -97,8 +97,8 @@ högst upp styr all data (sparas i `?offer=` och cookien `or_offer`).
 
 | Sida | Väg | Grund |
 |---|---|---|
-| Översikt | `/` | Kontaktade, svar, bokade, avtal denna/förra veckan; bokade per 100 per kanal (`offer_stats_weekly`) |
-| Idag | `/ringpass` | Svar/tips, möten, partner att höra, Att göra + Ringpasset (oförändrad logik), rätt manus per erbjudande |
+| Översikt | `/` | Att hantera (svar/tips, partnersvar, möten, Att göra, partner att höra), Partnermejl (vecka + logg), kontaktade/svar/bokade/avtal per vecka, bokade per 100 per kanal |
+| Idag | `/ringpass` | Bara samtal: dagens siffror, kön och kontaktkortet med manus per erbjudande |
 | Företag | `/contacts`, `/contacts/[id]` | Registret med erbjudande; kontaktkort med historik (`activities`), Logga LinkedIn, byte av erbjudande med spärr |
 | Pipeline | `/pipeline` | Kontaktad → Kund med antal och värde; flytt via `move_deal_stage` |
 | Kunder | `/customers` | Optely: projekt, faktura, driftsavtal. SBA: bokningar mot garantin (3/mån) |

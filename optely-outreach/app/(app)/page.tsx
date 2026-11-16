@@ -2,12 +2,18 @@ import type { Metadata } from "next";
 import { ArrowDownRight, ArrowRight, ArrowUpRight, BarChart3 } from "lucide-react";
 
 import { OfferBadge } from "@/components/offer/offer-badge";
+import { PartnerEmails } from "@/components/overview/partner-emails";
+import { TodoPanel } from "@/components/ringpass/todo-panel";
+import { TodayFollowups } from "@/components/today/followups";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { formatDate, isoWeek } from "@/lib/format";
+import { formatDate, isoWeek, startOfTomorrowHelsinki } from "@/lib/format";
 import { OFFER_LABEL, offersFor } from "@/lib/offer";
 import { getOfferFilter } from "@/lib/offer-server";
+import { loadFollowups } from "@/lib/queries/followups";
+import { loadPartnerEmails } from "@/lib/queries/partner-emails";
 import { CHANNEL_NAME, loadWeeklyStats, per100 } from "@/lib/queries/stats";
+import { loadTodo } from "@/lib/queries/todo";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -40,8 +46,14 @@ function Metric({ label, value, previous }: { label: string; value: number; prev
 export default async function OverviewPage({ searchParams }: PageProps<"/">) {
   const filter = await getOfferFilter(searchParams);
   const supabase = await createClient();
+  const tomorrow = startOfTomorrowHelsinki();
   const stats = await loadWeeklyStats(supabase, filter, 4);
   const [thisWeek, lastWeek] = stats.weeks;
+  const [followups, todo, partnerEmails] = await Promise.all([
+    loadFollowups(supabase, tomorrow, filter),
+    loadTodo(supabase, tomorrow, filter),
+    filter === "sba" ? Promise.resolve(null) : loadPartnerEmails(supabase, thisWeek, lastWeek),
+  ]);
   const offers = offersFor(filter);
   const hasData = stats.rows.length > 0;
 
@@ -56,6 +68,10 @@ export default async function OverviewPage({ searchParams }: PageProps<"/">) {
           </>
         }
       />
+
+      <TodayFollowups data={followups} />
+      <TodoPanel data={todo} />
+      {partnerEmails && <PartnerEmails data={partnerEmails} />}
 
       {!hasData ? (
         <EmptyState
