@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 const helsinkiDate = (d: Date) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Helsinki" }).format(d);
 
 /**
- * Startar n8n-flödet som hämtar skickade partnermejl från Gmail.
+ * Startar n8n-flödet som hämtar skickade partnermejl och svar från Gmail.
  * Hämtar från dagen före det senast loggade mejlet (eller 30 dagar bakåt första gången).
  */
 export async function syncPartnerGmail(): Promise<ActionResult<{ since: string }>> {

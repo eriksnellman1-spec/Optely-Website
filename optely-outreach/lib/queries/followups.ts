@@ -2,6 +2,8 @@ import "server-only";
 
 import type { OfferFilter } from "@/lib/offer";
 import type { createClient } from "@/lib/supabase/server";
+import type { NextStep } from "@/components/partners/partner-step";
+import { toNextStep } from "@/lib/queries/partner-steps";
 import type { Tables } from "@/lib/supabase/types";
 
 type Client = Awaited<ReturnType<typeof createClient>>;
@@ -19,7 +21,7 @@ export type FollowupData = {
     phone: string | null;
     isToday: boolean;
   }[];
-  partners: Tables<"partners_due">[];
+  partners: NextStep[];
 };
 
 /** Dagens uppföljningar på Idag: svar/tips, möten i dag och i morgon, partner att höra (bara Optely). */
@@ -49,11 +51,17 @@ export async function loadFollowups(
       .lt("starts_at", dayAfter)
       .order("starts_at"),
     offer === "sba"
-      ? Promise.resolve({ data: [] as Tables<"partners_due">[], error: null })
+      ? Promise.resolve({
+          data: [] as Tables<"partner_next_step">[],
+          error: null,
+        })
       : supabase
-          .from("partners_due")
+          .from("partner_next_step")
           .select("*")
-          .order("last_checkin_at", { ascending: true, nullsFirst: true }),
+          .lte("sort_rank", 2)
+          .order("sort_rank")
+          .order("due_date")
+          .limit(50),
   ]);
 
   return {
@@ -75,6 +83,8 @@ export async function loadFollowups(
         phone: m.contact?.phone ?? null,
         isToday: m.starts_at < tomorrowIso,
       })),
-    partners: partnersRes.data ?? [],
+    partners: (partnersRes.data ?? [])
+      .map(toNextStep)
+      .filter((x): x is NextStep => x !== null),
   };
 }

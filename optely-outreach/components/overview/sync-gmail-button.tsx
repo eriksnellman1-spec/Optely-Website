@@ -24,7 +24,7 @@ export function SyncGmailButton() {
             toast.error(r.error);
             return;
           }
-          toast.success("Synkar skickade partnermejl – listan uppdateras om en stund.");
+          toast.success("Synkar partnermejl och svar – listan uppdateras om en stund.");
           // n8n arbetar i bakgrunden; hämta om sidan några gånger medan mejlen kommer in.
           for (const ms of [8000, 20000, 45000]) setTimeout(() => router.refresh(), ms);
         })

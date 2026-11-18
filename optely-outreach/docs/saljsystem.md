@@ -166,7 +166,10 @@ Det här finns i appen sedan fas A–C och ändras inte förrän en egen omgång
 | 2026-11-16 | Svar från partner | Visas överst på Idag ("Svar från partner") tills Erik klickar Hanterad. |
 | 2026-11-16 | Bara partnermejl hämtas | n8n frågar först appen (`GET /api/webhooks/n8n/gmail-query`) efter en Gmail-sökning byggd på partnerlistan (domän, eller hela adressen för gmail.com m.fl.) och hämtar bara de mejlen. Övrig post lämnas orörd. Nya partner kommer med automatiskt. |
 | 2026-11-16 | Idag bara för samtal | Idag visar bara dagens siffror, kön och kontaktkortet. Svar och partnertips, svar från partner, möten, Att göra för hand och partner som behöver höras ligger överst på Översikt, följt av Partnermejl (veckosiffror + logg) och veckostatistiken. |
-| 2026-11-16 | Gmail-synk med knapp | Ett n8n-flöde i stället för schema: knappen "Synka Gmail" på Översikt (Partnermejl) startar flödet, som hämtar skickade partnermejl sedan dagen före det senast loggade. Svar synkas inte – Erik läser dem i Gmail. Blocket "Svar från partner" är borttaget. Ny env: `N8N_GMAIL_SYNC_URL`. |
+| 2026-11-16 | Gmail-synk med knapp | Ett n8n-flöde i stället för schema: knappen "Synka Gmail" på Översikt (Partnermejl) startar flödet, som hämtar partnermejl sedan dagen före det senast loggade. Ny env: `N8N_GMAIL_SYNC_URL`. (Svar synkas igen sedan 2026-11-18, se Partnersekvens.) |
+| 2026-11-18 | Partnersekvens | Dag 0 första mejlet (från Gmail-synken) → dag 2 samtal om telefon finns, annars dag 3 kort påminnelse i tråden → dag 7 mejl med kundexempel → dag 14 sista mejlet → +3 mån ny kontakt. Mejlsteg klara när ett nytt skickat mejl synkas, samtal när de loggas. Helgsteg → måndag. Försenat visas gult. Inga färdiga texter – bara vad som ska göras. |
+| 2026-11-18 | Svar stoppar partnersekvensen | Synka Gmail hämtar även svar (inkorg, partnerns adress eller domän). Svar efter senaste skickade → "Svar att hantera": Boka möte (blir aktiv partner med check-in var 30:e dag), Ring upp, Inte nu (vilande till datum, då ny kontakt) eller Nej (avslutad). Ersätter 30-dagarsregeln för partner som inte är aktiva. |
+| 2026-11-18 | Hoppa över steg | Steget markeras klart utan kontakt; nästa steg räknas från i dag. Befintliga mejlade partner startar sekvensen från senaste skickade mejlet. |
 
 ## Implementationsnoter
 

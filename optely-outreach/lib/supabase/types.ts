@@ -607,6 +607,7 @@ export type Database = {
       }
       partner_checkins: {
         Row: {
+          channel: string | null
           checked_in_at: string
           created_at: string
           id: string
@@ -614,6 +615,7 @@ export type Database = {
           partner_id: string
         }
         Insert: {
+          channel?: string | null
           checked_in_at?: string
           created_at?: string
           id?: string
@@ -621,6 +623,7 @@ export type Database = {
           partner_id: string
         }
         Update: {
+          channel?: string | null
           checked_in_at?: string
           created_at?: string
           id?: string
@@ -701,8 +704,13 @@ export type Database = {
           last_checkin_at: string | null
           name: string
           notes: string | null
+          paused_until: string | null
           phone: string | null
           referrals_count: number
+          sequence_due: string | null
+          sequence_started_at: string | null
+          sequence_status: string | null
+          sequence_step: string | null
           type: Database["public"]["Enums"]["partner_type"]
           updated_at: string
         }
@@ -716,8 +724,13 @@ export type Database = {
           last_checkin_at?: string | null
           name: string
           notes?: string | null
+          paused_until?: string | null
           phone?: string | null
           referrals_count?: number
+          sequence_due?: string | null
+          sequence_started_at?: string | null
+          sequence_status?: string | null
+          sequence_step?: string | null
           type?: Database["public"]["Enums"]["partner_type"]
           updated_at?: string
         }
@@ -731,8 +744,13 @@ export type Database = {
           last_checkin_at?: string | null
           name?: string
           notes?: string | null
+          paused_until?: string | null
           phone?: string | null
           referrals_count?: number
+          sequence_due?: string | null
+          sequence_started_at?: string | null
+          sequence_status?: string | null
+          sequence_step?: string | null
           type?: Database["public"]["Enums"]["partner_type"]
           updated_at?: string
         }
@@ -1150,6 +1168,32 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_next_step: {
+        Row: {
+          city: string | null
+          contact_name: string | null
+          due_date: string | null
+          email: string | null
+          id: string | null
+          last_checkin_at: string | null
+          name: string | null
+          overdue: boolean | null
+          paused_until: string | null
+          phone: string | null
+          reply_at: string | null
+          reply_snippet: string | null
+          reply_subject: string | null
+          sequence_started_at: string | null
+          sort_rank: number | null
+          status: string | null
+          step: string | null
+          step_channel: string | null
+          step_label: string | null
+          thread_id: string | null
+          type: Database["public"]["Enums"]["partner_type"] | null
+        }
+        Relationships: []
+      }
       partners_due: {
         Row: {
           checkin_interval_days: number | null
@@ -1264,6 +1308,10 @@ export type Database = {
         Args: { p: Json }
         Returns: Json
       }
+      log_partner_call: {
+        Args: { p_partner: string; p_notes?: string; p_result?: string; p_until?: string }
+        Returns: undefined
+      }
       move_deal_stage: {
         Args: { p_company_id: string; p_stage: Database["public"]["Enums"]["deal_stage"] }
         Returns: undefined
@@ -1291,6 +1339,26 @@ export type Database = {
       offer_for_industry: {
         Args: { p_industry: string }
         Returns: Database["public"]["Enums"]["offer"]
+      }
+      partner_handle: {
+        Args: { p_partner: string; p_action: string; p_until?: string }
+        Returns: undefined
+      }
+      partner_skip_step: {
+        Args: { p_partner: string }
+        Returns: undefined
+      }
+      partner_step_channel: {
+        Args: { p_step: string }
+        Returns: string
+      }
+      partner_step_done: {
+        Args: { p_partner: string; p_channel: string; p_at: string }
+        Returns: undefined
+      }
+      partner_step_offset: {
+        Args: { p_step: string }
+        Returns: number
       }
       partner_type_for: {
         Args: { p_text: string }
@@ -1339,6 +1407,10 @@ export type Database = {
       test_data_counts: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      weekday_on_or_after: {
+        Args: { p: string }
+        Returns: string
       }
     }
     Enums: {
