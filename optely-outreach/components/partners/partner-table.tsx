@@ -6,9 +6,9 @@ import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { BulkBar, DeleteConfirm, type DeleteRequest } from "@/components/bulk/delete-confirm";
-import { OpenDialogButton } from "@/components/shell/open-dialog-button";
+import { StepActions, StepCell, type NextStep } from "@/components/partners/partner-step";
 import { deleteAllPartners, deletePartners } from "@/lib/actions/delete";
-import { formatDate, formatRelative } from "@/lib/format";
+import { formatRelative } from "@/lib/format";
 import { PARTNER_TYPE } from "@/lib/labels";
 import type { Tables } from "@/lib/supabase/types";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 type Partner = Pick<
   Tables<"partners">,
   "id" | "name" | "type" | "city" | "contact_name" | "phone" | "email" | "last_checkin_at"
-> & { due: boolean; referred: number };
+> & { referred: number; next: NextStep | null };
 
 const WHAT = "Check-ins och partneruppgifter raderas också. Hänvisade bolag finns kvar, utan partner.";
 
@@ -80,8 +80,9 @@ export function PartnerTable({ partners }: { partners: Partner[] }) {
               <th className="w-9 pl-3" aria-label="Markera" />
               <th className="px-3 font-medium">Partner</th>
               <th className="px-3 font-medium max-md:hidden">Kontakt</th>
-              <th className="px-3 font-medium">Senast hörd</th>
-              <th className="px-3 text-right font-medium max-sm:hidden">Hänvisade</th>
+              <th className="px-3 font-medium">Nästa steg</th>
+              <th className="px-3 font-medium max-lg:hidden">Senast hörd</th>
+              <th className="px-3 text-right font-medium max-xl:hidden">Hänvisade</th>
               <th className="w-0 px-3" />
             </tr>
           </thead>
@@ -104,19 +105,14 @@ export function PartnerTable({ partners }: { partners: Partner[] }) {
                 <td className="px-3 text-xs text-muted-foreground max-md:hidden">
                   {[p.contact_name, p.phone, p.email].filter(Boolean).join(" · ")}
                 </td>
-                <td className="px-3">
-                  <span className={cn("text-xs", p.due ? "text-status-yellow" : "text-muted-foreground")}>
-                    {p.last_checkin_at ? formatRelative(p.last_checkin_at) : "aldrig"}
-                    {p.due && " · behöver höras"}
-                  </span>
-                  {p.last_checkin_at && <div className="font-mono text-[11px] text-subtle">{formatDate(p.last_checkin_at)}</div>}
+                <td className="px-3 py-2">{p.next && <StepCell step={p.next} />}</td>
+                <td className="px-3 text-xs text-muted-foreground max-lg:hidden">
+                  {p.last_checkin_at ? formatRelative(p.last_checkin_at) : "aldrig"}
                 </td>
-                <td className="px-3 text-right font-mono tabular-nums max-sm:hidden">{p.referred}</td>
+                <td className="px-3 text-right font-mono tabular-nums max-xl:hidden">{p.referred}</td>
                 <td className="px-2">
                   <div className="flex items-center justify-end gap-1">
-                    <OpenDialogButton dialog="partner-checkin" payload={{ partnerId: p.id }} size="sm" variant="ghost">
-                      Check-in
-                    </OpenDialogButton>
+                    {p.next && <StepActions step={p.next} compact />}
                     <button
                       type="button"
                       aria-label={`Radera ${p.name}`}

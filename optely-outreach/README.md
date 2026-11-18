@@ -103,7 +103,7 @@ högst upp styr all data (sparas i `?offer=` och cookien `or_offer`).
 | Pipeline | `/pipeline` | Kontaktad → Kund med antal och värde; flytt via `move_deal_stage` |
 | Kunder | `/customers` | Optely: projekt, faktura, driftsavtal. SBA: bokningar mot garantin (3/mån) |
 | Manus och sekvenser | `/scripts` | Samtalsmanus, invändningar, e-postsekvens per erbjudande |
-| Partner | `/partners` | Bara Optely; behöver höras först, check-in, hänvisade bolag |
+| Partner | `/partners` | Bara Optely; uppföljningssekvens med nästa steg per partner (`partner_next_step`), svar att hantera, Logga samtal, Hoppa över, Gmail-tråd |
 | Lördagsanalys | `/strategy` | 4 veckor per erbjudande och kanal + "Vad ska ändras" (`weekly_reviews`) |
 | Inställningar | `/settings` | Veckoplan, nya bolag per ringdag, senaste `webhook_events` |
 | Outreach (Mer) | `/outreach` | Mejl per status |
@@ -129,7 +129,7 @@ Händelsen loggas i `webhook_events` och bearbetas om typen är känd (`processe
 **Gmail → appen (n8n):** importera `n8n/gmail-partner-sync.json` i n8n och aktivera det. Knappen **Synka Gmail**
 (Översikt → Partnermejl) anropar flödets webhook (`N8N_GMAIL_SYNC_URL`, med `x-optely-secret`). Flödet frågar appen
 efter en Gmail-sökning som bara träffar mejl till partnerna (`GET /api/webhooks/n8n/gmail-query?since=…`), hämtar de
-skickade mejlen och postar dem som `gmail.message`. Credentials i n8n: *Gmail* (OAuth2) och *Optely O.R. webhook*
+skickade mejlen och svaren i inkorgen och postar dem som `gmail.message` (`direction: sent/received`). Credentials i n8n: *Gmail* (OAuth2) och *Optely O.R. webhook*
 (Header Auth: namn `x-optely-secret`, värde = `WEBHOOK_SECRET`) – samma används i Webhook-noden och HTTP-noderna.
 
 ```bash

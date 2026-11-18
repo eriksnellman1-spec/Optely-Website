@@ -8,11 +8,10 @@ import {
 
 import { MeetingActions, TaskDoneButton } from "@/components/home/row-actions";
 import { OfferBadge } from "@/components/offer/offer-badge";
-import { OpenDialogButton } from "@/components/shell/open-dialog-button";
+import { StepActions, StepCell } from "@/components/partners/partner-step";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
 import { formatRelative, formatTime } from "@/lib/format";
-import { PARTNER_TYPE } from "@/lib/labels";
 import type { FollowupData } from "@/lib/queries/followups";
 import { cn } from "@/lib/utils";
 
@@ -155,42 +154,21 @@ export function TodayFollowups({ data }: { data: FollowupData }) {
 
       {partners.length > 0 && (
         <Block
-          title="Partner som behöver höras"
+          title="Partner att följa upp"
           icon={Handshake}
           count={partners.length}
         >
           <ul className="divide-y divide-border">
             {partners.map((p) => (
               <li
-                key={p.id}
-                className="flex flex-wrap items-center gap-3 px-4 py-3"
+                key={p.partnerId}
+                className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3"
               >
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 basis-48">
                   <div className="truncate text-sm font-medium">{p.name}</div>
-                  <div className="truncate text-xs text-muted-foreground">
-                    {[
-                      p.type ? PARTNER_TYPE[p.type] : null,
-                      p.contact_name,
-                      p.phone,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </div>
+                  <StepCell step={p} />
                 </div>
-                <span className="font-mono text-xs text-status-yellow">
-                  {p.days_since === null
-                    ? "aldrig hörts"
-                    : `${p.days_since} d sedan`}
-                </span>
-                {p.id && (
-                  <OpenDialogButton
-                    dialog="partner-checkin"
-                    payload={{ partnerId: p.id }}
-                    size="sm"
-                  >
-                    <Handshake /> Logga check-in
-                  </OpenDialogButton>
-                )}
+                <StepActions step={p} compact={p.step !== "reply"} />
               </li>
             ))}
           </ul>

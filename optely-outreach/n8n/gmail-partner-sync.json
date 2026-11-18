@@ -50,7 +50,7 @@
         "fieldToSplitOut": "sent",
         "options": {}
       },
-      "name": "En sökning i taget",
+      "name": "Sökningar: skickat",
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
@@ -67,7 +67,7 @@
           "q": "={{ $json.sent }}"
         }
       },
-      "name": "Gmail: skickade partnermejl",
+      "name": "Gmail: skickat",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
@@ -92,12 +92,73 @@
         "jsonBody": "={{ JSON.stringify({ type: 'gmail.message', direction: 'sent', message: { id: $json.id, threadId: $json.threadId, From: $json.From, To: $json.To, Cc: $json.Cc, Subject: $json.Subject, snippet: $json.snippet, internalDate: $json.internalDate, labelIds: $json.labelIds } }) }}",
         "options": {}
       },
-      "name": "Till appen",
+      "name": "Till appen: skickat",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
         1000,
         0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Optely O.R. webhook"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "inbox",
+        "options": {}
+      },
+      "name": "Sökningar: inkorg",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "simple": true,
+        "filters": {
+          "q": "={{ $json.inbox }}"
+        }
+      },
+      "name": "Gmail: svar i inkorgen",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        750,
+        200
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://DIN-APP.vercel.app/api/webhooks/n8n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: 'gmail.message', direction: 'received', message: { id: $json.id, threadId: $json.threadId, From: $json.From, To: $json.To, Cc: $json.Cc, Subject: $json.Subject, snippet: $json.snippet, internalDate: $json.internalDate, labelIds: $json.labelIds } }) }}",
+        "options": {}
+      },
+      "name": "Till appen: svar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        200
       ],
       "credentials": {
         "httpHeaderAuth": {
@@ -123,29 +184,56 @@
       "main": [
         [
           {
-            "node": "En sökning i taget",
+            "node": "Sökningar: skickat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sökningar: inkorg",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "En sökning i taget": {
+    "Sökningar: skickat": {
       "main": [
         [
           {
-            "node": "Gmail: skickade partnermejl",
+            "node": "Gmail: skickat",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Gmail: skickade partnermejl": {
+    "Gmail: skickat": {
       "main": [
         [
           {
-            "node": "Till appen",
+            "node": "Till appen: skickat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sökningar: inkorg": {
+      "main": [
+        [
+          {
+            "node": "Gmail: svar i inkorgen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: svar i inkorgen": {
+      "main": [
+        [
+          {
+            "node": "Till appen: svar",
             "type": "main",
             "index": 0
           }
