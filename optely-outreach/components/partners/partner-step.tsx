@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarCheck, Mail, MailOpen, MessageSquareReply, Phone, PhoneCall, SkipForward, X } from "lucide-react";
+import { CalendarCheck, Mail, MailCheck, MailOpen, MessageSquareReply, Phone, PhoneCall, SkipForward, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { handlePartner, logPartnerCall, skipPartnerStep, type PartnerAction } from "@/lib/actions/partners";
+import { handlePartner, logPartnerCall, logPartnerMail, skipPartnerStep, type PartnerAction } from "@/lib/actions/partners";
 import type { ActionResult } from "@/lib/actions/types";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -76,6 +76,10 @@ function useRun() {
   return { pending, run };
 }
 
+/** Steg som görs klara med ett mejl (även "ny kontakt", som kan vara mejl eller samtal). */
+const isMailStep = (s: NextStep) =>
+  s.step === "first_mail" || s.channel === "mejl" || s.channel === "mejl/samtal";
+
 const tomorrowIso = () => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
 
 /** Knappar per partner: svar (Boka möte, Ring upp, Inte nu, Nej) eller Gmail-tråd, Logga samtal, Hoppa över. */
@@ -114,6 +118,17 @@ export function StepActions({ step, compact = false }: { step: NextStep; compact
       ) : (
         step.step && (
           <>
+            {isMailStep(step) && (
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={pending}
+                title="Markera mejlet som skickat"
+                onClick={() => run(() => logPartnerMail(step.partnerId), `${step.name}: mejl skickat`)}
+              >
+                <MailCheck /> {!compact && "Mejl skickat"}
+              </Button>
+            )}
             <Button size="sm" variant="ghost" disabled={pending} onClick={() => setDialog("call")} title="Logga samtal">
               <Phone /> {!compact && "Logga samtal"}
             </Button>

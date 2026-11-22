@@ -611,6 +611,8 @@ export type Database = {
           checked_in_at: string
           created_at: string
           id: string
+          manual: boolean
+          matched_email_id: string | null
           notes: string | null
           partner_id: string
         }
@@ -619,6 +621,8 @@ export type Database = {
           checked_in_at?: string
           created_at?: string
           id?: string
+          manual?: boolean
+          matched_email_id?: string | null
           notes?: string | null
           partner_id: string
         }
@@ -627,10 +631,19 @@ export type Database = {
           checked_in_at?: string
           created_at?: string
           id?: string
+          manual?: boolean
+          matched_email_id?: string | null
           notes?: string | null
           partner_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "partner_checkins_matched_email_id_fkey"
+            columns: ["matched_email_id"]
+            isOneToOne: false
+            referencedRelation: "partner_emails"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "partner_checkins_partner_id_fkey"
             columns: ["partner_id"]
@@ -1310,6 +1323,10 @@ export type Database = {
       }
       log_partner_call: {
         Args: { p_partner: string; p_notes?: string; p_result?: string; p_until?: string }
+        Returns: undefined
+      }
+      log_partner_mail: {
+        Args: { p_partner: string; p_notes?: string }
         Returns: undefined
       }
       move_deal_stage: {

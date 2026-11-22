@@ -75,3 +75,12 @@ export async function logPartnerCall(input: {
   revalidatePath("/", "layout");
   return { ok: true, data: undefined };
 }
+
+/** Markera partnerns mejlsteg som gjort ("Mejl skickat") utan att vänta på Gmail-synken. */
+export async function logPartnerMail(partnerId: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("log_partner_mail", { p_partner: partnerId });
+  if (error) return { ok: false, error: "Kunde inte markera mejlet." };
+  revalidatePath("/", "layout");
+  return { ok: true, data: undefined };
+}
