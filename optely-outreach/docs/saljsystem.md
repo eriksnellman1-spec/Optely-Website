@@ -170,6 +170,7 @@ Det här finns i appen sedan fas A–C och ändras inte förrän en egen omgång
 | 2026-11-18 | Partnersekvens | Dag 0 första mejlet (från Gmail-synken) → dag 2 samtal om telefon finns, annars dag 3 kort påminnelse i tråden → dag 7 mejl med kundexempel → dag 14 sista mejlet → +3 mån ny kontakt. Mejlsteg klara när ett nytt skickat mejl synkas, samtal när de loggas. Helgsteg → måndag. Försenat visas gult. Inga färdiga texter – bara vad som ska göras. |
 | 2026-11-18 | Svar stoppar partnersekvensen | Synka Gmail hämtar även svar (inkorg, partnerns adress eller domän). Svar efter senaste skickade → "Svar att hantera": Boka möte (blir aktiv partner med check-in var 30:e dag), Ring upp, Inte nu (vilande till datum, då ny kontakt) eller Nej (avslutad). Ersätter 30-dagarsregeln för partner som inte är aktiva. |
 | 2026-11-18 | Hoppa över steg | Steget markeras klart utan kontakt; nästa steg räknas från i dag. Befintliga mejlade partner startar sekvensen från senaste skickade mejlet. |
+| 2026-11-22 | Markera partnermejl för hand | Knappen "Mejl skickat" på mejlsteg gör steget klart direkt (check-in, kanal mejl, `manual`). Synkas samma mejl från Gmail inom 3 dagar räknas det inte igen. |
 
 ## Implementationsnoter
 
