@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { FollowupCalls, type FollowupCall } from "@/components/ringpass/followup-calls";
 import { RingpassView, type QueueItem, type TimelineEvent } from "@/components/ringpass/ringpass-view";
 import { PageHeader } from "@/components/ui/page-header";
 import { startOfTomorrowHelsinki } from "@/lib/format";
@@ -30,7 +31,28 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
 
   let queueQuery = supabase.from("ringpass_queue").select("*").order("priority").order("due_at").limit(200);
   if (offer !== "all") queueQuery = queueQuery.eq("offer", offer);
-  const queueRes = await queueQuery;
+  let followupQuery = supabase.from("followup_calls").select("*").order("due_date");
+  if (offer !== "all") followupQuery = followupQuery.eq("offer", offer);
+  const [queueRes, followupRes] = await Promise.all([queueQuery, followupQuery]);
+  const followups: FollowupCall[] = (followupRes.data ?? []).flatMap((f) =>
+    f.ref_id && (f.kind === "partner" || f.kind === "deal")
+      ? [
+          {
+            kind: f.kind,
+            refId: f.ref_id,
+            name: f.name ?? "",
+            contactName: f.contact_name || null,
+            phone: f.phone,
+            title: f.title,
+            source: f.source ?? "",
+            context: f.context,
+            due: f.due_date,
+            overdue: Boolean(f.overdue),
+            offer: f.offer === "sba" ? "sba" : "optely",
+          },
+        ]
+      : [],
+  );
   if (queueRes.error) throw new Error("Kunde inte läsa Ringpassets kö.");
 
   const queue = queueRes.data.filter((q): q is typeof q & { task_id: string; company_id: string } =>
@@ -167,6 +189,12 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
         description={
           <>
             <span className="font-mono tabular-nums">{items.length}</span> samtal i dag
+            {followups.length > 0 && (
+              <>
+                {" · "}
+                <span className="font-mono tabular-nums">{followups.length}</span> uppföljningar
+              </>
+            )}
             {upcoming > 0 && (
               <>
                 {" · "}
@@ -176,6 +204,7 @@ export default async function RingpassPage({ searchParams }: PageProps<"/ringpas
           </>
         }
       />
+      <FollowupCalls items={followups} />
       <RingpassView
         queue={items}
         timeline={timeline}

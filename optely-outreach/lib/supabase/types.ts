@@ -358,6 +358,7 @@ export type Database = {
           id: string
           next_action: string | null
           next_action_at: string | null
+          next_action_channel: string | null
           offer: Database["public"]["Enums"]["offer"]
           stage: Database["public"]["Enums"]["deal_stage"]
           stage_changed_at: string
@@ -372,6 +373,7 @@ export type Database = {
           id?: string
           next_action?: string | null
           next_action_at?: string | null
+          next_action_channel?: string | null
           offer: Database["public"]["Enums"]["offer"]
           stage?: Database["public"]["Enums"]["deal_stage"]
           stage_changed_at?: string
@@ -386,6 +388,7 @@ export type Database = {
           id?: string
           next_action?: string | null
           next_action_at?: string | null
+          next_action_channel?: string | null
           offer?: Database["public"]["Enums"]["offer"]
           stage?: Database["public"]["Enums"]["deal_stage"]
           stage_changed_at?: string
@@ -1145,6 +1148,23 @@ export type Database = {
         }
         Relationships: []
       }
+      followup_calls: {
+        Row: {
+          company_id: string | null
+          contact_name: string | null
+          context: string | null
+          due_date: string | null
+          kind: string | null
+          name: string | null
+          offer: Database["public"]["Enums"]["offer"] | null
+          overdue: boolean | null
+          phone: string | null
+          ref_id: string | null
+          source: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       notices: {
         Row: {
           city: string | null
@@ -1232,6 +1252,8 @@ export type Database = {
           industry: string | null
           next_action: string | null
           next_action_at: string | null
+          next_action_channel: string | null
+          next_action_own: boolean | null
           offer: Database["public"]["Enums"]["offer"] | null
           stage: Database["public"]["Enums"]["deal_stage"] | null
           stage_changed_at: string | null
@@ -1300,6 +1322,10 @@ export type Database = {
       find_company_duplicates: {
         Args: { p_name: string; p_website?: string; p_email?: string; p_phone?: string }
         Returns: { company_id: string | null; name: string | null; status: Database["public"]["Enums"]["company_status"] | null; matched_on: string | null }[]
+      }
+      followup_call_outcome: {
+        Args: { p_kind: string; p_ref: string; p_outcome: string; p_notes?: string; p_until?: string; p_next?: string; p_next_channel?: string; p_next_at?: string }
+        Returns: undefined
       }
       helsinki_at: {
         Args: { p_day: string; p_time: string }
