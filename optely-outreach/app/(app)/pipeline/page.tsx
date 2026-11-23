@@ -4,15 +4,15 @@ import { Kanban } from "lucide-react";
 
 import { AddDealButton } from "@/components/pipeline/add-deal";
 import { MoveStage } from "@/components/pipeline/move-stage";
+import { NextStepEdit } from "@/components/pipeline/next-step-edit";
 import { OfferBadge } from "@/components/offer/offer-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { formatDate, formatEur } from "@/lib/format";
+import { formatEur } from "@/lib/format";
 import { DEAL_STAGE_LABEL, PIPELINE_STAGES } from "@/lib/labels";
 import { getOfferFilter } from "@/lib/offer-server";
 import type { SearchParams } from "@/lib/page-types";
 import { createClient } from "@/lib/supabase/server";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Pipeline" };
 
@@ -75,16 +75,15 @@ export default async function PipelinePage({ searchParams }: { searchParams: Sea
                         <div className="truncate text-xs text-muted-foreground">
                           {[c.industry, c.city].filter(Boolean).join(" · ")}
                         </div>
-                        {c.next_action && (
-                          <div
-                            className={cn(
-                              "mt-1.5 text-xs",
-                              c.next_action_at && c.next_action_at < new Date().toISOString() ? "text-status-yellow" : "text-foreground",
-                            )}
-                          >
-                            {c.next_action}
-                            {c.next_action_at && <span className="ml-1 font-mono text-subtle">{formatDate(c.next_action_at)}</span>}
-                          </div>
+                        {c.deal_id && (
+                          <NextStepEdit
+                            dealId={c.deal_id}
+                            companyName={c.company_name ?? ""}
+                            next={c.next_action}
+                            at={c.next_action_at}
+                            channel={c.next_action_channel}
+                            own={Boolean(c.next_action_own)}
+                          />
                         )}
                         <div className="mt-2 flex items-center justify-between gap-2">
                           <span className="font-mono text-xs text-subtle tabular-nums">

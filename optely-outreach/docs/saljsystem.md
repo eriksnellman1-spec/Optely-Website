@@ -171,6 +171,8 @@ Det här finns i appen sedan fas A–C och ändras inte förrän en egen omgång
 | 2026-11-18 | Svar stoppar partnersekvensen | Synka Gmail hämtar även svar (inkorg, partnerns adress eller domän). Svar efter senaste skickade → "Svar att hantera": Boka möte (blir aktiv partner med check-in var 30:e dag), Ring upp, Inte nu (vilande till datum, då ny kontakt) eller Nej (avslutad). Ersätter 30-dagarsregeln för partner som inte är aktiva. |
 | 2026-11-18 | Hoppa över steg | Steget markeras klart utan kontakt; nästa steg räknas från i dag. Befintliga mejlade partner startar sekvensen från senaste skickade mejlet. |
 | 2026-11-22 | Markera partnermejl för hand | Knappen "Mejl skickat" på mejlsteg gör steget klart direkt (check-in, kanal mejl, `manual`). Synkas samma mejl från Gmail inom 3 dagar räknas det inte igen. |
+| 2026-11-23 | Uppföljningssamtal på Idag | Partnersekvensens samtalssteg och affärer vars nästa steg har kanal Samtal visas i rutan "Uppföljningssamtal" överst på Idag när dagen kommer, med etikett för källan (Partnersekvens / Pipeline · steg) och bakgrund. Utfall: Inget svar (nästa ringdag), Pratade – fortsätt (partner → nästa mejlsteg; affär → nytt nästa steg med kanal), Möte bokat, Inte nu (datum), Nej. Därefter tillbaka till sin kanal. Bolag i den kalla ringkön visas där i stället. |
+| 2026-11-23 | Kanal på nästa steg | Affärens nästa steg har kanal (Samtal, Mejl, Möte) och redigeras på Pipeline-kortet. Befintliga steg som börjar med "Ring" fick Samtal. |
 
 ## Implementationsnoter
 
