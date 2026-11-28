@@ -1,0 +1,6 @@
+# Skydda konfiguration och kod som inte är sidor
+<FilesMatch "^(config\.php|config\.sample\.php|schema\.sql|README\.md|CLAUDE\.md|\.gitignore)$">
+  Require all denied
+</FilesMatch>
+DirectoryIndex index.php
+Options -Indexes
